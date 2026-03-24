@@ -1,6 +1,12 @@
 export type FindingSeverity = 'NEEDS_REFACTOR' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 export type FindingStatus = 'unfixed' | 'FIXED' | 'SKIPPED' | 'MANUAL';
 
+export interface CodeSnippet {
+  label: string;
+  language: string;
+  code: string;
+}
+
 export interface ReviewFinding {
   number: number;
   ruleId: string;
@@ -8,6 +14,9 @@ export interface ReviewFinding {
   location: string;
   summary: string;
   fix: string;
+  why: string;
+  gain: string;
+  codeBlocks: CodeSnippet[];
   status: FindingStatus;
 }
 
@@ -42,7 +51,13 @@ export function parseReview(content: string): ReviewParseResult {
 
   const lines = content.split('\n').map((l) => l.replace(/\r$/, ''));
   const branch = extractBranch(lines);
-  const findings = extractFindings(lines);
+
+  // Try block-based extraction first (new format), fall back to table (old format)
+  let findings = extractFindingsFromBlocks(lines);
+  if (findings.length === 0) {
+    findings = extractFindings(lines);
+  }
+
   const healSummary = extractHealSummary(lines);
 
   // Apply heal status to findings
@@ -90,12 +105,156 @@ function extractFindings(lines: string[]): ReviewFinding[] {
           location: cells[3],
           summary: cells[4],
           fix: cells[5],
+          why: '',
+          gain: '',
+          codeBlocks: [],
           status: 'unfixed',
         });
       }
     }
   }
 
+  return findings;
+}
+
+function extractFindingsFromBlocks(lines: string[]): ReviewFinding[] {
+  const findings: ReviewFinding[] = [];
+  const FINDING_HEADING = /^####\s+Finding\s+#(\d+):\s*(\S+)\s*[—–-]\s*(.+)/;
+
+  let current: Partial<ReviewFinding> | null = null;
+  let currentField: string | null = null;
+  let inCodeBlock = false;
+  let codeLanguage = '';
+  let codeLines: string[] = [];
+  let inFindingsSection = false;
+
+  function finalizeCurrent() {
+    if (current && typeof current.number === 'number') {
+      findings.push({
+        number: current.number,
+        ruleId: current.ruleId ?? '',
+        severity: current.severity ?? 'MEDIUM',
+        location: current.location ?? '',
+        summary: current.summary ?? '',
+        fix: (current.fix ?? '').trim(),
+        why: (current.why ?? '').trim(),
+        gain: (current.gain ?? '').trim(),
+        codeBlocks: current.codeBlocks ?? [],
+        status: 'unfixed',
+      });
+    }
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Track whether we're in the ### Findings section
+    if (!inCodeBlock && line.trim() === '### Findings') {
+      inFindingsSection = true;
+      continue;
+    }
+    // Exit findings section when we hit another ### heading
+    if (!inCodeBlock && inFindingsSection && /^###\s/.test(line) && line.trim() !== '### Findings') {
+      finalizeCurrent();
+      inFindingsSection = false;
+      break;
+    }
+    // Only look for block findings within ### Findings section
+    if (!inFindingsSection) continue;
+
+    // Handle fenced code blocks
+    if (inCodeBlock) {
+      if (line.startsWith('```')) {
+        if (current) {
+          if (!current.codeBlocks) current.codeBlocks = [];
+          current.codeBlocks.push({ label: '', language: codeLanguage, code: codeLines.join('\n') });
+        }
+        inCodeBlock = false;
+        codeLines = [];
+        continue;
+      }
+      codeLines.push(line);
+      continue;
+    }
+
+    if (line.startsWith('```')) {
+      inCodeBlock = true;
+      codeLanguage = line.slice(3).trim();
+      codeLines = [];
+      continue;
+    }
+
+    // New finding heading
+    const headingMatch = line.match(FINDING_HEADING);
+    if (headingMatch) {
+      finalizeCurrent();
+      current = {
+        number: parseInt(headingMatch[1], 10),
+        ruleId: headingMatch[2],
+        summary: headingMatch[3].trim(),
+        codeBlocks: [],
+        why: '',
+        gain: '',
+        fix: '',
+      };
+      currentField = null;
+      continue;
+    }
+
+    if (!current) continue;
+
+    // Field extraction from **Key**: Value lines
+    const severityMatch = line.match(/^\*\*Severity\*\*:\s*(.+)/);
+    if (severityMatch) {
+      current.severity = severityMatch[1].trim() as FindingSeverity;
+      currentField = null;
+      continue;
+    }
+
+    const locationMatch = line.match(/^\*\*Location\*\*:\s*(.+)/);
+    if (locationMatch) {
+      current.location = locationMatch[1].trim();
+      currentField = null;
+      continue;
+    }
+
+    const ruleMatch = line.match(/^\*\*Rule\*\*:\s*(.+)/);
+    if (ruleMatch) {
+      current.ruleId = ruleMatch[1].trim();
+      currentField = null;
+      continue;
+    }
+
+    const whyMatch = line.match(/^\*\*Why this severity\*\*:\s*(.+)/);
+    if (whyMatch) {
+      current.why = whyMatch[1].trim();
+      currentField = 'why';
+      continue;
+    }
+
+    const gainMatch = line.match(/^\*\*What you gain\*\*:\s*(.+)/);
+    if (gainMatch) {
+      current.gain = gainMatch[1].trim();
+      currentField = 'gain';
+      continue;
+    }
+
+    // Continuation lines for current field (non-empty, non-heading, non-field)
+    if (currentField && line.trim() && !line.startsWith('**') && !line.startsWith('#')) {
+      if (currentField === 'why') {
+        current.why = (current.why ?? '') + ' ' + line.trim();
+      } else if (currentField === 'gain') {
+        current.gain = (current.gain ?? '') + ' ' + line.trim();
+      }
+    }
+
+    // Empty line resets field context
+    if (!line.trim()) {
+      currentField = null;
+    }
+  }
+
+  finalizeCurrent();
   return findings;
 }
 

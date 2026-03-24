@@ -70,7 +70,7 @@ export default function App() {
 
   return (
     <div className="flex h-screen font-sans">
-      <BoardView onSelectProject={handleSelectProject} selectedProjectId={selectedProject?.id ?? null} />
+      <BoardView onSelectProject={handleSelectProject} selectedProjectId={selectedProject?.id ?? null} refreshKey={refreshKey} />
       <div className="flex flex-1 flex-col overflow-auto">
         {selectedProject && (
           <div className="flex justify-end px-4 pt-2">

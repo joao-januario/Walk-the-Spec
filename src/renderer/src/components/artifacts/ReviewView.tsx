@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '../../lib/utils.js';
 import { severityClasses, statusClasses } from '../../theme.js';
-import type { Element, ReviewFinding, FindingSeverity, FindingStatus, HealSummary } from '../../types/index.js';
-
-const SEVERITY_ORDER: FindingSeverity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NEEDS_REFACTOR'];
+import CodeBlock from '../elements/CodeBlock.js';
+import type { ReviewFinding, FindingSeverity, FindingStatus, HealSummary } from '../../types/index.js';
 
 function ProgressBar({ done, total }: { done: number; total: number }) {
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -15,7 +14,7 @@ function ProgressBar({ done, total }: { done: number; total: number }) {
             'h-full rounded-[3px] transition-[width] duration-300',
             pct === 100 ? 'bg-board-green' : 'bg-board-cyan',
           )}
-          style={{ width: `${pct}%` }} // dynamic: runtime value
+          style={{ width: `${pct}%` }}
         />
       </div>
       <span className="text-board-text-muted text-[0.75rem] whitespace-nowrap">
@@ -36,32 +35,67 @@ function StatusBadge({ status }: { status: FindingStatus }) {
 }
 
 function FindingRow({ finding }: { finding: ReviewFinding }) {
+  const hasDetail = finding.why || finding.gain || finding.codeBlocks.length > 0;
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <div
       className={cn(
-        'border-board-border/20 flex items-start gap-[10px] border-b py-2',
+        'border-board-border/20 border-b',
         finding.status === 'FIXED' ? 'opacity-50' : 'opacity-100',
       )}
     >
-      <span className="text-board-text-muted w-5 text-right text-[0.7rem]">#{finding.number}</span>
-      <SeverityBadge severity={finding.severity} />
-      <code className="text-board-cyan bg-board-cyan/[0.08] rounded-[3px] px-[5px] py-[1px] text-[0.7rem] font-semibold">
-        {finding.ruleId}
-      </code>
-      <div className="flex-1">
-        <div
-          className={cn(
-            'text-[0.82rem]',
-            finding.status === 'FIXED' ? 'text-board-text-muted line-through' : 'text-board-text',
-          )}
-        >
-          {finding.summary}
+      <div
+        className={cn('flex items-start gap-[10px] py-2', hasDetail && 'cursor-pointer')}
+        onClick={() => hasDetail && setExpanded(!expanded)}
+      >
+        <span className="text-board-text-muted w-5 text-right text-[0.7rem]">#{finding.number}</span>
+        <SeverityBadge severity={finding.severity} />
+        <code className="text-board-cyan bg-board-cyan/[0.08] rounded-[3px] px-[5px] py-[1px] text-[0.7rem] font-semibold">
+          {finding.ruleId}
+        </code>
+        <div className="flex-1">
+          <div
+            className={cn(
+              'text-[0.82rem]',
+              finding.status === 'FIXED' ? 'text-board-text-muted line-through' : 'text-board-text',
+            )}
+          >
+            {finding.summary}
+          </div>
+          <div className="text-board-text-muted mt-[2px] text-[0.7rem]">
+            {finding.location}
+          </div>
         </div>
-        <div className="text-board-text-muted mt-[2px] text-[0.7rem]">
-          {finding.location}
-        </div>
+        <StatusBadge status={finding.status} />
+        {hasDetail && (
+          <span className="text-board-text-muted text-[0.7rem]">{expanded ? '▼' : '▶'}</span>
+        )}
       </div>
-      <StatusBadge status={finding.status} />
+
+      {expanded && hasDetail && (
+        <div className="border-board-border/10 mb-2 ml-[30px] border-l-2 pl-4 pb-2">
+          {finding.why && (
+            <div className="mb-2">
+              <div className="text-board-purple text-[0.65rem] font-semibold tracking-[0.05em] uppercase">Why this severity</div>
+              <p className="text-board-text mt-0.5 text-[0.8rem] leading-relaxed">{finding.why}</p>
+            </div>
+          )}
+          {finding.gain && (
+            <div className="mb-2">
+              <div className="text-board-green text-[0.65rem] font-semibold tracking-[0.05em] uppercase">What you gain</div>
+              <p className="text-board-text mt-0.5 text-[0.8rem] leading-relaxed">{finding.gain}</p>
+            </div>
+          )}
+          {finding.codeBlocks.length > 0 && (
+            <div className="mt-2">
+              {finding.codeBlocks.map((block, i) => (
+                <CodeBlock key={i} code={block.code} language={block.language} label={block.label || undefined} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -73,7 +107,6 @@ interface ReviewViewProps {
 
 export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
   if (findings.length === 0) {
-    // Clean review — success state
     return (
       <div className="py-[60px] text-center">
         <div className="mb-3 text-[2.5rem]">✅</div>
@@ -83,13 +116,11 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
     );
   }
 
-  // Progress: all actionable findings (everything except NEEDS_REFACTOR)
   const actionable = findings.filter((f) => f.severity !== 'NEEDS_REFACTOR');
   const fixed = actionable.filter((f) => f.status === 'FIXED');
   const manual = actionable.filter((f) => f.status === 'MANUAL');
   const isComplete = actionable.length > 0 && actionable.every((f) => f.status === 'FIXED');
 
-  // Group actionable by severity (exclude NEEDS_REFACTOR)
   const refactorItems = findings.filter((f) => f.severity === 'NEEDS_REFACTOR');
   const actionableSeverities: FindingSeverity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
   const grouped = new Map<FindingSeverity, ReviewFinding[]>();
@@ -100,7 +131,6 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
 
   return (
     <div>
-      {/* Heal progress — all actionable findings */}
       {actionable.length > 0 && (
         <div className="mb-6 max-w-[400px]">
           <div
@@ -120,7 +150,6 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
         </div>
       )}
 
-      {/* Heal summary stats */}
       {healSummary && (
         <div className="bg-board-surface border-board-border text-board-text-muted mb-5 rounded-lg border px-[14px] py-[10px] text-[0.78rem]">
           <span className="font-semibold">Last heal</span>: {healSummary.date} — {healSummary.appliedCount} applied,{' '}
@@ -128,7 +157,6 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
         </div>
       )}
 
-      {/* Actionable findings grouped by severity */}
       {Array.from(grouped.entries()).map(([severity, items]) => (
         <section key={severity} className="mb-5">
           <div className="mb-2 flex items-center gap-2">
@@ -143,7 +171,6 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
         </section>
       ))}
 
-      {/* NEEDS_REFACTOR — separated, tracked in backlog */}
       {refactorItems.length > 0 && (
         <section className="border-board-border mt-7 border-t pt-4">
           <div className="mb-2 flex items-center gap-2">

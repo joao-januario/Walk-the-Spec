@@ -6,9 +6,10 @@ import * as api from '../../services/api.js';
 interface BoardViewProps {
   onSelectProject: (project: Project) => void;
   selectedProjectId: string | null;
+  refreshKey?: number;
 }
 
-export default function BoardView({ onSelectProject, selectedProjectId }: BoardViewProps) {
+export default function BoardView({ onSelectProject, selectedProjectId, refreshKey }: BoardViewProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,7 +17,11 @@ export default function BoardView({ onSelectProject, selectedProjectId }: BoardV
     try {
       const data = await api.getProjects();
       setProjects(data.projects);
-      if (!selectedProjectId && data.projects.length > 0) {
+      // Update selected project with fresh data (phase, branch, hasSpeckitContent)
+      if (selectedProjectId) {
+        const fresh = data.projects.find((p) => p.id === selectedProjectId);
+        if (fresh) onSelectProject(fresh);
+      } else if (data.projects.length > 0) {
         onSelectProject(data.projects[0]);
       }
     } catch (err) {
@@ -28,7 +33,7 @@ export default function BoardView({ onSelectProject, selectedProjectId }: BoardV
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [refreshKey]);
 
   const handleAddProject = async () => {
     try {

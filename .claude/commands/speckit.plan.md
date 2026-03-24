@@ -59,10 +59,12 @@ You **MUST** consider the user input before proceeding (if not empty).
 2. **Load context**: Read FEATURE_SPEC and `.claude/specify/memory/constitution.md`. Load IMPL_PLAN template (already copied).
 
 3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
-   - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")
+   - Fill Technical Approach as 2-3 paragraphs of prose describing how technologies interact, where code runs, and how data flows. Do NOT use key-value metadata lists.
+   - Fill Architecture Decisions — one subsection per key technical choice with Decision/Rationale/Alternatives rejected. If a constitution violation must be justified, do it inline in the relevant decision's rationale.
    - Fill Constitution Check section from constitution
    - Evaluate gates (ERROR if violations unjustified)
-   - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
+   - Fill Project Structure with concrete file paths being created or modified — no generic placeholder trees or option blocks
+   - Phase 0: Generate research.md (resolve all unknowns)
    - Phase 1: Generate data-model.md, contracts/, quickstart.md
    - Phase 1: Update agent context by running the agent script
    - Re-evaluate Constitution Check post-design
@@ -102,18 +104,18 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ### Phase 0: Outline & Research
 
-1. **Extract unknowns from Technical Context** above:
-   - For each NEEDS CLARIFICATION → research task
-   - For each dependency → best practices task
-   - For each integration → patterns task
+1. **Identify unknowns** from the feature spec and existing codebase:
+   - Technology choices that need validation → research task
+   - Integration patterns between components → patterns task
+   - Architecture trade-offs that need analysis → decision task
 
 2. **Generate and dispatch research agents**:
 
    ```text
-   For each unknown in Technical Context:
-     Task: "Research {unknown} for {feature context}"
-   For each technology choice:
-     Task: "Find best practices for {tech} in {domain}"
+   For each unknown or technology choice:
+     Task: "Research {topic} for {feature context}"
+   For each architecture trade-off:
+     Task: "Compare approaches for {decision} — evaluate {option A} vs {option B}"
    ```
 
 3. **Consolidate findings** in `research.md` using format:
@@ -121,7 +123,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Rationale: [why chosen]
    - Alternatives considered: [what else evaluated]
 
-**Output**: research.md with all NEEDS CLARIFICATION resolved
+4. **Fill plan sections** using research findings:
+   - Write Technical Approach as prose (2-3 paragraphs, no key-value metadata)
+   - Write Architecture Decisions with Decision/Rationale/Alternatives rejected per entry
+   - Fill Project Structure with concrete file paths only
+
+**Output**: research.md with all unknowns resolved, plan.md Technical Approach and Architecture Decisions filled
 
 ### Phase 1: Design & Contracts
 

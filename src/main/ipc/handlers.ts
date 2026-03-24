@@ -166,16 +166,34 @@ export function registerIpcHandlers() {
       }
       case 'plan': {
         const parsed = parsePlan(content);
-        elements = [
+        const planElements: typeof elements = [
           { id: 'Summary', type: 'section', content: { type: 'section', heading: 'Summary', content: parsed.summary }, editableFields: [], commentCount: 0 },
-          { id: 'Technical Context', type: 'section', content: { type: 'section', heading: 'Technical Context', content: JSON.stringify(parsed.technicalContext) }, editableFields: [], commentCount: 0 },
-          ...parsed.decisions.map((d) => ({
+        ];
+        // New format: Technical Approach (prose)
+        if (parsed.technicalApproach) {
+          planElements.push({ id: 'Technical Approach', type: 'section', content: { type: 'section', heading: 'Technical Approach', content: parsed.technicalApproach }, editableFields: [], commentCount: 0 });
+        }
+        // Old format fallback: Technical Context (key-value)
+        if (!parsed.technicalApproach && Object.keys(parsed.technicalContext).length > 0) {
+          planElements.push({ id: 'Technical Context', type: 'section', content: { type: 'section', heading: 'Technical Context', content: JSON.stringify(parsed.technicalContext) }, editableFields: [], commentCount: 0 });
+        }
+        // New format: Architecture Decisions
+        for (const ad of parsed.architectureDecisions) {
+          planElements.push({
+            id: `Decision: ${ad.heading}`, type: 'decision',
+            content: { type: 'decision', heading: ad.heading, content: ad.decision, rationale: ad.rationale, alternatives: ad.alternativesRejected },
+            editableFields: [], commentCount: 0,
+          });
+        }
+        // Old format fallback: Legacy decisions
+        for (const d of parsed.decisions) {
+          planElements.push({
             id: d.heading, type: 'decision',
             content: { type: 'decision', ...d },
-            editableFields: [],
-            commentCount: 0,
-          })),
-        ];
+            editableFields: [], commentCount: 0,
+          });
+        }
+        elements = planElements;
         break;
       }
       case 'tasks': {

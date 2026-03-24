@@ -39,7 +39,6 @@ TypeScript 5.x: Follow standard conventions. Dark Tokyo Night theme for UI.
 - 003-tailwind-migration: Added TypeScript 5.x (existing) + Tailwind CSS v4, @tailwindcss/vite (new). Electron, React 19, electron-vite (existing)
 - 003-review-heal-tracking: Added TypeScript 5.x (existing) + Electron, React 19, unified/remark, chokidar (all existing — no new deps)
 
-- 002-spec-board: Electron desktop app with React renderer, IPC-based communication, native folder picker, Tokyo Night dark theme, persistent project sidebar
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

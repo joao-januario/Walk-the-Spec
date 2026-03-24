@@ -117,14 +117,43 @@ function Extract-PlanField {
     } | Select-Object -First 1
 }
 
+function Extract-ProseField {
+    param(
+        [Parameter(Mandatory=$true)][string]$Pattern,
+        [Parameter(Mandatory=$true)][string]$PlanFile
+    )
+    if (-not (Test-Path $PlanFile)) { return '' }
+    $inSection = $false
+    Get-Content -LiteralPath $PlanFile -Encoding utf8 | ForEach-Object {
+        if ($_ -match '^## Technical Approach') { $inSection = $true; return }
+        if ($inSection -and $_ -match '^## ') { $inSection = $false; return }
+        if ($inSection -and $_ -match $Pattern) { return $Matches[0] }
+    } | Select-Object -First 1
+}
+
 function Parse-PlanData {
     param([Parameter(Mandatory=$true)][string]$PlanFile)
     if (-not (Test-Path $PlanFile)) { Write-Err "Plan file not found: $PlanFile"; return $false }
     Write-Info "Parsing plan data from $PlanFile"
+
+    # Try old key-value format first
     $script:NEW_LANG        = Extract-PlanField -FieldPattern 'Language/Version' -PlanFile $PlanFile
     $script:NEW_FRAMEWORK   = Extract-PlanField -FieldPattern 'Primary Dependencies' -PlanFile $PlanFile
     $script:NEW_DB          = Extract-PlanField -FieldPattern 'Storage' -PlanFile $PlanFile
     $script:NEW_PROJECT_TYPE = Extract-PlanField -FieldPattern 'Project Type' -PlanFile $PlanFile
+
+    # Fallback: extract from Technical Approach prose if key-value not found
+    if (-not $NEW_LANG) {
+        $match = Extract-ProseField -Pattern 'TypeScript\s+\d+\.\w+' -PlanFile $PlanFile
+        if (-not $match) { $match = Extract-ProseField -Pattern 'Python\s+\d+\.\d+' -PlanFile $PlanFile }
+        if (-not $match) { $match = Extract-ProseField -Pattern 'Rust\s+\d+\.\d+' -PlanFile $PlanFile }
+        if (-not $match) { $match = Extract-ProseField -Pattern 'Go\s+\d+\.\d+' -PlanFile $PlanFile }
+        if ($match) { $script:NEW_LANG = $match }
+    }
+    if (-not $NEW_FRAMEWORK) {
+        $match = Extract-ProseField -Pattern '(React\s+\d+|Express|FastAPI|Django|Next\.js|Vue\s+\d+|Angular\s+\d+|Electron|Flask|Spring\s+Boot)' -PlanFile $PlanFile
+        if ($match) { $script:NEW_FRAMEWORK = $match }
+    }
 
     if ($NEW_LANG) { Write-Info "Found language: $NEW_LANG" } else { Write-WarningMsg 'No language information found in plan' }
     if ($NEW_FRAMEWORK) { Write-Info "Found framework: $NEW_FRAMEWORK" }

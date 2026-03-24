@@ -8,6 +8,12 @@ export type ArtifactType = 'spec' | 'plan' | 'tasks' | 'research' | 'review';
 export type FindingSeverity = 'NEEDS_REFACTOR' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 export type FindingStatus = 'unfixed' | 'FIXED' | 'SKIPPED' | 'MANUAL';
 
+export interface CodeSnippet {
+  label: string;
+  language: string;
+  code: string;
+}
+
 export interface ReviewFinding {
   number: number;
   ruleId: string;
@@ -15,6 +21,9 @@ export interface ReviewFinding {
   location: string;
   summary: string;
   fix: string;
+  why: string;
+  gain: string;
+  codeBlocks: CodeSnippet[];
   status: FindingStatus;
 }
 

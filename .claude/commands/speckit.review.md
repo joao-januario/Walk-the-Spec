@@ -100,7 +100,9 @@ For each violation found, report:
    - LOW: Nits. Naming, formatting, style.
 3. File and line number
 4. Summary of the issue
-5. Proposed fix: show current code and what it should be changed to
+5. **Why this severity**: Explain the concrete risk or impact — what could go wrong, what breaks, what becomes unmaintainable. Do NOT just restate the rule name.
+6. **What you gain**: State the concrete engineering benefit of fixing this — in terms of security, performance, maintainability, or reliability.
+7. Code snippets (when relevant): Show the problematic code and the proposed fix using fenced code blocks. Include code when it helps explain the issue — like a linter would show the flagged line.
 
 Detection guidelines:
 - Only flag violations in added/modified lines (+ lines in the diff)
@@ -153,31 +155,29 @@ Output a Markdown report:
 
 ### Findings
 
-| # | Rule | Category | File:Line | Summary | Fix |
-|---|------|----------|-----------|---------|-----|
-| 1 | ES04 | CRITICAL | src/preload/index.ts:5 | Raw ipcRenderer exposed | Wrap in named functions |
+One heading block per finding. Each finding MUST include Why and Gain. Code snippets are included when they help illustrate the issue.
 
-### Proposed Fixes
+#### Finding #1: ES04 — Raw ipcRenderer exposed in preload
 
-For each CRITICAL and HIGH finding:
+**Severity**: CRITICAL
+**Location**: src/preload/index.ts:5
+**Rule**: ES04
 
-#### Finding #N: Rule ID — Summary
+**Why this severity**: [Concrete risk/impact — what could go wrong. Do NOT just restate the rule name.]
 
-**File**: path:line
+**What you gain**: [Concrete engineering benefit of fixing — security, performance, maintainability, or reliability.]
 
-**Current:**
 \`\`\`typescript
-// problematic code
+// Problematic code (include when it helps explain the issue)
 \`\`\`
 
-**Proposed:**
 \`\`\`typescript
-// fixed code
+// Proposed fix (include when it helps explain the solution)
 \`\`\`
 
-**Rule reference**: Brief explanation
+#### Finding #2: ...
 
----
+[Repeat for each finding]
 
 ### Cross-Vertical Observations
 
