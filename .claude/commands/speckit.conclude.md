@@ -12,7 +12,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Goal
 
-Conclude the current feature branch by validating tests pass, cleaning up branch-specific speckit artifacts, committing all work, and squash-merging to main. This is the final step after `/speckit.implement` (and optionally `/speckit.review-branch`).
+Conclude the current feature branch by validating tests pass, cleaning up branch-specific speckit artifacts, committing all work, and squash-merging to main. This is the final step after `/speckit.implement` (and optionally `/speckit.review`).
 
 ## Execution Steps
 
