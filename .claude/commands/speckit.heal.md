@@ -116,10 +116,10 @@ Update `.claude/specs/<BRANCH_NAME>/review.md`:
 Remaining findings (MEDIUM/LOW — optional to fix):
 - ...
 
-Next: Run `/speckit.conclude` to finalize the branch.
+Run `/speckit.conclude` or `/speckit.review`.
 ```
 
-If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL findings remain. Review manually before concluding."
+If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL findings remain. Run `/speckit.review` to re-assess."
 
 ## Scope Rules
 
