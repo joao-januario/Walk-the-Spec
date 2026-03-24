@@ -52,19 +52,29 @@ Proceed? (yes/no)
 
 Wait for user confirmation. If no, stop.
 
-### Step 3: Apply Fixes
+### Step 3: Apply Fixes via Sonnet Agents
 
-For each finding (CRITICAL first, then HIGH), in order:
+Group findings by file. For each file (or small group of related files), spawn a **Sonnet sub-agent** using the Agent tool with `model: "sonnet"`. Launch independent file groups **in parallel**.
 
-1. Read the current file
-2. Locate the code matching the "Current" snippet from the review
-3. Apply the "Proposed" fix
-4. Report what was changed
+Each sub-agent prompt MUST include:
 
-If a fix cannot be applied (code has changed since the review, snippet not found):
-- Skip it
-- Mark as "Could not apply — file may have changed since review"
-- Continue with remaining fixes
+1. The full current content of the file(s) to fix
+2. The specific findings (rule ID, category, line, current code, proposed fix) from review.md
+3. The applicable best practices document content for context
+4. Clear instructions:
+
+```
+You are applying code fixes. For each finding:
+1. Read the current file content
+2. Locate the code matching the "Current" snippet
+3. Apply the "Proposed" fix from the review
+4. If the code has changed since the review and the snippet can't be found,
+   skip that fix and report it as "Could not apply — code changed since review"
+5. Use the Edit tool to apply changes. Be precise — change only what the fix requires.
+6. Report what was changed for each finding.
+```
+
+After all sub-agents return, collect results — which fixes were applied, which were skipped.
 
 ### Step 4: Run Tests
 
