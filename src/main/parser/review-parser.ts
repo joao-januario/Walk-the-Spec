@@ -5,8 +5,7 @@ export interface ReviewFinding {
   number: number;
   ruleId: string;
   severity: FindingSeverity;
-  file: string;
-  line: number | null;
+  location: string;
   summary: string;
   fix: string;
   status: FindingStatus;
@@ -33,7 +32,7 @@ export interface ReviewParseResult {
   healSummary: HealSummary | null;
 }
 
-const FINDING_ROW = /^\|\s*(\d+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+?)(?::(\d+))?\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|$/;
+// No regex — we split on | for robustness
 const HEAL_STATUS_ROW = /^\|\s*(\d+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+?)\s*\|$/;
 
 export function parseReview(content: string): ReviewParseResult {
@@ -41,7 +40,7 @@ export function parseReview(content: string): ReviewParseResult {
     return { branch: '', findings: [], healSummary: null };
   }
 
-  const lines = content.split('\n');
+  const lines = content.split('\n').map((l) => l.replace(/\r$/, ''));
   const branch = extractBranch(lines);
   const findings = extractFindings(lines);
   const healSummary = extractHealSummary(lines);
@@ -82,16 +81,15 @@ function extractFindings(lines: string[]): ReviewFinding[] {
     }
 
     if (inFindings) {
-      const match = line.match(FINDING_ROW);
-      if (match) {
+      const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
+      if (cells.length >= 6 && /^\d+$/.test(cells[0])) {
         findings.push({
-          number: parseInt(match[1], 10),
-          ruleId: match[2],
-          severity: match[3] as FindingSeverity,
-          file: match[4],
-          line: match[5] ? parseInt(match[5], 10) : null,
-          summary: match[6].trim(),
-          fix: match[7].trim(),
+          number: parseInt(cells[0], 10),
+          ruleId: cells[1],
+          severity: cells[2] as FindingSeverity,
+          location: cells[3],
+          summary: cells[4],
+          fix: cells[5],
           status: 'unfixed',
         });
       }

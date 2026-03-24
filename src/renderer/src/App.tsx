@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { theme } from './theme.js';
+import { getPhaseClasses } from './theme.js';
+import { cn } from './lib/utils.js';
 import BoardView from './components/board/BoardView.js';
 import FeatureDetail from './components/feature/FeatureDetail.js';
 import RefactorBacklogView from './components/refactor/RefactorBacklogView.js';
@@ -47,7 +48,10 @@ export default function App() {
       setTimeout(() => setNotification(null), 3000);
     });
 
-    return () => { unsubSpecs(); unsubBranch(); };
+    return () => {
+      unsubSpecs();
+      unsubBranch();
+    };
   }, []);
 
   const handleSelectProject = (project: Project) => {
@@ -65,45 +69,31 @@ export default function App() {
   }
 
   return (
-    <div style={{
-      display: 'flex', height: '100vh', backgroundColor: theme.bg, color: theme.text,
-      fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-    }}>
-      <BoardView
-        onSelectProject={handleSelectProject}
-        selectedProjectId={selectedProject?.id ?? null}
-      />
-      <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-        {/* Top bar with broom icon */}
+    <div className="flex h-screen font-sans">
+      <BoardView onSelectProject={handleSelectProject} selectedProjectId={selectedProject?.id ?? null} />
+      <div className="flex flex-1 flex-col overflow-auto">
         {selectedProject && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 16px 0' }}>
+          <div className="flex justify-end px-4 pt-2">
             <button
               onClick={() => setShowBacklog(!showBacklog)}
+              aria-label={showBacklog ? 'Back to feature' : 'Refactor Backlog'}
               title={showBacklog ? 'Back to feature' : 'Refactor Backlog'}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: '1.1rem', padding: '4px 8px', borderRadius: '6px',
-                opacity: showBacklog ? 1 : 0.5,
-                filter: showBacklog ? 'none' : 'grayscale(0.5)',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.filter = 'none'; }}
-              onMouseLeave={(e) => { if (!showBacklog) { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.filter = 'grayscale(0.5)'; } }}
-            >🧹</button>
+              className={cn(
+                'rounded-md px-2 py-1 text-lg transition-opacity',
+                showBacklog ? 'opacity-100' : 'opacity-50 hover:opacity-100',
+              )}
+            >
+              🧹
+            </button>
           </div>
         )}
-        <div style={{ flex: 1, overflow: 'auto', padding: '8px 32px 24px' }}>
+        <div className="flex-1 overflow-auto px-8 pt-2 pb-6">
           <MainContent view={view} refreshKey={refreshKey} />
         </div>
       </div>
 
       {notification && (
-        <div style={{
-          position: 'fixed', bottom: '20px', right: '20px', padding: '10px 18px',
-          backgroundColor: `${theme.yellow}15`, border: `1px solid ${theme.yellow}40`,
-          borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-          fontSize: '0.8rem', color: theme.yellow, zIndex: 200,
-          display: 'flex', alignItems: 'center', gap: '8px',
-        }}>
+        <div className="border-board-yellow/40 bg-board-yellow/10 text-board-yellow fixed right-5 bottom-5 z-50 flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm shadow-lg">
           <span>⚡</span>
           <span>{notification}</span>
         </div>

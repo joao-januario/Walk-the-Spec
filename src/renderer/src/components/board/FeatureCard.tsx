@@ -1,5 +1,6 @@
 import React from 'react';
-import { theme, getPhaseColors } from '../../theme.js';
+import { getPhaseClasses } from '../../theme.js';
+import { cn } from '../../lib/utils.js';
 import type { Project } from '../../types/index.js';
 
 interface FeatureCardProps {
@@ -10,41 +11,33 @@ interface FeatureCardProps {
 
 export default function FeatureCard({ project, selected, onClick }: FeatureCardProps) {
   const hasError = !!project.error;
-  const p = hasError ? { bg: `${theme.red}20`, text: theme.red, dot: theme.red, label: 'Error' } : getPhaseColors(project.phase);
+  const p = hasError
+    ? { bg: 'bg-board-red/20', text: 'text-board-red', dot: 'bg-board-red', border: 'border-board-red', label: 'Error' }
+    : getPhaseClasses(project.phase);
 
   return (
     <div
       onClick={onClick}
-      style={{
-        padding: '10px 14px',
-        cursor: 'pointer',
-        borderRadius: '8px',
-        backgroundColor: selected ? theme.surfaceHover : 'transparent',
-        borderLeft: selected ? `3px solid ${p.dot}` : '3px solid transparent',
-        marginBottom: '2px',
-        transition: 'all 0.12s',
-      }}
-      onMouseEnter={(e) => { if (!selected) e.currentTarget.style.backgroundColor = theme.surfaceHover; }}
-      onMouseLeave={(e) => { if (!selected) e.currentTarget.style.backgroundColor = selected ? theme.surfaceHover : 'transparent'; }}
+      className={cn(
+        'mb-[2px] cursor-pointer rounded-lg border-l-[3px] px-[14px] py-[10px] transition-all duration-[120ms]',
+        selected ? 'bg-board-surface-hover' : 'hover:bg-board-surface-hover bg-transparent',
+        selected ? p.border : 'border-l-transparent',
+      )}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: p.dot, flexShrink: 0 }} />
-        <span style={{ fontWeight: 600, fontSize: '0.85rem', color: selected ? theme.textBright : theme.text }}>
+      <div className="flex items-center gap-2">
+        <span className={cn('h-2 w-2 shrink-0 rounded-full', p.dot)} />
+        <span className={cn('text-[0.85rem] font-semibold', selected ? 'text-board-text-bright' : 'text-board-text')}>
           {project.name}
         </span>
       </div>
-      <div style={{ marginLeft: '16px', marginTop: '2px' }}>
+      <div className="mt-[2px] ml-4">
         {hasError ? (
-          <span style={{ fontSize: '0.65rem', color: theme.red }}>{project.error}</span>
+          <span className="text-board-red text-[0.65rem]">{project.error}</span>
         ) : (
           <>
-            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: p.text, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {p.label}
-            </span>
+            <span className={cn('text-[0.65rem] font-semibold tracking-[0.05em] uppercase', p.text)}>{p.label}</span>
             {project.hasSpeckitContent && (
-              <span style={{ fontSize: '0.65rem', color: theme.textMuted, marginLeft: '6px' }}>
-                {project.currentBranch}
-              </span>
+              <span className="text-board-text-muted ml-[6px] text-[0.65rem]">{project.currentBranch}</span>
             )}
           </>
         )}

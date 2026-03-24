@@ -12,8 +12,7 @@ export interface ReviewFinding {
   number: number;
   ruleId: string;
   severity: FindingSeverity;
-  file: string;
-  line: number | null;
+  location: string;
   summary: string;
   fix: string;
   status: FindingStatus;
@@ -188,10 +187,7 @@ export interface CommentsResponse {
 
 // --- WebSocket Messages ---
 
-export type WSMessage =
-  | SpecsChangedMessage
-  | BranchChangedMessage
-  | ProjectErrorMessage;
+export type WSMessage = SpecsChangedMessage | BranchChangedMessage | ProjectErrorMessage;
 
 export interface SpecsChangedMessage {
   type: 'specs-changed';

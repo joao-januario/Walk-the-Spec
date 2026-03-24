@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { theme } from '../../theme.js';
 import FeatureCard from './FeatureCard.js';
 import type { Project } from '../../types/index.js';
 import * as api from '../../services/api.js';
@@ -27,7 +26,9 @@ export default function BoardView({ onSelectProject, selectedProjectId }: BoardV
     }
   };
 
-  useEffect(() => { fetchProjects(); }, []);
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   const handleAddProject = async () => {
     try {
@@ -50,34 +51,26 @@ export default function BoardView({ onSelectProject, selectedProjectId }: BoardV
   };
 
   return (
-    <div style={{
-      width: '220px', minWidth: '220px', height: '100vh',
-      backgroundColor: theme.bg, borderRight: `1px solid ${theme.border}`,
-      display: 'flex', flexDirection: 'column', padding: '12px 8px',
-      overflow: 'hidden',
-    }}>
-      <div style={{ padding: '4px 8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-          Projects
-        </span>
+    <div className="bg-board-bg border-board-border flex h-screen w-[220px] min-w-[220px] flex-col overflow-hidden border-r px-2 py-3">
+      <div className="flex items-center justify-between px-2 pb-4">
+        <span className="text-board-text-muted text-[0.7rem] font-semibold tracking-[0.1em] uppercase">Projects</span>
         <button
           onClick={handleAddProject}
+          aria-label="Add project"
           title="Add project"
-          style={{
-            width: '22px', height: '22px', border: `1px solid ${theme.border}`, borderRadius: '6px',
-            backgroundColor: 'transparent', color: theme.textMuted, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.color = theme.accent; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.textMuted; }}
-        >+</button>
+          className="border-board-border text-board-text-muted hover:border-board-accent hover:text-board-accent flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[6px] border bg-transparent text-[0.9rem]"
+        >
+          +
+        </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {loading && <div style={{ color: theme.textMuted, fontSize: '0.8rem', padding: '8px' }}>Loading...</div>}
+      <div className="flex-1 overflow-y-auto">
+        {loading && <div className="text-board-text-muted p-2 text-[0.8rem]">Loading...</div>}
         {!loading && projects.length === 0 && (
-          <div style={{ color: theme.textMuted, fontSize: '0.8rem', padding: '8px', textAlign: 'center' }}>
-            No projects yet.<br />Click + to add one.
+          <div className="text-board-text-muted p-2 text-center text-[0.8rem]">
+            No projects yet.
+            <br />
+            Click + to add one.
           </div>
         )}
         {projects.map((p) => (
@@ -89,7 +82,6 @@ export default function BoardView({ onSelectProject, selectedProjectId }: BoardV
           />
         ))}
       </div>
-
     </div>
   );
 }

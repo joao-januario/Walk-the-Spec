@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { theme } from '../../theme.js';
 import CommentThread from './CommentThread.js';
 import type { Comment } from '../../types/index.js';
 
@@ -22,15 +21,14 @@ export default function CommentPanel({ elementId, comments, onAdd, onUpdate, onD
   };
 
   return (
-    <div style={{
-      backgroundColor: theme.surfaceAlt, border: `1px solid ${theme.border}`,
-      borderRadius: '8px', padding: '14px', marginTop: '8px', maxWidth: '550px',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <span style={{ fontWeight: 600, fontSize: '0.82rem', color: theme.textBright }}>
-          Comments on <code style={{ fontSize: '0.75rem', color: theme.accent }}>{elementId}</code>
+    <div className="bg-board-surface-alt border-board-border mt-2 max-w-[550px] rounded-lg border p-[14px]">
+      <div className="mb-[10px] flex items-center justify-between">
+        <span className="text-board-text-bright text-[0.82rem] font-semibold">
+          Comments on <code className="text-board-accent text-[0.75rem]">{elementId}</code>
         </span>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', color: theme.textMuted, cursor: 'pointer', fontSize: '1rem' }}>×</button>
+        <button onClick={onClose} className="text-board-text-muted cursor-pointer border-none bg-transparent text-base">
+          ×
+        </button>
       </div>
 
       <CommentThread comments={comments} onUpdate={onUpdate} onDelete={onDelete} />
@@ -39,21 +37,19 @@ export default function CommentPanel({ elementId, comments, onAdd, onUpdate, onD
         value={newText}
         onChange={(e) => setNewText(e.target.value)}
         placeholder="Add a comment..."
-        onKeyDown={(e) => { if (e.key === 'Enter' && e.ctrlKey) handleSubmit(); }}
-        style={{
-          width: '100%', padding: '8px', border: `1px solid ${theme.border}`, borderRadius: '6px',
-          fontSize: '0.82rem', resize: 'vertical', minHeight: '50px', fontFamily: 'inherit',
-          backgroundColor: theme.bg, color: theme.text, boxSizing: 'border-box', outline: 'none',
-          marginTop: '6px',
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && e.ctrlKey) handleSubmit();
         }}
+        className="border-board-border bg-board-bg text-board-text mt-[6px] box-border min-h-[50px] w-full resize-y rounded-[6px] border p-2 font-[inherit] text-[0.82rem] focus-visible:outline-none"
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-        <span style={{ fontSize: '0.65rem', color: theme.textMuted }}>Ctrl+Enter to submit</span>
-        <button onClick={handleSubmit} style={{
-          padding: '5px 12px', border: 'none', borderRadius: '6px',
-          backgroundColor: theme.accent, color: '#1a1b26', cursor: 'pointer',
-          fontSize: '0.78rem', fontWeight: 600,
-        }}>Add Comment</button>
+      <div className="mt-[6px] flex items-center justify-between">
+        <span className="text-board-text-muted text-[0.65rem]">Ctrl+Enter to submit</span>
+        <button
+          onClick={handleSubmit}
+          className="bg-board-accent cursor-pointer rounded-[6px] border-none px-3 py-[5px] text-[0.78rem] font-semibold text-board-bg"
+        >
+          Add Comment
+        </button>
       </div>
     </div>
   );

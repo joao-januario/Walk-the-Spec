@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '../../theme.js';
+import { cn } from '../../lib/utils.js';
 
 interface RefactorBacklogIconProps {
   active: boolean;
@@ -11,20 +11,14 @@ export default function RefactorBacklogIcon({ active, onClick }: RefactorBacklog
     <button
       onClick={onClick}
       title="Refactor Backlog"
-      style={{
-        display: 'flex', alignItems: 'center', gap: '6px',
-        width: '100%', padding: '8px 14px',
-        border: 'none', borderRadius: '6px',
-        backgroundColor: active ? theme.surfaceHover : 'transparent',
-        borderLeft: active ? `3px solid ${theme.purple}` : '3px solid transparent',
-        color: active ? theme.purple : theme.textMuted,
-        cursor: 'pointer', fontSize: '0.78rem', fontWeight: 500,
-        textAlign: 'left',
-      }}
-      onMouseEnter={(e) => { if (!active) e.currentTarget.style.backgroundColor = theme.surfaceHover; }}
-      onMouseLeave={(e) => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}
+      className={cn(
+        'flex w-full cursor-pointer items-center gap-[6px] rounded-[6px] border-l-[3px] border-none px-[14px] py-2 text-left text-[0.78rem] font-medium',
+        active
+          ? 'bg-board-surface-hover border-board-purple text-board-purple'
+          : 'text-board-text-muted hover:bg-board-surface-hover border-l-transparent bg-transparent',
+      )}
     >
-      <span style={{ fontSize: '0.9rem' }}>🧹</span>
+      <span className="text-[0.9rem]">🧹</span>
       <span>Refactor Backlog</span>
     </button>
   );

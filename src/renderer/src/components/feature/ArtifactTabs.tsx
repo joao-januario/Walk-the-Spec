@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '../../theme.js';
+import { cn } from '../../lib/utils.js';
 import type { ArtifactType } from '../../types/index.js';
 
 const TAB_LABELS: Record<string, string> = {
@@ -18,18 +18,17 @@ interface ArtifactTabsProps {
 
 export default function ArtifactTabs({ available, active, onSelect }: ArtifactTabsProps) {
   return (
-    <div style={{ display: 'flex', gap: '0', borderBottom: `1px solid ${theme.border}`, marginBottom: '20px' }}>
+    <div className="border-board-border mb-5 flex border-b">
       {available.map((type) => (
         <button
           key={type}
           onClick={() => onSelect(type as ArtifactType)}
-          style={{
-            padding: '8px 18px', border: 'none', background: 'none', cursor: 'pointer',
-            fontSize: '0.8rem', fontWeight: active === type ? 600 : 400,
-            color: active === type ? theme.accent : theme.textMuted,
-            borderBottom: active === type ? `2px solid ${theme.accent}` : '2px solid transparent',
-            marginBottom: '-1px',
-          }}
+          className={cn(
+            '-mb-px cursor-pointer border-b-2 border-none bg-transparent px-[18px] py-2 text-[0.8rem]',
+            active === type
+              ? 'text-board-accent border-board-accent font-semibold'
+              : 'text-board-text-muted border-transparent font-normal',
+          )}
         >
           {TAB_LABELS[type] ?? type}
         </button>

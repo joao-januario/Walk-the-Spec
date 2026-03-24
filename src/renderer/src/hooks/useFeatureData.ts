@@ -8,7 +8,10 @@ export function useFeatureData(projectId: string | null) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchFeature = useCallback(async () => {
-    if (!projectId) { setFeature(null); return; }
+    if (!projectId) {
+      setFeature(null);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -22,7 +25,9 @@ export function useFeatureData(projectId: string | null) {
     }
   }, [projectId]);
 
-  useEffect(() => { fetchFeature(); }, [fetchFeature]);
+  useEffect(() => {
+    fetchFeature();
+  }, [fetchFeature]);
 
   return { feature, loading, error, refetch: fetchFeature };
 }
@@ -33,7 +38,10 @@ export function useArtifactData(projectId: string | null, artifactType: Artifact
   const [error, setError] = useState<string | null>(null);
 
   const fetchArtifact = useCallback(async () => {
-    if (!projectId || !artifactType) { setArtifact(null); return; }
+    if (!projectId || !artifactType) {
+      setArtifact(null);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -47,7 +55,9 @@ export function useArtifactData(projectId: string | null, artifactType: Artifact
     }
   }, [projectId, artifactType]);
 
-  useEffect(() => { fetchArtifact(); }, [fetchArtifact]);
+  useEffect(() => {
+    fetchArtifact();
+  }, [fetchArtifact]);
 
   return { artifact, loading, error, refetch: fetchArtifact };
 }

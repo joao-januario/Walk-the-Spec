@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  /* Board surfaces */
+  --color-board-bg: #1a1b26;
+  --color-board-surface: #222436;
+  --color-board-surface-hover: #2a2c42;
+  --color-board-surface-alt: #1e2030;
+  --color-board-border: #363850;
+
+  /* Text */
+  --color-board-text: #c0caf5;
+  --color-board-text-muted: #7982a9;
+  --color-board-text-bright: #e0e6ff;
+
+  /* Accent colors */
+  --color-board-accent: #7aa2f7;
+  --color-board-red: #f7768e;
+  --color-board-orange: #ff9e64;
+  --color-board-yellow: #e0af68;
+  --color-board-green: #9ece6a;
+  --color-board-purple: #bb9af7;
+  --color-board-cyan: #7dcfff;
+
+  /* Phase colors */
+  --color-phase-specify: #7aa2f7;
+  --color-phase-plan: #bb9af7;
+  --color-phase-tasks: #ff9e64;
+  --color-phase-implement: #9ece6a;
+  --color-phase-review: #7dcfff;
+  --color-phase-unknown: #565870;
+
+  /* Font */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html {
+    @apply bg-board-bg text-board-text antialiased;
+    font-family: var(--font-sans);
+  }
+
+  body {
+    @apply m-0 overflow-hidden;
+  }
+}

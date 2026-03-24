@@ -38,21 +38,9 @@ npm test
 - If tests **fail**: STOP. Report failures. Say: "Tests must pass before concluding. Fix the failing tests and try again."
 - If tests **pass**: Continue.
 
-### Step 3: Show Summary
+### Step 3: Proceed
 
-Before doing anything destructive, show the user what will happen:
-
-```markdown
-## Conclude: BRANCH_NAME
-
-**Tests**: ✓ All passing
-**Branch artifacts to delete**: list each file in FEATURE_DIR
-**Merge strategy**: Squash merge to main
-
-Proceed? (yes/no)
-```
-
-Wait for user confirmation before continuing. If user says no, stop.
+Tests passed — proceed immediately. No confirmation needed. The user already invoked the command.
 
 ### Step 4: Stage All Current Work
 

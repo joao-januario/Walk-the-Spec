@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { theme } from '../../theme.js';
+import { cn } from '../../lib/utils.js';
 import UserStoryCard from '../elements/UserStoryCard.js';
 import RequirementRow from '../elements/RequirementRow.js';
 import CommentBadge from '../elements/CommentBadge.js';
 import CommentPanel from '../comments/CommentPanel.js';
-import type { Element, UserStoryContent, RequirementContent, SuccessCriterionContent, Comment } from '../../types/index.js';
+import type {
+  Element,
+  UserStoryContent,
+  RequirementContent,
+  SuccessCriterionContent,
+  Comment,
+} from '../../types/index.js';
 
 interface SpecViewProps {
   elements: Element[];
@@ -14,7 +20,13 @@ interface SpecViewProps {
   onDeleteComment: (commentId: string) => void;
 }
 
-export default function SpecView({ elements, comments, onAddComment, onUpdateComment, onDeleteComment }: SpecViewProps) {
+export default function SpecView({
+  elements,
+  comments,
+  onAddComment,
+  onUpdateComment,
+  onDeleteComment,
+}: SpecViewProps) {
   const [openCommentId, setOpenCommentId] = useState<string | null>(null);
 
   const stories = elements.filter((e) => e.type === 'user-story');
@@ -26,14 +38,21 @@ export default function SpecView({ elements, comments, onAddComment, onUpdateCom
   return (
     <div>
       {stories.length > 0 && (
-        <section style={{ marginBottom: '28px' }}>
-          <h3 style={{ fontSize: '0.85rem', color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 600 }}>User Stories</h3>
+        <section className="mb-7">
+          <h3 className="text-board-text-muted mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
+            User Stories
+          </h3>
           {stories.map((e) => (
             <div key={e.id}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <div style={{ flex: 1 }}><UserStoryCard content={e.content as UserStoryContent} /></div>
-                <div style={{ paddingTop: '16px' }}>
-                  <CommentBadge count={e.commentCount} onClick={() => setOpenCommentId(openCommentId === e.id ? null : e.id)} />
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <UserStoryCard content={e.content as UserStoryContent} />
+                </div>
+                <div className="pt-4">
+                  <CommentBadge
+                    count={e.commentCount}
+                    onClick={() => setOpenCommentId(openCommentId === e.id ? null : e.id)}
+                  />
                 </div>
               </div>
               {openCommentId === e.id && (
@@ -52,14 +71,21 @@ export default function SpecView({ elements, comments, onAddComment, onUpdateCom
       )}
 
       {requirements.length > 0 && (
-        <section style={{ marginBottom: '28px' }}>
-          <h3 style={{ fontSize: '0.85rem', color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 600 }}>Functional Requirements</h3>
+        <section className="mb-7">
+          <h3 className="text-board-text-muted mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
+            Functional Requirements
+          </h3>
           {requirements.map((e) => (
             <div key={e.id}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
-                <div style={{ flex: 1 }}><RequirementRow content={e.content as RequirementContent} commentCount={e.commentCount} /></div>
-                <div style={{ paddingTop: '7px' }}>
-                  <CommentBadge count={e.commentCount} onClick={() => setOpenCommentId(openCommentId === e.id ? null : e.id)} />
+              <div className="flex items-start gap-1">
+                <div className="flex-1">
+                  <RequirementRow content={e.content as RequirementContent} commentCount={e.commentCount} />
+                </div>
+                <div className="pt-[7px]">
+                  <CommentBadge
+                    count={e.commentCount}
+                    onClick={() => setOpenCommentId(openCommentId === e.id ? null : e.id)}
+                  />
                 </div>
               </div>
               {openCommentId === e.id && (
@@ -79,13 +105,17 @@ export default function SpecView({ elements, comments, onAddComment, onUpdateCom
 
       {criteria.length > 0 && (
         <section>
-          <h3 style={{ fontSize: '0.85rem', color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 600 }}>Success Criteria</h3>
+          <h3 className="text-board-text-muted mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
+            Success Criteria
+          </h3>
           {criteria.map((e) => {
             const sc = e.content as SuccessCriterionContent;
             return (
-              <div key={e.id} style={{ display: 'flex', gap: '10px', padding: '7px 0', borderBottom: `1px solid ${theme.border}30` }}>
-                <code style={{ fontSize: '0.7rem', fontWeight: 700, color: theme.green, backgroundColor: `${theme.green}15`, padding: '2px 6px', borderRadius: '4px' }}>{sc.id}</code>
-                <span style={{ fontSize: '0.82rem', color: theme.text }}>{sc.text}</span>
+              <div key={e.id} className="border-board-border/20 flex gap-[10px] border-b py-[7px]">
+                <code className="text-board-green bg-board-green/[0.08] rounded px-[6px] py-[2px] text-[0.7rem] font-bold">
+                  {sc.id}
+                </code>
+                <span className="text-board-text text-[0.82rem]">{sc.text}</span>
               </div>
             );
           })}
@@ -104,17 +134,20 @@ export default function SpecView({ elements, comments, onAddComment, onUpdateCom
         }
 
         return (
-          <section style={{ marginTop: '28px', opacity: 0.7 }}>
-            <h3 style={{ fontSize: '0.85rem', color: theme.yellow, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', fontWeight: 600 }}>
+          <section className="mt-7 opacity-70">
+            <h3 className="text-board-yellow mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
               Stale Comments (element removed)
             </h3>
             {Array.from(grouped.entries()).map(([elementId, cmts]) => (
-              <div key={elementId} style={{ marginBottom: '12px', padding: '10px', backgroundColor: `${theme.yellow}08`, borderRadius: '6px', border: `1px solid ${theme.yellow}20` }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: theme.yellow, marginBottom: '6px' }}>
-                  {elementId} <span style={{ fontWeight: 400, color: theme.textMuted }}>(no longer in artifact)</span>
+              <div
+                key={elementId}
+                className="bg-board-yellow/[0.03] border-board-yellow/20 mb-3 rounded-[6px] border p-[10px]"
+              >
+                <div className="text-board-yellow mb-[6px] text-[0.75rem] font-semibold">
+                  {elementId} <span className="text-board-text-muted font-normal">(no longer in artifact)</span>
                 </div>
                 {cmts.map((c) => (
-                  <div key={c.id} style={{ fontSize: '0.78rem', color: theme.textMuted, marginBottom: '2px', paddingLeft: '10px' }}>
+                  <div key={c.id} className="text-board-text-muted mb-[2px] pl-[10px] text-[0.78rem]">
                     [{c.createdAt}] {c.content}
                   </div>
                 ))}

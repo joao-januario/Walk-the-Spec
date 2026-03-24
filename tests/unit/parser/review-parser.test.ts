@@ -19,8 +19,7 @@ describe('review-parser', () => {
       expect(f1.number).toBe(1);
       expect(f1.ruleId).toBe('ES04');
       expect(f1.severity).toBe('CRITICAL');
-      expect(f1.file).toBe('src/preload/index.ts');
-      expect(f1.line).toBe(5);
+      expect(f1.location).toBe('src/preload/index.ts:5');
       expect(f1.summary).toContain('Raw ipcRenderer');
     });
 

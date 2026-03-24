@@ -1,5 +1,4 @@
 import React from 'react';
-import { theme } from '../../theme.js';
 
 interface EmptyStateProps {
   branchName?: string;
@@ -8,12 +7,14 @@ interface EmptyStateProps {
 
 export default function EmptyState({ branchName, message }: EmptyStateProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: theme.textMuted }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', marginBottom: '12px', opacity: 0.4 }}>📂</div>
-        <div style={{ fontSize: '0.9rem' }}>
+    <div className="text-board-text-muted flex h-full items-center justify-center">
+      <div className="text-center">
+        <div className="mb-3 text-2xl opacity-40">📂</div>
+        <div className="text-sm">
           {message ?? (
-            <>No speckit content on <code style={{ color: theme.text }}>{branchName ?? 'this branch'}</code></>
+            <>
+              No speckit content on <code className="text-board-text">{branchName ?? 'this branch'}</code>
+            </>
           )}
         </div>
       </div>

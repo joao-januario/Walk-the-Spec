@@ -7,7 +7,9 @@ export default function ResearchView({ elements }: { elements: Element[] }) {
 
   return (
     <div>
-      {decisions.map((e) => <DecisionSection key={e.id} content={e.content as DecisionContent} />)}
+      {decisions.map((e) => (
+        <DecisionSection key={e.id} content={e.content as DecisionContent} />
+      ))}
     </div>
   );
 }

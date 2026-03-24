@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { theme, getPhaseColors } from '../../theme.js';
+import { getPhaseClasses } from '../../theme.js';
+import { cn } from '../../lib/utils.js';
 import ArtifactTabs from './ArtifactTabs.js';
 import SpecView from '../artifacts/SpecView.js';
 import PlanView from '../artifacts/PlanView.js';
@@ -21,20 +22,29 @@ const PHASE_HERO: Record<string, ArtifactType> = {
 
 export default function FeatureDetail({ project }: { project: Project }) {
   const { feature, loading: featureLoading } = useFeatureData(project.id);
-  const availableTypes = (feature?.artifacts ?? []).map((a) => a.type).filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
+  const availableTypes = (feature?.artifacts ?? [])
+    .map((a) => a.type)
+    .filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
   const heroType = PHASE_HERO[project.phase] ?? 'spec';
-  const defaultTab = availableTypes.includes(heroType) ? heroType : availableTypes[0] ?? null;
+  const defaultTab = availableTypes.includes(heroType) ? heroType : (availableTypes[0] ?? null);
 
   const [activeTab, setActiveTab] = useState<ArtifactType | null>(defaultTab);
 
   useEffect(() => {
-    const types = (feature?.artifacts ?? []).map((a) => a.type).filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
+    const types = (feature?.artifacts ?? [])
+      .map((a) => a.type)
+      .filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
     const hero = PHASE_HERO[project.phase] ?? 'spec';
-    setActiveTab((types.includes(hero) ? hero : types[0] ?? null) as ArtifactType | null);
+    setActiveTab((types.includes(hero) ? hero : (types[0] ?? null)) as ArtifactType | null);
   }, [project.id, feature]);
 
   const { artifact, loading: artifactLoading, refetch: refetchArtifact } = useArtifactData(project.id, activeTab);
-  const { comments, add: addComment, update: updateComment, remove: removeComment } = useComments(project.id, activeTab);
+  const {
+    comments,
+    add: addComment,
+    update: updateComment,
+    remove: removeComment,
+  } = useComments(project.id, activeTab);
 
   const handleAddComment = async (elementId: string, content: string) => {
     await addComment(elementId, content);
@@ -60,24 +70,24 @@ export default function FeatureDetail({ project }: { project: Project }) {
   };
 
   if (featureLoading) {
-    return <div style={{ color: theme.textMuted, fontSize: '0.85rem' }}>Loading feature...</div>;
+    return <div className="text-board-text-muted text-[0.85rem]">Loading feature...</div>;
   }
 
   if (!feature) {
     return <EmptyState branchName={project.currentBranch} />;
   }
 
-  const p = getPhaseColors(project.phase);
+  const p = getPhaseClasses(project.phase);
 
   return (
     <div>
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', color: theme.textBright }}>{feature.summary || project.name}</h2>
-          <span style={{ padding: '2px 10px', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 600, backgroundColor: p.bg, color: p.text }}>{p.label}</span>
+      <div className="mb-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-board-text-bright m-0 text-[1.2rem]">{feature.summary || project.name}</h2>
+          <span className={cn('rounded-full px-2.5 py-0.5 text-[0.7rem] font-semibold', p.bg, p.text)}>{p.label}</span>
         </div>
-        <div style={{ color: theme.textMuted, fontSize: '0.75rem', marginTop: '4px' }}>
-          <code style={{ fontSize: '0.7rem', color: theme.text }}>{feature.branchName}</code>
+        <div className="text-board-text-muted mt-1 text-[0.75rem]">
+          <code className="text-board-text text-[0.7rem]">{feature.branchName}</code>
         </div>
       </div>
 
@@ -85,7 +95,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
         <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} />
       )}
 
-      {artifactLoading && <div style={{ color: theme.textMuted, fontSize: '0.85rem' }}>Loading...</div>}
+      {artifactLoading && <div className="text-board-text-muted text-[0.85rem]">Loading...</div>}
 
       {artifact && activeTab === 'spec' && (
         <SpecView

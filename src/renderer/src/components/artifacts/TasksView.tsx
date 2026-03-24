@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import { theme } from '../../theme.js';
+import { cn } from '../../lib/utils.js';
 import TaskRow from '../elements/TaskRow.js';
 import type { Element, TaskContent } from '../../types/index.js';
 
 function ProgressBar({ done, total }: { done: number; total: number }) {
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <div style={{ flex: 1, height: '5px', backgroundColor: theme.border, borderRadius: '3px', overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', backgroundColor: pct === 100 ? theme.green : theme.accent, borderRadius: '3px', transition: 'width 0.3s' }} />
+    <div className="flex items-center gap-2">
+      <div className="bg-board-border h-[5px] flex-1 overflow-hidden rounded-[3px]">
+        <div
+          className={cn(
+            'h-full rounded-[3px] transition-[width] duration-300',
+            pct === 100 ? 'bg-board-green' : 'bg-board-accent',
+          )}
+          style={{ width: `${pct}%` }} // dynamic: runtime value
+        />
       </div>
-      <span style={{ fontSize: '0.7rem', color: theme.textMuted, whiteSpace: 'nowrap' }}>{done}/{total}</span>
+      <span className="text-board-text-muted text-[0.7rem] whitespace-nowrap">
+        {done}/{total}
+      </span>
     </div>
   );
 }
@@ -51,7 +59,8 @@ export default function TasksView({ elements, onToggleTask }: TasksViewProps) {
   const toggleDone = (phase: string) => {
     setExpandedDone((prev) => {
       const next = new Set(prev);
-      if (next.has(phase)) next.delete(phase); else next.add(phase);
+      if (next.has(phase)) next.delete(phase);
+      else next.add(phase);
       return next;
     });
   };
@@ -59,9 +68,10 @@ export default function TasksView({ elements, onToggleTask }: TasksViewProps) {
   return (
     <div>
       {/* Overall progress */}
-      <div style={{ marginBottom: '24px', maxWidth: '350px' }}>
-        <div style={{ fontSize: '0.78rem', color: theme.textMuted, marginBottom: '4px' }}>
-          Overall: {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% ({completedTasks}/{totalTasks} tasks)
+      <div className="mb-6 max-w-[350px]">
+        <div className="text-board-text-muted mb-1 text-[0.78rem]">
+          Overall: {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% ({completedTasks}/
+          {totalTasks} tasks)
         </div>
         <ProgressBar done={completedTasks} total={totalTasks} />
       </div>
@@ -74,23 +84,26 @@ export default function TasksView({ elements, onToggleTask }: TasksViewProps) {
         const isExpanded = !allDone || expandedDone.has(phaseName);
 
         return (
-          <section key={phaseName} style={{ marginBottom: '16px' }}>
+          <section key={phaseName} className="mb-4">
             <div
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', cursor: allDone ? 'pointer' : 'default' }}
-              onClick={() => { if (allDone) toggleDone(phaseName); }}
+              className={cn('mb-[6px] flex items-center gap-[10px]', allDone ? 'cursor-pointer' : 'cursor-default')}
+              onClick={() => {
+                if (allDone) toggleDone(phaseName);
+              }}
             >
-              {allDone && (
-                <span style={{ color: theme.textMuted, fontSize: '0.7rem' }}>{isExpanded ? '▼' : '▶'}</span>
-              )}
-              <h3 style={{ margin: 0, fontSize: '0.88rem', color: allDone ? theme.textMuted : theme.textBright }}>{phaseName}</h3>
-              {allDone && <span style={{ fontSize: '0.65rem', fontWeight: 700, color: theme.green }}>DONE</span>}
+              {allDone && <span className="text-board-text-muted text-[0.7rem]">{isExpanded ? '▼' : '▶'}</span>}
+              <h3 className={cn('m-0 text-[0.88rem]', allDone ? 'text-board-text-muted' : 'text-board-text-bright')}>
+                {phaseName}
+              </h3>
+              {allDone && <span className="text-board-green text-[0.65rem] font-bold">DONE</span>}
             </div>
-            <div style={{ marginBottom: '6px', maxWidth: '250px' }}>
+            <div className="mb-[6px] max-w-[250px]">
               <ProgressBar done={done} total={phaseElements.length} />
             </div>
-            {isExpanded && phaseElements.map((e) => (
-              <TaskRow key={e.id} content={e.content as TaskContent} onToggle={onToggleTask} />
-            ))}
+            {isExpanded &&
+              phaseElements.map((e) => (
+                <TaskRow key={e.id} content={e.content as TaskContent} onToggle={onToggleTask} />
+              ))}
           </section>
         );
       })}

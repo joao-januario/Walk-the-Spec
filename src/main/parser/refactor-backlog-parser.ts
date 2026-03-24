@@ -18,7 +18,8 @@ export function parseRefactorBacklog(content: string): RefactorBacklogResult {
 
   const entries: RefactorEntry[] = [];
 
-  for (const line of content.split('\n')) {
+  for (const rawLine of content.split('\n')) {
+    const line = rawLine.replace(/\r$/, '');
     const match = line.match(TABLE_ROW);
     if (match && match[1] !== 'ID' && !match[1].startsWith('-')) {
       entries.push({

@@ -55,6 +55,7 @@ Read ALL documents from `.claude/best-practices/`:
 - `react-typescript.md` — RT01-RT14
 - `typescript-strict.md` — TS01-TS13
 - `testing.md` — TT01-TT11
+- `tailwind.md` — TW01-TW23
 
 Also load `.claude/specify/memory/constitution.md` for the Design Philosophy principles.
 
@@ -64,7 +65,8 @@ Group changed files into technology verticals:
 |----------|--------------|---------------------|
 | **Electron Main** | `src/main/**/*.ts` | electron-security.md, electron-architecture.md, typescript-strict.md |
 | **Electron Preload** | `src/preload/**/*.ts` | electron-security.md |
-| **Renderer (React)** | `src/renderer/**/*.tsx`, `src/renderer/**/*.ts` | react-typescript.md, typescript-strict.md |
+| **Renderer (React)** | `src/renderer/**/*.tsx`, `src/renderer/**/*.ts` | react-typescript.md, typescript-strict.md, tailwind.md |
+| **Renderer CSS** | `src/renderer/**/*.css` | tailwind.md |
 | **Tests** | `tests/**/*.test.ts` | testing.md, typescript-strict.md |
 | **Config/Build** | `tsconfig*.json`, `electron.vite.config.*`, `vitest.config.*`, `package.json` | typescript-strict.md, electron-architecture.md |
 

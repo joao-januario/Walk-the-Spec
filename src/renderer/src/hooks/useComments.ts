@@ -7,7 +7,10 @@ export function useComments(projectId: string | null, artifactType: ArtifactType
   const [loading, setLoading] = useState(false);
 
   const fetchComments = useCallback(async () => {
-    if (!projectId || !artifactType) { setComments([]); return; }
+    if (!projectId || !artifactType) {
+      setComments([]);
+      return;
+    }
     setLoading(true);
     try {
       const data = await api.getComments(projectId, artifactType);
@@ -19,7 +22,9 @@ export function useComments(projectId: string | null, artifactType: ArtifactType
     }
   }, [projectId, artifactType]);
 
-  useEffect(() => { fetchComments(); }, [fetchComments]);
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   const add = async (elementId: string, content: string) => {
     if (!projectId || !artifactType) return;
