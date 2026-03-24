@@ -214,16 +214,13 @@ Continue numbering from the last existing ID. Do not duplicate existing entries 
 - If NEEDS_REFACTOR: "Architectural debt recorded in refactor-backlog.md for future work."
 - If no findings: "Branch passes all best practices checks."
 
-### Phase 9: Offer Fix Application
+### Phase 9: Suggest Next Step
 
-Ask: "Would you like me to apply the proposed fixes for CRITICAL and HIGH findings?"
+Output: "Run `/speckit.heal` to apply the proposed fixes for CRITICAL and HIGH findings."
 
-If approved:
-1. Show summary of fixes to apply
-2. Apply fixes one file at a time
-3. Run `npm test` after all fixes
-4. If tests fail, identify the breaking fix, revert it, mark as "requires manual intervention"
-5. Report final status
+If no CRITICAL or HIGH findings exist: "No fixes needed. Run `/speckit.conclude` to finalize the branch."
+
+**IMPORTANT**: `/speckit.review` is strictly read-only. It MUST NOT modify any source files. All fixes are applied by `/speckit.heal`.
 
 ## Operating Principles
 
@@ -233,4 +230,4 @@ If approved:
 - **Only review changed code** — pre-existing issues are out of scope.
 - **Be thorough over fast** — check every rule against every changed line.
 - **Critical thinking** — flag real problems, not theoretical concerns.
-- **NEVER modify files** during review until user explicitly approves fixes.
+- **NEVER modify files** — review is read-only. Fixes are applied by `/speckit.heal`.
