@@ -1,0 +1,39 @@
+# spec-board Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-03-24
+
+## Active Technologies
+
+- TypeScript 5.x (shared across main process and renderer) + Electron (desktop shell), React 19 (renderer UI), electron-vite (build tooling), chokidar (file watching), unified/remark (markdown parsing) (002-spec-board)
+
+## Project Structure
+
+```text
+src/main/       # Electron main process (IPC handlers, parsers, filesystem)
+src/preload/    # Preload script (contextBridge IPC exposure)
+src/renderer/   # React UI (components, hooks, services)
+tests/          # Vitest unit + integration tests
+```
+
+## Commands
+
+npm test; npm run dev; npm run build
+
+## Code Style
+
+TypeScript 5.x: Follow standard conventions. Dark Tokyo Night theme for UI.
+
+## Design Principles
+
+- No wasted space — every pixel should serve a purpose
+- Colorful dark theme — fun and easy on the eyes for night sessions
+- Persistent project sidebar — all projects visible at all times with phase status
+- 1-click project switching — sidebar is always visible regardless of view
+- Native OS integration — folder picker, window management via Electron
+
+## Recent Changes
+
+- 002-spec-board: Electron desktop app with React renderer, IPC-based communication, native folder picker, Tokyo Night dark theme, persistent project sidebar
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

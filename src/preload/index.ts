@@ -1,0 +1,46 @@
+import { contextBridge, ipcRenderer } from 'electron';
+
+const api = {
+  // Projects
+  getProjects: () => ipcRenderer.invoke('get-projects'),
+  addProject: (path: string, name?: string) => ipcRenderer.invoke('add-project', path, name),
+  deleteProject: (id: string) => ipcRenderer.invoke('delete-project', id),
+
+  // Native folder picker
+  showFolderPicker: () => ipcRenderer.invoke('show-folder-picker'),
+
+  // Feature
+  getFeature: (projectId: string) => ipcRenderer.invoke('get-feature', projectId),
+
+  // Artifacts
+  getArtifact: (projectId: string, type: string) => ipcRenderer.invoke('get-artifact', projectId, type),
+
+  // Comments (Phase 6)
+  getComments: (projectId: string, artifactType: string) => ipcRenderer.invoke('get-comments', projectId, artifactType),
+  addComment: (projectId: string, artifactType: string, elementId: string, content: string) =>
+    ipcRenderer.invoke('add-comment', projectId, artifactType, elementId, content),
+  updateComment: (projectId: string, artifactType: string, commentId: string, content: string) =>
+    ipcRenderer.invoke('update-comment', projectId, artifactType, commentId, content),
+  deleteComment: (projectId: string, artifactType: string, commentId: string) =>
+    ipcRenderer.invoke('delete-comment', projectId, artifactType, commentId),
+
+  // Edits (Phase 7)
+  editField: (projectId: string, artifactType: string, elementId: string, field: string, value: unknown) =>
+    ipcRenderer.invoke('edit-field', projectId, artifactType, elementId, field, value),
+
+  // File watcher events (Phase 8) — renderer listens
+  onSpecsChanged: (callback: (...args: any[]) => void) => {
+    const sub = (_event: any, ...args: any[]) => callback(...args);
+    ipcRenderer.on('specs-changed', sub);
+    return () => ipcRenderer.removeListener('specs-changed', sub);
+  },
+  onBranchChanged: (callback: (...args: any[]) => void) => {
+    const sub = (_event: any, ...args: any[]) => callback(...args);
+    ipcRenderer.on('branch-changed', sub);
+    return () => ipcRenderer.removeListener('branch-changed', sub);
+  },
+};
+
+contextBridge.exposeInMainWorld('api', api);
+
+export type ElectronApi = typeof api;
