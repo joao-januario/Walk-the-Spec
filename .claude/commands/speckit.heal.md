@@ -1,5 +1,5 @@
 ---
-description: Apply fixes for CRITICAL and HIGH findings from the most recent /speckit.review. Reads review.md and applies proposed code changes.
+description: Apply fixes for all actionable findings (CRITICAL, HIGH, MEDIUM, LOW) from the most recent /speckit.review. NEEDS_REFACTOR is excluded (tracked in refactor-backlog.md).
 ---
 
 ## User Input
@@ -28,9 +28,9 @@ Read `.claude/specs/<BRANCH_NAME>/review.md`.
 
 If the file doesn't exist: ERROR — "No review found. Run `/speckit.review` first."
 
-Parse the findings table and proposed fixes sections. Extract all CRITICAL and HIGH findings with their proposed code changes.
+Parse the findings table and proposed fixes sections. Extract all findings except NEEDS_REFACTOR.
 
-If no CRITICAL or HIGH findings exist: "Nothing to heal. All findings are MEDIUM/LOW. Run `/speckit.conclude` to finalize."
+If no actionable findings exist (only NEEDS_REFACTOR or none): "Nothing to heal. Run `/speckit.conclude` to finalize."
 
 ### Step 2: Present Fix Plan
 
@@ -133,9 +133,8 @@ If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL find
 
 ## Scope Rules
 
-- **CRITICAL and HIGH only** — MEDIUM and LOW are informational, not auto-fixed
-- **NEEDS_REFACTOR never** — these are architectural and tracked in refactor-backlog.md
-- If user passes arguments like "all" or "medium", extend scope to include those categories
+- **All actionable findings**: CRITICAL, HIGH, MEDIUM, and LOW are all fixed
+- **NEEDS_REFACTOR excluded** — these are architectural debt tracked in refactor-backlog.md, addressed in dedicated future branches
 - Each fix is applied independently — one broken fix doesn't block others
 - Tests are the safety net — if a fix breaks tests, revert it
 

@@ -157,7 +157,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - For parallel tasks [P], continue with successful tasks, report failed ones
    - Provide clear error messages with context for debugging
    - Suggest next steps if implementation cannot proceed
-   - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
+   - **CRITICAL**: After EACH PHASE completes, immediately update tasks.md to mark completed tasks as `[x]` and update the progress line at the top. Do NOT batch task updates to the end — the user needs real-time visibility into progress. If the user checks tasks.md mid-implementation, it must reflect the current state accurately.
 
 9. Completion validation:
    - Verify all required tasks are completed
@@ -165,11 +165,17 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Validate that tests pass and coverage meets requirements
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
-   - Suggest next steps: "Run `/speckit.review` or `/speckit.conclude`."
+
+10. **Commit implementation work**:
+   - Stage all changed files (`git add -A`)
+   - Commit with message: `feat(<branch>): implement <feature summary>`
+   - This ensures `/speckit.review` can diff the branch against main
+
+11. Suggest next steps: "Run `/speckit.review` or `/speckit.conclude`."
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
 
-10. **Check for extension hooks**: After completion validation, check if `.claude/specify/extensions.yml` exists in the project root.
+12. **Check for extension hooks**: After completion validation, check if `.claude/specify/extensions.yml` exists in the project root.
     - If it exists, read it and look for entries under the `hooks.after_implement` key
     - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
     - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.

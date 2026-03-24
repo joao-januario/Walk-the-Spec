@@ -216,9 +216,9 @@ Continue numbering from the last existing ID. Do not duplicate existing entries 
 
 ### Phase 9: Suggest Next Step
 
-Output: "Run `/speckit.heal` to apply the proposed fixes for CRITICAL and HIGH findings."
+Output: "Run `/speckit.heal` to apply fixes for all findings (CRITICAL, HIGH, MEDIUM, LOW)."
 
-If no CRITICAL or HIGH findings exist: "No fixes needed. Run `/speckit.conclude` to finalize the branch."
+If no actionable findings exist (only NEEDS_REFACTOR or none): "No fixes needed. Run `/speckit.conclude` to finalize the branch."
 
 **IMPORTANT**: `/speckit.review` is strictly read-only. It MUST NOT modify any source files. All fixes are applied by `/speckit.heal`.
 

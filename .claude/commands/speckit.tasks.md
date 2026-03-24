@@ -93,6 +93,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Independent test criteria for each story
    - Suggested MVP scope (typically just User Story 1)
    - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
+   - Suggest next steps: "Run `/speckit.analyze` or `/speckit.implement`."
 
 6. **Check for extension hooks**: After tasks.md is generated, check if `.claude/specify/extensions.yml` exists in the project root.
    - If it exists, read it and look for entries under the `hooks.after_tasks` key

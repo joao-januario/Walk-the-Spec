@@ -9,6 +9,8 @@ import { parsePlan } from '../parser/plan-parser.js';
 import { parseTasks } from '../parser/tasks-parser.js';
 import { parseResearch } from '../parser/research-parser.js';
 import { parseComments } from '../parser/comment-parser.js';
+import { parseReview } from '../parser/review-parser.js';
+import { parseRefactorBacklog } from '../parser/refactor-backlog-parser.js';
 import { writeComment, updateComment, deleteComment } from '../writer/comment-writer.js';
 import { editTaskCheckbox, editRequirementText } from '../writer/artifact-writer.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -198,9 +200,21 @@ export function registerIpcHandlers() {
         }));
         break;
       }
+      case 'review': {
+        const parsed = parseReview(content);
+        elements = parsed.findings.map((f) => ({
+          id: String(f.number),
+          type: 'section' as const,
+          content: f,
+          editableFields: [],
+          commentCount: 0,
+        }));
+        // healSummary and branch returned as top-level reviewMeta field below
+        break;
+      }
     }
-    } catch (err: any) {
-      parseWarning = `Partial parse: ${err.message}`;
+    } catch (err: unknown) {
+      parseWarning = `Partial parse: ${err instanceof Error ? err.message : String(err)}`;
     }
 
     // Enrich elements with comment counts
@@ -215,12 +229,18 @@ export function registerIpcHandlers() {
       }
     }
 
+    // For review artifacts, include healSummary as top-level metadata
+    const reviewMeta = artifactType === 'review'
+      ? (() => { const parsed = parseReview(content); return { healSummary: parsed.healSummary, branch: parsed.branch }; })()
+      : undefined;
+
     return {
       type: artifactType,
       filePath: fileName,
       lastModified: stat.mtime.toISOString(),
       elements,
       parseWarning,
+      reviewMeta,
     };
   });
 
@@ -318,5 +338,19 @@ export function registerIpcHandlers() {
       value,
       artifactModified: new Date().toISOString(),
     };
+  });
+
+  // --- Refactor Backlog (project-level) ---
+
+  ipcMain.handle('backlog:list', (_event, projectId: string) => {
+    const config = loadConfig();
+    const project = getProjects(config).find((p) => p.id === projectId);
+    if (!project) throw new Error('Project not found');
+
+    const backlogPath = path.join(project.path, '.claude', 'specs', 'refactor-backlog.md');
+    if (!fs.existsSync(backlogPath)) return { entries: [] };
+
+    const content = fs.readFileSync(backlogPath, 'utf-8');
+    return parseRefactorBacklog(content);
   });
 }

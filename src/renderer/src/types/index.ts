@@ -1,8 +1,47 @@
 // Phase enum
-export type Phase = 'specify' | 'plan' | 'tasks' | 'implement' | 'unknown';
+export type Phase = 'specify' | 'plan' | 'tasks' | 'implement' | 'review' | 'unknown';
 
-// Artifact types supported in v1
-export type ArtifactType = 'spec' | 'plan' | 'tasks' | 'research';
+// Artifact types
+export type ArtifactType = 'spec' | 'plan' | 'tasks' | 'research' | 'review';
+
+// Review finding types
+export type FindingSeverity = 'NEEDS_REFACTOR' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+export type FindingStatus = 'unfixed' | 'FIXED' | 'SKIPPED' | 'MANUAL';
+
+export interface ReviewFinding {
+  number: number;
+  ruleId: string;
+  severity: FindingSeverity;
+  file: string;
+  line: number | null;
+  summary: string;
+  fix: string;
+  status: FindingStatus;
+}
+
+export interface HealFindingStatus {
+  number: number;
+  ruleId: string;
+  status: FindingStatus;
+  notes: string;
+}
+
+export interface HealSummary {
+  date: string;
+  appliedCount: number;
+  skippedCount: number;
+  revertedCount: number;
+  findings: HealFindingStatus[];
+}
+
+export interface RefactorEntry {
+  id: string;
+  branch: string;
+  rule: string;
+  files: string;
+  description: string;
+  status: string;
+}
 
 // Element types within artifacts
 export type ElementType =
@@ -53,6 +92,7 @@ export interface Artifact {
   filePath: string;
   lastModified: string;
   elements: Element[];
+  reviewMeta?: { healSummary: HealSummary | null; branch: string };
 }
 
 export interface Element {

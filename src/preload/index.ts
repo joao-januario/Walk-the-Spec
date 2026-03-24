@@ -24,9 +24,12 @@ const api = {
   deleteComment: (projectId: string, artifactType: string, commentId: string) =>
     ipcRenderer.invoke('delete-comment', projectId, artifactType, commentId),
 
-  // Edits (Phase 7)
+  // Edits
   editField: (projectId: string, artifactType: string, elementId: string, field: string, value: unknown) =>
     ipcRenderer.invoke('edit-field', projectId, artifactType, elementId, field, value),
+
+  // Refactor backlog (project-level)
+  getRefactorBacklog: (projectId: string) => ipcRenderer.invoke('backlog:list', projectId),
 
   // File watcher events (Phase 8) — renderer listens
   onSpecsChanged: (callback: (...args: any[]) => void) => {

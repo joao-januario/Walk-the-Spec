@@ -89,6 +89,7 @@ export default function BoardView({ onSelectProject, selectedProjectId }: BoardV
           />
         ))}
       </div>
+
     </div>
   );
 }

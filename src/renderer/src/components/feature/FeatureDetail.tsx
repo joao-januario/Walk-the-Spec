@@ -5,28 +5,30 @@ import SpecView from '../artifacts/SpecView.js';
 import PlanView from '../artifacts/PlanView.js';
 import TasksView from '../artifacts/TasksView.js';
 import ResearchView from '../artifacts/ResearchView.js';
+import ReviewView from '../artifacts/ReviewView.js';
 import EmptyState from '../common/EmptyState.js';
 import { useFeatureData, useArtifactData } from '../../hooks/useFeatureData.js';
 import { useComments } from '../../hooks/useComments.js';
-import type { Project, ArtifactType } from '../../types/index.js';
+import type { Project, ArtifactType, ReviewFinding } from '../../types/index.js';
 
 const PHASE_HERO: Record<string, ArtifactType> = {
   specify: 'spec',
   plan: 'plan',
   tasks: 'tasks',
   implement: 'tasks',
+  review: 'review',
 };
 
 export default function FeatureDetail({ project }: { project: Project }) {
   const { feature, loading: featureLoading } = useFeatureData(project.id);
-  const availableTypes = (feature?.artifacts ?? []).map((a) => a.type).filter((t) => ['spec', 'plan', 'tasks', 'research'].includes(t));
+  const availableTypes = (feature?.artifacts ?? []).map((a) => a.type).filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
   const heroType = PHASE_HERO[project.phase] ?? 'spec';
   const defaultTab = availableTypes.includes(heroType) ? heroType : availableTypes[0] ?? null;
 
   const [activeTab, setActiveTab] = useState<ArtifactType | null>(defaultTab);
 
   useEffect(() => {
-    const types = (feature?.artifacts ?? []).map((a) => a.type).filter((t) => ['spec', 'plan', 'tasks', 'research'].includes(t));
+    const types = (feature?.artifacts ?? []).map((a) => a.type).filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
     const hero = PHASE_HERO[project.phase] ?? 'spec';
     setActiveTab((types.includes(hero) ? hero : types[0] ?? null) as ArtifactType | null);
   }, [project.id, feature]);
@@ -97,6 +99,12 @@ export default function FeatureDetail({ project }: { project: Project }) {
       {artifact && activeTab === 'plan' && <PlanView elements={artifact.elements} />}
       {artifact && activeTab === 'tasks' && <TasksView elements={artifact.elements} onToggleTask={handleToggleTask} />}
       {artifact && activeTab === 'research' && <ResearchView elements={artifact.elements} />}
+      {artifact && activeTab === 'review' && (
+        <ReviewView
+          findings={artifact.elements.map((e) => e.content as ReviewFinding)}
+          healSummary={artifact.reviewMeta?.healSummary ?? null}
+        />
+      )}
     </div>
   );
 }

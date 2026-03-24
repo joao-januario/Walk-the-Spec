@@ -15,6 +15,7 @@ declare global {
       updateComment: (projectId: string, artifactType: string, commentId: string, content: string) => Promise<Comment>;
       deleteComment: (projectId: string, artifactType: string, commentId: string) => Promise<void>;
       editField: (projectId: string, artifactType: string, elementId: string, field: string, value: unknown) => Promise<any>;
+      getRefactorBacklog: (projectId: string) => Promise<{ entries: import('../types/index.js').RefactorEntry[] }>;
       onSpecsChanged: (callback: (...args: any[]) => void) => () => void;
       onBranchChanged: (callback: (...args: any[]) => void) => () => void;
     };
@@ -75,4 +76,10 @@ export async function deleteComment(projectId: string, artifactType: ArtifactTyp
 
 export async function editField(projectId: string, artifactType: ArtifactType, elementId: string, field: string, value: unknown) {
   return window.api.editField(projectId, artifactType, elementId, field, value);
+}
+
+// --- Refactor Backlog ---
+
+export async function getRefactorBacklog(projectId: string) {
+  return window.api.getRefactorBacklog(projectId);
 }

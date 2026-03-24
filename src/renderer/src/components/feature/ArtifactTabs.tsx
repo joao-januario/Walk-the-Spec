@@ -7,6 +7,7 @@ const TAB_LABELS: Record<string, string> = {
   plan: 'Plan',
   tasks: 'Tasks',
   research: 'Research',
+  review: 'Review',
 };
 
 interface ArtifactTabsProps {

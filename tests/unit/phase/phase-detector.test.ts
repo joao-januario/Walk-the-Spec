@@ -37,4 +37,19 @@ describe('phase-detector', () => {
   it('treats research.md alone as "specify" (not a phase-advancing artifact)', () => {
     expect(detectPhase(['spec.md', 'research.md'])).toBe('specify');
   });
+
+  it('returns "review" when review.md exists and tasks are checked', () => {
+    const tasksContent = '- [x] T001 Done\n- [ ] T002 Not done';
+    expect(detectPhase(['spec.md', 'plan.md', 'tasks.md', 'review.md'], tasksContent)).toBe('review');
+  });
+
+  it('returns "tasks" when review.md exists but no tasks are checked', () => {
+    const tasksContent = '- [ ] T001 Not done';
+    expect(detectPhase(['spec.md', 'plan.md', 'tasks.md', 'review.md'], tasksContent)).toBe('tasks');
+  });
+
+  it('returns "review" over "implement" when review.md is present', () => {
+    const tasksContent = '- [x] T001 Done\n- [x] T002 Done';
+    expect(detectPhase(['tasks.md', 'review.md'], tasksContent)).toBe('review');
+  });
 });

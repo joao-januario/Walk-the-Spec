@@ -22,6 +22,7 @@ export const phaseColors = {
   plan:      { bg: '#bb9af720', text: '#bb9af7', dot: '#bb9af7', label: 'Plan' },
   tasks:     { bg: '#ff9e6420', text: '#ff9e64', dot: '#ff9e64', label: 'Tasks' },
   implement: { bg: '#9ece6a20', text: '#9ece6a', dot: '#9ece6a', label: 'Implement' },
+  review:    { bg: '#7dcfff20', text: '#7dcfff', dot: '#7dcfff', label: 'Review' },
   unknown:   { bg: '#56587020', text: '#565870', dot: '#565870', label: '—' },
 } as const;
 
