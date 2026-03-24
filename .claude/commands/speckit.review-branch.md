@@ -188,7 +188,15 @@ For each CRITICAL and HIGH finding:
 | ... | No matching vertical |
 ```
 
-### Phase 6: Record NEEDS_REFACTOR
+### Phase 6: Write Review Artifact
+
+Write the full report to `.claude/specs/<BRANCH_NAME>/review.md`. This persists the review as part of the branch's artifact trail alongside spec.md, plan.md, tasks.md, etc.
+
+The file should contain the complete report (summary table, all findings, proposed fixes, cross-vertical observations). It is cleaned up when `/speckit.conclude` deletes the branch artifacts.
+
+If the file already exists (re-review), overwrite it with the new report and note "Re-reviewed on YYYY-MM-DD" at the top.
+
+### Phase 7: Record NEEDS_REFACTOR (project-level)
 
 For any NEEDS_REFACTOR findings, append entries to `.claude/specs/refactor-backlog.md`:
 
@@ -198,7 +206,7 @@ For any NEEDS_REFACTOR findings, append entries to `.claude/specs/refactor-backl
 
 Continue numbering from the last existing ID. Do not duplicate existing entries for the same file+rule.
 
-### Phase 7: Next Actions
+### Phase 8: Next Actions
 
 - If CRITICAL findings exist: "**BLOCKED**: Resolve CRITICAL findings before merging."
 - If only HIGH: "Branch is mergeable but HIGH findings strongly recommended for fixing."
@@ -206,7 +214,7 @@ Continue numbering from the last existing ID. Do not duplicate existing entries 
 - If NEEDS_REFACTOR: "Architectural debt recorded in refactor-backlog.md for future work."
 - If no findings: "Branch passes all best practices checks."
 
-### Phase 8: Offer Fix Application
+### Phase 9: Offer Fix Application
 
 Ask: "Would you like me to apply the proposed fixes for CRITICAL and HIGH findings?"
 
