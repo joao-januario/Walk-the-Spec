@@ -189,34 +189,30 @@ function finalizeDecision(partial: Partial<ArchitectureDecision>): ArchitectureD
 
 function extractFileStructure(tree: Root): string {
   let inSection = false;
-  let sectionName = '';
+  const blocks: string[] = [];
 
   for (const child of tree.children) {
     if (child.type === 'heading') {
       const text = getTextContent(child);
       if (text === 'Project Structure' || text === 'Files modified') {
         inSection = true;
-        sectionName = text;
         continue;
       }
       if (text.includes('Files modified') || text.includes('Source Code')) {
         inSection = true;
-        sectionName = text;
         continue;
       }
-      if (inSection && child.depth <= 2 && text !== sectionName) {
-        // Still in project structure subsections
-        if (!text.includes('Documentation') && !text.includes('Source Code') && !text.includes('Files modified')) {
-          break;
-        }
+      if (inSection && child.depth <= 2) {
+        // Reached next top-level section — stop collecting
+        break;
       }
     }
     if (inSection && child.type === 'code') {
-      return child.value;
+      blocks.push(child.value);
     }
   }
 
-  return '';
+  return blocks.join('\n\n');
 }
 
 function extractLegacyDecisions(tree: Root): Decision[] {

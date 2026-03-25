@@ -39,7 +39,7 @@ export default function SpecView({
     <div>
       {stories.length > 0 && (
         <section className="mb-7">
-          <h3 className="text-board-text-muted mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
+          <h3 className="text-board-text-muted mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
             User Stories
           </h3>
           {stories.map((e) => (
@@ -72,7 +72,7 @@ export default function SpecView({
 
       {requirements.length > 0 && (
         <section className="mb-7">
-          <h3 className="text-board-text-muted mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
+          <h3 className="text-board-text-muted mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
             Functional Requirements
           </h3>
           {requirements.map((e) => (
@@ -105,17 +105,17 @@ export default function SpecView({
 
       {criteria.length > 0 && (
         <section>
-          <h3 className="text-board-text-muted mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
+          <h3 className="text-board-text-muted mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
             Success Criteria
           </h3>
           {criteria.map((e) => {
             const sc = e.content as SuccessCriterionContent;
             return (
               <div key={e.id} className="border-board-border/20 flex gap-[10px] border-b py-[7px]">
-                <code className="text-board-green bg-board-green/[0.08] rounded px-[6px] py-[2px] text-[0.7rem] font-bold">
+                <code className="text-board-green bg-board-green/[0.08] rounded px-[6px] py-[2px] text-[0.8125rem] font-bold">
                   {sc.id}
                 </code>
-                <span className="text-board-text text-[0.82rem]">{sc.text}</span>
+                <span className="text-board-text text-[0.9375rem]">{sc.text}</span>
               </div>
             );
           })}
@@ -135,7 +135,7 @@ export default function SpecView({
 
         return (
           <section className="mt-7 opacity-70">
-            <h3 className="text-board-yellow mb-[10px] text-[0.85rem] font-semibold tracking-[0.05em] uppercase">
+            <h3 className="text-board-yellow mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
               Stale Comments (element removed)
             </h3>
             {Array.from(grouped.entries()).map(([elementId, cmts]) => (
@@ -143,11 +143,11 @@ export default function SpecView({
                 key={elementId}
                 className="bg-board-yellow/[0.03] border-board-yellow/20 mb-3 rounded-[6px] border p-[10px]"
               >
-                <div className="text-board-yellow mb-[6px] text-[0.75rem] font-semibold">
+                <div className="text-board-yellow mb-[6px] text-[0.8125rem] font-semibold">
                   {elementId} <span className="text-board-text-muted font-normal">(no longer in artifact)</span>
                 </div>
                 {cmts.map((c) => (
-                  <div key={c.id} className="text-board-text-muted mb-[2px] pl-[10px] text-[0.78rem]">
+                  <div key={c.id} className="text-board-text-muted mb-[2px] pl-[10px] text-[0.875rem]">
                     [{c.createdAt}] {c.content}
                   </div>
                 ))}

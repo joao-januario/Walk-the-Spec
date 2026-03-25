@@ -193,6 +193,14 @@ export function registerIpcHandlers() {
             editableFields: [], commentCount: 0,
           });
         }
+        // Project Structure / Files modified
+        if (parsed.fileStructure) {
+          planElements.push({
+            id: 'Project Structure', type: 'section',
+            content: { type: 'section', heading: 'Project Structure', content: parsed.fileStructure },
+            editableFields: [], commentCount: 0,
+          });
+        }
         elements = planElements;
         break;
       }

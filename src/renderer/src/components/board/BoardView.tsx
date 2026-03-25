@@ -58,7 +58,7 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
   return (
     <div className="bg-board-bg border-board-border flex h-screen w-[220px] min-w-[220px] flex-col overflow-hidden border-r px-2 py-3">
       <div className="flex items-center justify-between px-2 pb-4">
-        <span className="text-board-text-muted text-[0.7rem] font-semibold tracking-[0.1em] uppercase">Projects</span>
+        <span className="text-board-text-muted text-[0.8125rem] font-semibold tracking-[0.1em] uppercase">Projects</span>
         <button
           onClick={handleAddProject}
           aria-label="Add project"
@@ -70,9 +70,9 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {loading && <div className="text-board-text-muted p-2 text-[0.8rem]">Loading...</div>}
+        {loading && <div className="text-board-text-muted p-2 text-[0.875rem]">Loading...</div>}
         {!loading && projects.length === 0 && (
-          <div className="text-board-text-muted p-2 text-center text-[0.8rem]">
+          <div className="text-board-text-muted p-2 text-center text-[0.875rem]">
             No projects yet.
             <br />
             Click + to add one.

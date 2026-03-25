@@ -6,11 +6,14 @@
   --color-board-surface: #222436;
   --color-board-surface-hover: #2a2c42;
   --color-board-surface-alt: #1e2030;
+  --color-board-surface-elevated: #282a3e;
+  --color-board-surface-overlay: #2e3148;
   --color-board-border: #363850;
+  --color-board-border-hover: #444866;
 
   /* Text */
   --color-board-text: #c0caf5;
-  --color-board-text-muted: #7982a9;
+  --color-board-text-muted: #8b94b8;
   --color-board-text-bright: #e0e6ff;
 
   /* Accent colors */
@@ -42,5 +45,16 @@
 
   body {
     @apply m-0 overflow-hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

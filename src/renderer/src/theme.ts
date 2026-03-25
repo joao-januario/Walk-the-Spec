@@ -67,6 +67,24 @@ export const statusClasses = {
   unfixed: { bg: 'bg-board-border/40', text: 'text-board-text-muted', label: 'Unfixed' },
 } as const;
 
+// Priority metadata for tooltips
+export interface PriorityMeta {
+  label: string;
+  description: string;
+}
+
+export const priorityMeta: Record<string, PriorityMeta> = {
+  P1: { label: 'Critical', description: 'Must ship for MVP — blocks release' },
+  P2: { label: 'High', description: 'Important but not blocking MVP' },
+  P3: { label: 'Medium', description: 'Valuable enhancement, can defer' },
+  P4: { label: 'Low', description: 'Minor improvement, nice-to-have' },
+  P5: { label: 'Nice-to-have', description: 'Stretch goal if time permits' },
+};
+
+export function getPriorityMeta(priority: string): PriorityMeta {
+  return priorityMeta[priority] ?? { label: priority, description: '' };
+}
+
 // Priority badge classes
 export const priorityClasses: Record<string, string> = {
   P1: 'bg-board-red/20 text-board-red',

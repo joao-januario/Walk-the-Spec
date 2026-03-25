@@ -33,9 +33,11 @@
     }
   },
   "dependencies": {
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.2.2",
     "chokidar": "^4.0.0",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",
     "remark-parse": "^11.0.0",

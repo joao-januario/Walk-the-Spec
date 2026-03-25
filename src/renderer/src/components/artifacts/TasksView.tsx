@@ -16,7 +16,7 @@ function ProgressBar({ done, total }: { done: number; total: number }) {
           style={{ width: `${pct}%` }} // dynamic: runtime value
         />
       </div>
-      <span className="text-board-text-muted text-[0.7rem] whitespace-nowrap">
+      <span className="text-board-text-muted text-[0.8125rem] whitespace-nowrap">
         {done}/{total}
       </span>
     </div>
@@ -69,7 +69,7 @@ export default function TasksView({ elements, onToggleTask }: TasksViewProps) {
     <div>
       {/* Overall progress */}
       <div className="mb-6 max-w-[350px]">
-        <div className="text-board-text-muted mb-1 text-[0.78rem]">
+        <div className="text-board-text-muted mb-1 text-[0.875rem]">
           Overall: {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% ({completedTasks}/
           {totalTasks} tasks)
         </div>
@@ -91,11 +91,11 @@ export default function TasksView({ elements, onToggleTask }: TasksViewProps) {
                 if (allDone) toggleDone(phaseName);
               }}
             >
-              {allDone && <span className="text-board-text-muted text-[0.7rem]">{isExpanded ? '▼' : '▶'}</span>}
-              <h3 className={cn('m-0 text-[0.88rem]', allDone ? 'text-board-text-muted' : 'text-board-text-bright')}>
+              {allDone && <span className="text-board-text-muted text-[0.8125rem]">{isExpanded ? '▼' : '▶'}</span>}
+              <h3 className={cn('m-0 text-[0.9375rem]', allDone ? 'text-board-text-muted' : 'text-board-text-bright')}>
                 {phaseName}
               </h3>
-              {allDone && <span className="text-board-green text-[0.65rem] font-bold">DONE</span>}
+              {allDone && <span className="text-board-green text-[0.75rem] font-bold">DONE</span>}
             </div>
             <div className="mb-[6px] max-w-[250px]">
               <ProgressBar done={done} total={phaseElements.length} />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getPhaseClasses } from '../../theme.js';
 import { cn } from '../../lib/utils.js';
 import ArtifactTabs from './ArtifactTabs.js';
@@ -48,7 +49,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
 
   const handleAddComment = async (elementId: string, content: string) => {
     await addComment(elementId, content);
-    refetchArtifact(); // refresh comment counts
+    refetchArtifact();
   };
 
   const handleUpdateComment = async (commentId: string, content: string) => {
@@ -70,7 +71,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
   };
 
   if (featureLoading) {
-    return <div className="text-board-text-muted text-[0.85rem]">Loading feature...</div>;
+    return <div className="text-board-text-muted text-[0.9375rem]">Loading feature...</div>;
   }
 
   if (!feature) {
@@ -83,11 +84,22 @@ export default function FeatureDetail({ project }: { project: Project }) {
     <div>
       <div className="mb-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-board-text-bright m-0 text-[1.2rem]">{feature.summary || project.name}</h2>
-          <span className={cn('rounded-full px-2.5 py-0.5 text-[0.7rem] font-semibold', p.bg, p.text)}>{p.label}</span>
+          <h2 className="text-board-text-bright m-0 text-[1.25rem]">{feature.summary || project.name}</h2>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={project.phase}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className={cn('rounded-full px-2.5 py-0.5 text-[0.8125rem] font-semibold', p.bg, p.text)}
+            >
+              {p.label}
+            </motion.span>
+          </AnimatePresence>
         </div>
-        <div className="text-board-text-muted mt-1 text-[0.75rem]">
-          <code className="text-board-text text-[0.7rem]">{feature.branchName}</code>
+        <div className="text-board-text-muted mt-1 text-[0.8125rem]">
+          <code className="text-board-text text-[0.8125rem]">{feature.branchName}</code>
         </div>
       </div>
 
@@ -95,7 +107,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
         <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} />
       )}
 
-      {artifactLoading && <div className="text-board-text-muted text-[0.85rem]">Loading...</div>}
+      {artifactLoading && <div className="text-board-text-muted text-[0.9375rem]">Loading...</div>}
 
       {artifact && activeTab === 'spec' && (
         <SpecView
