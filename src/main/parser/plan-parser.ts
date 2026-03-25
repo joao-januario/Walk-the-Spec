@@ -43,7 +43,7 @@ export function parsePlan(content: string): PlanParseResult {
 function getTextContent(node: any): string {
   if (node.type === 'text') return node.value;
   if (node.type === 'strong') return `**${node.children.map(getTextContent).join('')}**`;
-  if (node.type === 'inlineCode') return node.value;
+  if (node.type === 'inlineCode') return `\`${node.value}\``;
   if (node.children) return node.children.map(getTextContent).join('');
   return '';
 }

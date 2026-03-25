@@ -1,6 +1,8 @@
 import React from 'react';
 import { cn } from '../../lib/utils.js';
 import type { TaskContent } from '../../types/index.js';
+import CodeTag from '../ui/CodeTag.js';
+import MarkdownContent from '../ui/MarkdownContent.js';
 
 interface TaskRowProps {
   content: TaskContent;
@@ -21,9 +23,7 @@ export default function TaskRow({ content, onToggle }: TaskRowProps) {
         className={cn('accent-board-accent', onToggle ? 'cursor-pointer' : 'cursor-default')}
         readOnly={!onToggle}
       />
-      <code className="text-board-text-muted bg-board-border/25 rounded-[3px] px-1 py-px text-[0.65rem] font-semibold">
-        {content.id}
-      </code>
+      <CodeTag color="muted" size="sm">{content.id}</CodeTag>
       {content.parallel && (
         <span className="text-board-purple bg-board-purple/20 rounded-[3px] px-1 text-[0.6rem] font-bold">P</span>
       )}
@@ -32,11 +32,11 @@ export default function TaskRow({ content, onToggle }: TaskRowProps) {
           {content.userStory}
         </span>
       )}
-      <span
-        className={cn('text-[0.82rem]', content.checked ? 'text-board-text-muted line-through' : 'text-board-text')}
-      >
-        {content.description}
-      </span>
+      <MarkdownContent
+        inline
+        content={content.description}
+        className={cn('text-[0.9375rem] leading-relaxed', content.checked ? 'text-board-text-muted line-through' : 'text-board-text')}
+      />
     </div>
   );
 }

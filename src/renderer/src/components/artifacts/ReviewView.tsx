@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils.js';
 import { severityClasses, statusClasses } from '../../theme.js';
 import CodeBlock from '../elements/CodeBlock.js';
+import CodeTag from '../ui/CodeTag.js';
+import SectionLabel from '../ui/SectionLabel.js';
+import MarkdownContent from '../ui/MarkdownContent.js';
 import type { ReviewFinding, FindingSeverity, FindingStatus, HealSummary } from '../../types/index.js';
 
 function ProgressBar({ done, total }: { done: number; total: number }) {
@@ -53,9 +56,7 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
       >
         <span className="text-board-text-muted w-5 text-right text-[0.8125rem]">#{finding.number}</span>
         <SeverityBadge severity={finding.severity} />
-        <code className="text-board-cyan bg-board-cyan/[0.08] rounded-[3px] px-[5px] py-[1px] text-[0.8125rem] font-semibold">
-          {finding.ruleId}
-        </code>
+        <CodeTag color="cyan">{finding.ruleId}</CodeTag>
         <div className="flex-1">
           <div
             className={cn(
@@ -63,10 +64,10 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
               finding.status === 'FIXED' ? 'text-board-text-muted line-through' : 'text-board-text',
             )}
           >
-            {finding.summary}
+            <MarkdownContent inline content={finding.summary} />
           </div>
           <div className="text-board-text-muted mt-[2px] text-[0.8125rem]">
-            {finding.location}
+            <MarkdownContent inline content={finding.location} />
           </div>
         </div>
         <StatusBadge status={finding.status} />
@@ -93,14 +94,14 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
             <div className="bg-board-surface-elevated border-board-border/10 mb-2 ml-[30px] rounded-md border-l-2 p-4">
               {finding.why && (
                 <div className="mb-2">
-                  <div className="text-board-purple text-[0.75rem] font-semibold tracking-[0.05em] uppercase">Why this severity</div>
-                  <p className="text-board-text mt-0.5 text-[0.9375rem] leading-relaxed">{finding.why}</p>
+                  <SectionLabel sub color="text-board-purple">Why this severity</SectionLabel>
+                  <MarkdownContent content={finding.why} className="mt-0.5" />
                 </div>
               )}
               {finding.gain && (
                 <div className="mb-2">
-                  <div className="text-board-green text-[0.75rem] font-semibold tracking-[0.05em] uppercase">What you gain</div>
-                  <p className="text-board-text mt-0.5 text-[0.9375rem] leading-relaxed">{finding.gain}</p>
+                  <SectionLabel sub color="text-board-green">What you gain</SectionLabel>
+                  <MarkdownContent content={finding.gain} className="mt-0.5" />
                 </div>
               )}
               {finding.codeBlocks.length > 0 && (

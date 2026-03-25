@@ -118,10 +118,20 @@ You **MUST** consider the user input before proceeding (if not empty).
      Task: "Compare approaches for {decision} — evaluate {option A} vs {option B}"
    ```
 
-3. **Consolidate findings** in `research.md` using format:
-   - Decision: [what was chosen]
-   - Rationale: [why chosen]
-   - Alternatives considered: [what else evaluated]
+3. **Consolidate findings** in `research.md` using this format per finding:
+
+   ```markdown
+   ## R1. [Topic Name]
+
+   **Decision**: [what was chosen]
+
+   **Rationale**: [why chosen]
+
+   **Alternatives considered**:
+   - [option]: [why rejected]
+   ```
+
+   Each finding gets a `## RN.` heading (R1, R2, R3...) with `**Decision**:` and `**Rationale**:` paragraphs. The app parser uses these markers to render research content.
 
 4. **Fill plan sections** using research findings:
    - Write Technical Approach as prose (2-3 paragraphs, no key-value metadata)

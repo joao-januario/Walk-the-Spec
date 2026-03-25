@@ -27,16 +27,18 @@ git rev-parse --abbrev-ref HEAD
 - Extract **FEATURE_DIR** as `.claude/specs/<BRANCH_NAME>/`
 - Verify FEATURE_DIR exists. If not, WARN — "No speckit artifacts found for this branch."
 
-### Step 2: Run Tests
+### Step 2: Build & Test
 
-Run the project's test suite:
+Run the production build and test suite:
 
 ```bash
+npm run build
 npm test
 ```
 
-- If tests **fail**: STOP. Report failures. Say: "Tests must pass before concluding. Fix the failing tests and try again."
-- If tests **pass**: Continue.
+- If **build fails**: STOP. Report errors. Say: "Build must pass before concluding. Fix the compilation errors and try again."
+- If **tests fail**: STOP. Report failures. Say: "Tests must pass before concluding. Fix the failing tests and try again."
+- If both **pass**: Continue.
 
 ### Step 3: Proceed
 
@@ -158,4 +160,4 @@ The feature is now on main. You can start a new feature with `/speckit.specify`.
 - NEVER force-push
 - NEVER delete other branches' spec directories
 - NEVER delete project-level files (refactor-backlog, best-practices, constitution, memory)
-- Run tests BEFORE any commits
+- Run build + tests BEFORE any commits

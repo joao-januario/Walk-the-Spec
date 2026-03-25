@@ -284,13 +284,14 @@ Success criteria must be:
 2. **Technology-agnostic**: No mention of frameworks, languages, databases, or tools
 3. **User-focused**: Describe outcomes from user/business perspective, not system internals
 4. **Verifiable**: Can be tested/validated without knowing implementation details
+5. **Formatted for readability**: Wrap key metrics in backticks (e.g., `` `15:1` ``, `` `100%` ``, `` `2 minutes` ``) and use MUST/SHOULD language where the criterion is a hard requirement vs. a target
 
 **Good examples**:
 
-- "Users can complete checkout in under 3 minutes"
-- "System supports 10,000 concurrent users"
-- "95% of searches return results in under 1 second"
-- "Task completion rate improves by 40%"
+- "Users MUST be able to complete checkout in under `3 minutes`"
+- "System MUST support `10,000` concurrent users"
+- "`95%` of searches return results in under `1 second`"
+- "Task completion rate SHOULD improve by `40%`"
 
 **Bad examples** (implementation-focused):
 

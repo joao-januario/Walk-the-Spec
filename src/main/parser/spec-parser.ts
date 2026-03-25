@@ -55,6 +55,9 @@ export function parseSpec(content: string): SpecParseResult {
 function getTextContent(node: any): string {
   if (node.type === 'text') return node.value;
   if (node.type === 'strong') return `**${node.children.map(getTextContent).join('')}**`;
+  if (node.type === 'emphasis') return `*${node.children.map(getTextContent).join('')}*`;
+  if (node.type === 'inlineCode') return `\`${node.value}\``;
+  if (node.type === 'link') return `[${node.children.map(getTextContent).join('')}](${node.url})`;
   if (node.children) return node.children.map(getTextContent).join('');
   return '';
 }

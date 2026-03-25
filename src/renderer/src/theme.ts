@@ -55,7 +55,7 @@ export const severityClasses = {
   CRITICAL: { bg: 'bg-board-red/20', text: 'text-board-red' },
   HIGH: { bg: 'bg-board-orange/20', text: 'text-board-orange' },
   MEDIUM: { bg: 'bg-board-yellow/20', text: 'text-board-yellow' },
-  LOW: { bg: 'bg-board-text-muted/20', text: 'text-board-text-muted' },
+  LOW: { bg: 'bg-board-teal/20', text: 'text-board-teal' },
   NEEDS_REFACTOR: { bg: 'bg-board-purple/20', text: 'text-board-purple' },
 } as const;
 

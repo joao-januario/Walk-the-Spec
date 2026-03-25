@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Comment } from '../../types/index.js';
+import MarkdownContent from '../ui/MarkdownContent.js';
 
 interface CommentThreadProps {
   comments: Comment[];
@@ -52,7 +53,9 @@ export default function CommentThread({ comments, onUpdate, onDelete }: CommentT
             </div>
           ) : (
             <>
-              <p className="text-board-text m-0 mb-[6px] text-[0.82rem]">{c.content}</p>
+              <p className="text-board-text m-0 mb-[6px] text-[0.82rem]">
+                <MarkdownContent inline content={c.content} />
+              </p>
               <div className="flex items-center justify-between">
                 <span className="text-board-text-muted text-[0.68rem]">{c.createdAt}</span>
                 <div className="flex gap-2">

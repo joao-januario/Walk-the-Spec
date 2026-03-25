@@ -2,7 +2,7 @@
 
 **Branch**: `002-spec-board` | **Date**: 2026-03-24
 
-## Decision 1: Markdown Parsing Strategy
+## R1. Markdown Parsing Strategy
 
 **Decision**: Hybrid approach — unified/remark for reading, positional string splicing for writing.
 
@@ -20,7 +20,7 @@
 - `unist-util-visit` — tree traversal
 - `remark-stringify` — only for generating new files (comment files), not round-trip editing
 
-## Decision 2: File Watching
+## R2. File Watching
 
 **Decision**: Chokidar v5 with application-level debounce.
 
@@ -35,7 +35,7 @@
 - Separate watch on each `<projectDir>/.git/HEAD` for branch change detection
 - 200-500ms application-level debounce before batching and pushing via WebSocket
 
-## Decision 3: Frontend Framework
+## R3. Frontend Framework
 
 **Decision**: React 19 with Vite.
 
@@ -46,7 +46,7 @@
 - **Vue**: Solid alternative but no strong advantage over React for this use case.
 - **Vanilla JS / Web Components**: Too much manual work for the UI complexity required (phase-adaptive views, form controls, comment threads).
 
-## Decision 4: Backend Framework
+## R4. Backend Framework
 
 **Decision**: Express with ws for WebSocket.
 
@@ -56,7 +56,7 @@
 - **Fastify**: Better performance characteristics, but the performance difference is negligible for a single-user local tool with <100 req/s.
 - **Socket.IO**: Adds unnecessary abstraction (rooms, namespaces, automatic reconnection protocol). Plain WebSocket with JSON messages is sufficient for push notifications.
 
-## Decision 5: Comment File Format
+## R5. Comment File Format
 
 **Decision**: Markdown files with speckit-compatible structure, one per artifact.
 
@@ -79,7 +79,7 @@
 - **YAML files**: Better than JSON for readability but still less natural than markdown for Claude.
 - **Inline markers in artifact files**: Would modify the artifacts themselves, creating noise and potential parsing issues.
 
-## Decision 6: Testing Strategy
+## R6. Testing Strategy
 
 **Decision**: Vitest for unit and integration tests. No E2E framework.
 

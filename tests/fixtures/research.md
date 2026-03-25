@@ -2,7 +2,7 @@
 
 **Branch**: `001-test-feature` | **Date**: 2026-01-15
 
-## Decision 1: Storage Approach
+## R1. Storage Approach
 
 **Decision**: Use JSON files for widget persistence.
 
@@ -12,7 +12,7 @@
 - **SQLite**: More structured but adds a dependency. Overkill for <100 widgets.
 - **In-memory only**: Fast but loses data on restart.
 
-## Decision 2: Validation Strategy
+## R2. Validation Strategy
 
 **Decision**: Validate on the server side before persisting.
 

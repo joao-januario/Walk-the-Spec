@@ -5,16 +5,6 @@ import { cn } from '../../lib/utils.js';
 import { usePrevious } from '../../hooks/usePrevious.js';
 import type { Project } from '../../types/index.js';
 
-// Phase color hex values for Framer Motion animate (can't use CSS classes for interpolation)
-const phaseColorHex: Record<string, string> = {
-  specify: '#7aa2f7',
-  plan: '#bb9af7',
-  tasks: '#ff9e64',
-  implement: '#9ece6a',
-  review: '#7dcfff',
-  unknown: '#565870',
-};
-
 interface FeatureCardProps {
   project: Project;
   selected: boolean;
@@ -29,7 +19,7 @@ export default function FeatureCard({ project, selected, onClick }: FeatureCardP
 
   const prevPhase = usePrevious(project.phase);
   const justTransitioned = prevPhase !== undefined && prevPhase !== project.phase;
-  const dotColor = phaseColorHex[project.phase] ?? phaseColorHex.unknown;
+  const phaseVar = `var(--color-phase-${project.phase})`;
 
   return (
     <div
@@ -37,19 +27,19 @@ export default function FeatureCard({ project, selected, onClick }: FeatureCardP
       className={cn(
         'mb-[2px] cursor-pointer rounded-lg border-l-[3px] px-[14px] py-[10px] transition-all duration-150',
         selected
-          ? 'bg-board-surface-elevated shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
-          : 'bg-transparent hover:-translate-y-px hover:bg-board-surface-hover hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)]',
+          ? 'bg-board-surface-elevated shadow-card'
+          : 'bg-transparent hover:-translate-y-px hover:bg-board-surface-hover hover:shadow-card-hover',
         selected ? p.border : 'border-l-transparent',
       )}
-      // Inline style required: borderImage gradient uses dynamic phase color that Tailwind can't express statically
-      style={selected ? { borderImage: `linear-gradient(to bottom, ${dotColor}, transparent) 1` } : undefined}
+      style={selected ? { borderImage: `linear-gradient(to bottom, ${phaseVar}, transparent) 1` } : undefined}
     >
       <div className="flex items-center gap-2">
         <motion.span
           className="inline-block h-[10px] w-[10px] shrink-0 rounded-full"
+          style={{ backgroundColor: phaseVar }}
           animate={justTransitioned
-            ? { backgroundColor: dotColor, scale: [1, 1.3, 1], boxShadow: [`0 0 0 0 ${dotColor}00`, `0 0 12px 4px ${dotColor}88`, `0 0 0 0 ${dotColor}00`] }
-            : { backgroundColor: dotColor }
+            ? { scale: [1, 1.3, 1], boxShadow: [`0 0 0 0 transparent`, `0 0 12px 4px ${phaseVar}`, `0 0 0 0 transparent`] }
+            : {}
           }
           transition={justTransitioned ? { duration: 0.8 } : { duration: 0.3 }}
         />

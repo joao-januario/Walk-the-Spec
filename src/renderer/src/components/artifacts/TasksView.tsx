@@ -101,8 +101,13 @@ export default function TasksView({ elements, onToggleTask }: TasksViewProps) {
               <ProgressBar done={done} total={phaseElements.length} />
             </div>
             {isExpanded &&
-              phaseElements.map((e) => (
-                <TaskRow key={e.id} content={e.content as TaskContent} onToggle={onToggleTask} />
+              phaseElements.map((e, index) => (
+                <div key={e.id}>
+                  {index > 0 && index % 5 === 0 && (
+                    <div className="border-board-border/15 my-1.5 border-t" />
+                  )}
+                  <TaskRow content={e.content as TaskContent} onToggle={onToggleTask} />
+                </div>
               ))}
           </section>
         );

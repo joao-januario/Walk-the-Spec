@@ -4,6 +4,9 @@ import UserStoryCard from '../elements/UserStoryCard.js';
 import RequirementRow from '../elements/RequirementRow.js';
 import CommentBadge from '../elements/CommentBadge.js';
 import CommentPanel from '../comments/CommentPanel.js';
+import CodeTag from '../ui/CodeTag.js';
+import SectionLabel from '../ui/SectionLabel.js';
+import MarkdownContent from '../ui/MarkdownContent.js';
 import type {
   Element,
   UserStoryContent,
@@ -39,9 +42,7 @@ export default function SpecView({
     <div>
       {stories.length > 0 && (
         <section className="mb-7">
-          <h3 className="text-board-text-muted mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
-            User Stories
-          </h3>
+          <SectionLabel>User Stories</SectionLabel>
           {stories.map((e) => (
             <div key={e.id}>
               <div className="flex items-start gap-2">
@@ -72,11 +73,12 @@ export default function SpecView({
 
       {requirements.length > 0 && (
         <section className="mb-7">
-          <h3 className="text-board-text-muted mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
-            Functional Requirements
-          </h3>
-          {requirements.map((e) => (
+          <SectionLabel>Functional Requirements</SectionLabel>
+          {requirements.map((e, index) => (
             <div key={e.id}>
+              {index > 0 && index % 5 === 0 && (
+                <div className="border-board-border/15 my-2 border-t" />
+              )}
               <div className="flex items-start gap-1">
                 <div className="flex-1">
                   <RequirementRow content={e.content as RequirementContent} commentCount={e.commentCount} />
@@ -105,17 +107,18 @@ export default function SpecView({
 
       {criteria.length > 0 && (
         <section>
-          <h3 className="text-board-text-muted mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
-            Success Criteria
-          </h3>
-          {criteria.map((e) => {
+          <SectionLabel>Success Criteria</SectionLabel>
+          {criteria.map((e, index) => {
             const sc = e.content as SuccessCriterionContent;
             return (
-              <div key={e.id} className="border-board-border/20 flex gap-[10px] border-b py-[7px]">
-                <code className="text-board-green bg-board-green/[0.08] rounded px-[6px] py-[2px] text-[0.8125rem] font-bold">
-                  {sc.id}
-                </code>
-                <span className="text-board-text text-[0.9375rem]">{sc.text}</span>
+              <div key={e.id}>
+                {index > 0 && index % 5 === 0 && (
+                  <div className="border-board-border/15 my-2 border-t" />
+                )}
+                <div className="border-board-border/20 flex items-start gap-[10px] border-b py-[10px]">
+                  <CodeTag color="green">{sc.id}</CodeTag>
+                  <MarkdownContent inline content={sc.text} className="text-board-text flex-1 text-[0.9375rem] leading-relaxed" />
+                </div>
               </div>
             );
           })}
@@ -135,9 +138,7 @@ export default function SpecView({
 
         return (
           <section className="mt-7 opacity-70">
-            <h3 className="text-board-yellow mb-[10px] text-[1rem] font-semibold tracking-[0.05em] uppercase">
-              Stale Comments (element removed)
-            </h3>
+            <SectionLabel color="text-board-yellow">Stale Comments (element removed)</SectionLabel>
             {Array.from(grouped.entries()).map(([elementId, cmts]) => (
               <div
                 key={elementId}
@@ -148,7 +149,7 @@ export default function SpecView({
                 </div>
                 {cmts.map((c) => (
                   <div key={c.id} className="text-board-text-muted mb-[2px] pl-[10px] text-[0.875rem]">
-                    [{c.createdAt}] {c.content}
+                    [{c.createdAt}] <MarkdownContent inline content={c.content} />
                   </div>
                 ))}
               </div>

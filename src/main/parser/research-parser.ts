@@ -22,18 +22,24 @@ export function parseResearch(content: string): ResearchParseResult {
 function getTextContent(node: any): string {
   if (node.type === 'text') return node.value;
   if (node.type === 'strong') return `**${node.children.map(getTextContent).join('')}**`;
+  if (node.type === 'emphasis') return `*${node.children.map(getTextContent).join('')}*`;
+  if (node.type === 'inlineCode') return `\`${node.value}\``;
+  if (node.type === 'link') return `[${node.children.map(getTextContent).join('')}](${node.url})`;
   if (node.children) return node.children.map(getTextContent).join('');
   return '';
 }
+
+const RESEARCH_HEADING_RE = /^R\d+\.\s/;
 
 function extractDecisions(tree: Root): ResearchDecision[] {
   const decisions: ResearchDecision[] = [];
   const decisionHeadings: { text: string; index: number }[] = [];
 
+  // Match ## RN. headings (e.g., "R1. Markdown Rendering Approach")
   tree.children.forEach((child, index) => {
     if (child.type === 'heading' && child.depth === 2) {
       const text = getTextContent(child);
-      if (text.startsWith('Decision')) {
+      if (RESEARCH_HEADING_RE.test(text)) {
         decisionHeadings.push({ text, index });
       }
     }

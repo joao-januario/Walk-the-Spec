@@ -105,11 +105,19 @@
 <!--
   ACTION REQUIRED: Define measurable success criteria.
   These must be technology-agnostic and measurable.
+
+  FORMATTING: Wrap key metrics in backticks for visual highlighting in the app:
+  - Ratios: `15:1`, `4.5:1`
+  - Percentages: `95%`, `100%`
+  - Durations: `2 minutes`, `1 second`
+  - Counts: `10,000 concurrent users`
+
+  Use MUST/SHOULD language where the criterion is a hard requirement vs. a target.
 -->
 
 ### Measurable Outcomes
 
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-001**: [Measurable metric, e.g., "Users MUST be able to complete account creation in under `2 minutes`"]
+- **SC-002**: [Measurable metric, e.g., "System MUST support `10,000` concurrent users without degradation"]
+- **SC-003**: [User satisfaction metric, e.g., "`95%` of users successfully complete primary task on first attempt"]
+- **SC-004**: [Business metric, e.g., "Support tickets related to [X] SHOULD reduce by `50%`"]

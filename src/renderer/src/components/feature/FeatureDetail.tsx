@@ -8,6 +8,7 @@ import PlanView from '../artifacts/PlanView.js';
 import TasksView from '../artifacts/TasksView.js';
 import ResearchView from '../artifacts/ResearchView.js';
 import ReviewView from '../artifacts/ReviewView.js';
+import RefactorBacklogView from '../refactor/RefactorBacklogView.js';
 import EmptyState from '../common/EmptyState.js';
 import { useFeatureData, useArtifactData } from '../../hooks/useFeatureData.js';
 import { useComments } from '../../hooks/useComments.js';
@@ -25,6 +26,8 @@ const PHASE_HERO: Record<string, ArtifactType> = {
 
 export default function FeatureDetail({ project }: { project: Project }) {
   const { feature, loading: featureLoading } = useFeatureData(project.id);
+  const [showBacklog, setShowBacklog] = useState(false);
+
   const availableTypes = (feature?.artifacts ?? [])
     .map((a) => a.type)
     .filter((t): t is ArtifactType => TAB_ORDER.includes(t as ArtifactType))
@@ -41,6 +44,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
       .sort((a, b) => TAB_ORDER.indexOf(a as ArtifactType) - TAB_ORDER.indexOf(b as ArtifactType));
     const hero = PHASE_HERO[project.phase] ?? 'spec';
     setActiveTab((types.includes(hero) ? hero : (types[0] ?? null)) as ArtifactType | null);
+    setShowBacklog(false);
   }, [project.id, feature]);
 
   const { artifact, loading: artifactLoading, refetch: refetchArtifact } = useArtifactData(project.id, activeTab);
@@ -88,7 +92,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
     <div>
       <div className="mb-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-board-text-bright m-0 text-[1.25rem]">{feature.summary || project.name}</h2>
+          <h2 className="text-board-text-bright m-0 flex-1 text-[1.25rem]">{feature.summary || project.name}</h2>
           <AnimatePresence mode="wait">
             <motion.span
               key={project.phase}
@@ -101,35 +105,52 @@ export default function FeatureDetail({ project }: { project: Project }) {
               {p.label}
             </motion.span>
           </AnimatePresence>
+          <button
+            onClick={() => setShowBacklog(!showBacklog)}
+            aria-label={showBacklog ? 'Back to feature' : 'Refactor Backlog'}
+            title={showBacklog ? 'Back to feature' : 'Refactor Backlog'}
+            className={cn(
+              'rounded-md px-2 py-1 text-lg transition-opacity',
+              showBacklog ? 'opacity-100' : 'opacity-50 hover:opacity-100',
+            )}
+          >
+            🧹
+          </button>
         </div>
         <div className="text-board-text-muted mt-1 text-[0.8125rem]">
           <code className="text-board-text text-[0.8125rem]">{feature.branchName}</code>
         </div>
       </div>
 
-      {availableTypes.length > 0 && activeTab && (
-        <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} heroTab={heroType} phase={project.phase} />
-      )}
+      {showBacklog ? (
+        <RefactorBacklogView projectId={project.id} />
+      ) : (
+        <>
+          {availableTypes.length > 0 && activeTab && (
+            <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} heroTab={heroType} phase={project.phase} />
+          )}
 
-      {artifactLoading && <div className="text-board-text-muted text-[0.9375rem]">Loading...</div>}
+          {artifactLoading && <div className="text-board-text-muted text-[0.9375rem]">Loading...</div>}
 
-      {artifact && activeTab === 'spec' && (
-        <SpecView
-          elements={artifact.elements}
-          comments={comments}
-          onAddComment={handleAddComment}
-          onUpdateComment={handleUpdateComment}
-          onDeleteComment={handleDeleteComment}
-        />
-      )}
-      {artifact && activeTab === 'plan' && <PlanView elements={artifact.elements} />}
-      {artifact && activeTab === 'tasks' && <TasksView elements={artifact.elements} onToggleTask={handleToggleTask} />}
-      {artifact && activeTab === 'research' && <ResearchView elements={artifact.elements} />}
-      {artifact && activeTab === 'review' && (
-        <ReviewView
-          findings={artifact.elements.map((e) => e.content as ReviewFinding)}
-          healSummary={artifact.reviewMeta?.healSummary ?? null}
-        />
+          {artifact && activeTab === 'spec' && (
+            <SpecView
+              elements={artifact.elements}
+              comments={comments}
+              onAddComment={handleAddComment}
+              onUpdateComment={handleUpdateComment}
+              onDeleteComment={handleDeleteComment}
+            />
+          )}
+          {artifact && activeTab === 'plan' && <PlanView elements={artifact.elements} />}
+          {artifact && activeTab === 'tasks' && <TasksView elements={artifact.elements} onToggleTask={handleToggleTask} />}
+          {artifact && activeTab === 'research' && <ResearchView elements={artifact.elements} />}
+          {artifact && activeTab === 'review' && (
+            <ReviewView
+              findings={artifact.elements.map((e) => e.content as ReviewFinding)}
+              healSummary={artifact.reviewMeta?.healSummary ?? null}
+            />
+          )}
+        </>
       )}
     </div>
   );

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils.js';
 import { getPriorityClasses, getPriorityMeta } from '../../theme.js';
 import Tooltip from '../ui/Tooltip.js';
+import SectionLabel from '../ui/SectionLabel.js';
+import MarkdownContent from '../ui/MarkdownContent.js';
 import type { UserStoryContent, GWTScenario } from '../../types/index.js';
 
 function buildTooltipContent(priority: string, whyPriority: string): React.ReactNode {
@@ -43,7 +45,9 @@ export default function UserStoryCard({ content }: { content: UserStoryContent }
           US{content.number} — {content.title}
         </span>
       </div>
-      <p className="text-board-text mt-[6px] mb-0 ml-8 text-[0.9375rem] leading-[1.5]">{content.description}</p>
+      <div className="mt-[6px] ml-8">
+        <MarkdownContent content={content.description} />
+      </div>
 
       <AnimatePresence>
         {expanded && (
@@ -54,21 +58,24 @@ export default function UserStoryCard({ content }: { content: UserStoryContent }
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="bg-board-surface-elevated mt-3 ml-8 rounded-md p-3">
+            <div className="bg-board-surface mt-3 ml-8 rounded-md border border-board-border/30 p-4">
               {content.whyPriority && (
                 <div className="mb-[10px]">
-                  <div className="text-board-purple mb-1 text-[0.75rem] font-semibold uppercase">Why this priority</div>
-                  <p className="text-board-text m-0 text-[0.875rem]">{content.whyPriority}</p>
+                  <SectionLabel sub color="text-board-purple" className="mb-1">Why this priority</SectionLabel>
+                  <MarkdownContent content={content.whyPriority} />
                 </div>
               )}
               {content.acceptanceScenarios.length > 0 && (
                 <div>
-                  <div className="text-board-text-muted mb-[6px] text-[0.75rem] font-semibold uppercase">Acceptance Scenarios</div>
+                  <SectionLabel sub className="mb-[6px]">Acceptance Scenarios</SectionLabel>
                   {content.acceptanceScenarios.map((s: GWTScenario, i: number) => (
-                    <div key={i} className="text-board-text border-board-border mb-1 border-l-2 pl-[10px] text-[0.875rem]">
-                      <span className="text-board-green font-semibold">Given</span> {s.given},{' '}
-                      <span className="text-board-orange font-semibold">When</span> {s.when},{' '}
-                      <span className="text-board-accent font-semibold">Then</span> {s.then}
+                    <div key={i} className="text-board-text border-board-border mb-1.5 border-l-2 pl-[10px] text-[0.9375rem] leading-relaxed">
+                      <span className="text-board-green font-semibold">Given</span>{' '}
+                      <MarkdownContent inline content={s.given} />,{' '}
+                      <span className="text-board-orange font-semibold">When</span>{' '}
+                      <MarkdownContent inline content={s.when} />,{' '}
+                      <span className="text-board-accent font-semibold">Then</span>{' '}
+                      <MarkdownContent inline content={s.then} />
                     </div>
                   ))}
                 </div>

@@ -239,17 +239,26 @@ function extractFindingsFromBlocks(lines: string[]): ReviewFinding[] {
       continue;
     }
 
-    // Continuation lines for current field (non-empty, non-heading, non-field)
-    if (currentField && line.trim() && !line.startsWith('**') && !line.startsWith('#')) {
-      if (currentField === 'why') {
-        current.why = (current.why ?? '') + ' ' + line.trim();
-      } else if (currentField === 'gain') {
-        current.gain = (current.gain ?? '') + ' ' + line.trim();
+    // Continuation lines for current field — preserve markdown formatting
+    if (currentField && !line.startsWith('**') && !line.startsWith('#')) {
+      if (line.trim()) {
+        if (currentField === 'why') {
+          current.why = (current.why ?? '') + '\n' + line;
+        } else if (currentField === 'gain') {
+          current.gain = (current.gain ?? '') + '\n' + line;
+        }
+      } else {
+        // Empty line: add paragraph break but don't reset field
+        if (currentField === 'why' && current.why) {
+          current.why += '\n';
+        } else if (currentField === 'gain' && current.gain) {
+          current.gain += '\n';
+        }
       }
     }
 
-    // Empty line resets field context
-    if (!line.trim()) {
+    // Reset field context on next field header or heading
+    if (!line.trim() && !currentField) {
       currentField = null;
     }
   }

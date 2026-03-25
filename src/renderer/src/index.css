@@ -1,39 +1,51 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
-  /* Board surfaces */
-  --color-board-bg: #1a1b26;
-  --color-board-surface: #222436;
-  --color-board-surface-hover: #2a2c42;
-  --color-board-surface-alt: #1e2030;
-  --color-board-surface-elevated: #282a3e;
-  --color-board-surface-overlay: #2e3148;
-  --color-board-border: #363850;
-  --color-board-border-hover: #444866;
+  /*
+   * Radix Mauve — accessibility-engineered 12-step dark scale
+   * All surface/text values from @radix-ui/colors mauve-dark.css
+   * All accent values from @radix-ui/colors {color}-dark.css step 11
+   */
 
-  /* Text */
-  --color-board-text: #c0caf5;
-  --color-board-text-muted: #8b94b8;
-  --color-board-text-bright: #e0e6ff;
+  /* ── Surfaces (mauve-dark steps 1-8) ── */
+  --color-board-bg: #121113;
+  --color-board-surface: #1a191b;
+  --color-board-surface-hover: #2b292d;
+  --color-board-surface-alt: #121113;
+  --color-board-surface-elevated: #323035;
+  --color-board-surface-overlay: #3c393f;
+  --color-board-border: #49474e;
+  --color-board-border-hover: #625f69;
 
-  /* Accent colors */
-  --color-board-accent: #7aa2f7;
-  --color-board-red: #f7768e;
-  --color-board-orange: #ff9e64;
-  --color-board-yellow: #e0af68;
-  --color-board-green: #9ece6a;
-  --color-board-purple: #bb9af7;
-  --color-board-cyan: #7dcfff;
+  /* ── Text (mauve-dark steps 11-12) ── */
+  --color-board-text: #eeeef0;
+  --color-board-text-muted: #b5b2bc;
+  --color-board-text-bright: #ffffff;
 
-  /* Phase colors */
-  --color-phase-specify: #7aa2f7;
-  --color-phase-plan: #bb9af7;
-  --color-phase-tasks: #ff9e64;
-  --color-phase-implement: #9ece6a;
-  --color-phase-review: #7dcfff;
-  --color-phase-unknown: #565870;
+  /* ── Accents (radix dark scales, step 11) ── */
+  --color-board-accent: #70b8ff;
+  --color-board-red: #ff9592;
+  --color-board-orange: #ffa057;
+  --color-board-yellow: #ffca16;
+  --color-board-green: #3dd68c;
+  --color-board-purple: #baa7ff;
+  --color-board-cyan: #4ccce6;
+  --color-board-teal: #0bd8b6;
 
-  /* Font */
+  /* ── Phase colors (5 distinct hue families) ── */
+  --color-phase-specify: #70b8ff;
+  --color-phase-plan: #baa7ff;
+  --color-phase-tasks: #ffa057;
+  --color-phase-implement: #3dd68c;
+  --color-phase-review: #0bd8b6;
+  --color-phase-unknown: #6f6d78;
+
+  /* ── Shadows ── */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.5);
+
+  /* ── Font ── */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 

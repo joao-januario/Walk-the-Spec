@@ -111,7 +111,7 @@ Don't guess, measure. But don't optimize what doesn't matter.
 
 No wasted space. Every pixel serves a purpose.
 
-- **MUST** use the dark Tokyo Night color palette as the base theme. Colorful accents, easy on eyes at night.
+- **MUST** use an accessibility-tested dark color palette as the base theme (default: Radix Mauve). Colorful accents, easy on eyes at night.
 - **MUST** maintain a persistent project sidebar visible at all times regardless of current view.
 - **MUST** support 1-click project switching — the sidebar is the primary navigation.
 - **MUST** use native OS integration where available (folder picker, window management).
@@ -128,4 +128,4 @@ This constitution defines the non-negotiable engineering standards for Spec Boar
 - The `/speckit.analyze` command validates artifacts against these principles.
 - Use CLAUDE.md for runtime development guidance that supplements (but does not override) this constitution.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-24
+**Version**: 1.1.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25

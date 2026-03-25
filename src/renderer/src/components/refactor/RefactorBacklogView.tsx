@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { cn } from '../../lib/utils.js';
 import type { RefactorEntry } from '../../types/index.js';
 import * as api from '../../services/api.js';
+import CodeTag from '../ui/CodeTag.js';
+import MarkdownContent from '../ui/MarkdownContent.js';
 
 interface RefactorBacklogViewProps {
   projectId: string;
@@ -57,24 +59,22 @@ export default function RefactorBacklogView({ projectId }: RefactorBacklogViewPr
       {Array.from(byBranch.entries()).map(([branch, items]) => (
         <section key={branch} className="mb-5">
           <div className="mb-2 flex items-center gap-2">
-            <code className="text-board-accent bg-board-accent/[0.08] rounded px-[6px] py-[2px] text-[0.7rem]">
-              {branch}
-            </code>
+            <CodeTag color="accent">{branch}</CodeTag>
             <span className="text-board-text-muted text-[0.7rem]">
               {items.length} item{items.length > 1 ? 's' : ''}
             </span>
           </div>
           {items.map((entry) => (
             <div key={entry.id} className="border-board-border/20 flex items-start gap-[10px] border-b py-2">
-              <code className="text-board-purple bg-board-purple/[0.08] rounded px-[6px] py-[2px] text-[0.65rem] font-bold whitespace-nowrap">
-                {entry.id}
-              </code>
-              <code className="text-board-text-muted bg-board-border/40 rounded-[3px] px-1 py-[1px] text-[0.65rem] whitespace-nowrap">
-                {entry.rule}
-              </code>
+              <CodeTag color="purple" size="sm">{entry.id}</CodeTag>
+              <CodeTag color="muted" size="sm">{entry.rule}</CodeTag>
               <div className="flex-1">
-                <div className="text-board-text text-[0.82rem]">{entry.description}</div>
-                <div className="text-board-text-muted mt-[2px] text-[0.7rem]">{entry.files}</div>
+                <div className="text-board-text text-[0.82rem]">
+                  <MarkdownContent inline content={entry.description} />
+                </div>
+                <div className="text-board-text-muted mt-[2px] text-[0.7rem]">
+                  <MarkdownContent inline content={entry.files} />
+                </div>
               </div>
               <span
                 className={cn(
