@@ -1,6 +1,6 @@
 ﻿# spec-board Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-24
+Auto-generated from all feature plans. Last updated: 2026-03-25
 
 ## Active Technologies
 - TypeScript 5.x (existing) + Electron, React 19, unified/remark, chokidar (all existing — no new deps) (003-review-heal-tracking)

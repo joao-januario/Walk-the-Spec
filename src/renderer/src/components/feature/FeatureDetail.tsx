@@ -13,6 +13,8 @@ import { useFeatureData, useArtifactData } from '../../hooks/useFeatureData.js';
 import { useComments } from '../../hooks/useComments.js';
 import type { Project, ArtifactType, ReviewFinding } from '../../types/index.js';
 
+const TAB_ORDER: ArtifactType[] = ['spec', 'plan', 'research', 'tasks', 'review'];
+
 const PHASE_HERO: Record<string, ArtifactType> = {
   specify: 'spec',
   plan: 'plan',
@@ -25,7 +27,8 @@ export default function FeatureDetail({ project }: { project: Project }) {
   const { feature, loading: featureLoading } = useFeatureData(project.id);
   const availableTypes = (feature?.artifacts ?? [])
     .map((a) => a.type)
-    .filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
+    .filter((t): t is ArtifactType => TAB_ORDER.includes(t as ArtifactType))
+    .sort((a, b) => TAB_ORDER.indexOf(a as ArtifactType) - TAB_ORDER.indexOf(b as ArtifactType));
   const heroType = PHASE_HERO[project.phase] ?? 'spec';
   const defaultTab = availableTypes.includes(heroType) ? heroType : (availableTypes[0] ?? null);
 
@@ -34,7 +37,8 @@ export default function FeatureDetail({ project }: { project: Project }) {
   useEffect(() => {
     const types = (feature?.artifacts ?? [])
       .map((a) => a.type)
-      .filter((t) => ['spec', 'plan', 'tasks', 'research', 'review'].includes(t));
+      .filter((t): t is ArtifactType => TAB_ORDER.includes(t as ArtifactType))
+      .sort((a, b) => TAB_ORDER.indexOf(a as ArtifactType) - TAB_ORDER.indexOf(b as ArtifactType));
     const hero = PHASE_HERO[project.phase] ?? 'spec';
     setActiveTab((types.includes(hero) ? hero : (types[0] ?? null)) as ArtifactType | null);
   }, [project.id, feature]);
@@ -104,7 +108,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
       </div>
 
       {availableTypes.length > 0 && activeTab && (
-        <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} />
+        <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} heroTab={heroType} phase={project.phase} />
       )}
 
       {artifactLoading && <div className="text-board-text-muted text-[0.9375rem]">Loading...</div>}
