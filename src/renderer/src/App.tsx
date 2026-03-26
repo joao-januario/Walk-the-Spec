@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import BoardView from './components/board/BoardView.js';
 import FeatureDetail from './components/feature/FeatureDetail.js';
 import EmptyState from './components/common/EmptyState.js';
+import { usePhaseNotification } from './hooks/usePhaseNotification.js';
 import type { Project } from './types/index.js';
 
 function applyFontSize(size: number): void {
@@ -12,6 +13,8 @@ export default function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
+
+  usePhaseNotification();
 
   // Load saved font size on mount + listen for menu changes
   useEffect(() => {

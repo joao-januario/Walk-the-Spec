@@ -10,6 +10,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.conclude" -Status "started"` to signal command start.
+
 ## Goal
 
 Conclude the current feature branch by validating tests pass, cleaning up branch-specific speckit artifacts, committing all work, and squash-merging to main. This is the final step after `/speckit.implement` (and optionally `/speckit.review`).
@@ -152,6 +154,8 @@ The feature is now on main. You can start a new feature with `/speckit.specify`.
 - **No feature directory**: Warn but allow conclude (the feature may not have used speckit).
 - **Uncommitted changes on main**: Stop. User must stash or commit main changes first.
 - **User cancels**: Stop. No changes made.
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.conclude" -Status "completed"` to signal command completion.
 
 ## Safety Rules
 

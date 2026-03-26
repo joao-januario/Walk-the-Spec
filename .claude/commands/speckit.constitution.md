@@ -14,6 +14,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.constitution" -Status "started"` to signal command start.
+
 ## Outline
 
 You are updating the project constitution at `.claude/specify/memory/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
@@ -69,6 +71,8 @@ Follow this execution flow:
    - New version and bump rationale.
    - Any files flagged for manual follow-up.
    - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.constitution" -Status "completed"` to signal command completion.
 
 Formatting & Style Requirements:
 

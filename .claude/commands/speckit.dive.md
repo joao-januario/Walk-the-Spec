@@ -10,6 +10,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.dive" -Status "started"` to signal command start.
+
 ## Outline
 
 1. Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json` from repo root and parse FEATURE_DIR. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
@@ -67,5 +69,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    ```
 
 9. **Update glossary.md** — add any new terms that appear in the deep-dives.
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.dive" -Status "completed"` to signal command completion.
 
 10. **Report completion**: List which overview steps got deep-dives and which didn't (with reasoning). Suggest `/speckit.review` or `/speckit.conclude` as next steps.

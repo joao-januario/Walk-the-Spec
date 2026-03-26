@@ -10,6 +10,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.review" -Status "started"` to signal command start.
+
 ## Goal
 
 Analyze all code changes on the current branch (compared to the base branch) against the best practices documents in `.claude/best-practices/`. Use a **multi-agent architecture**: perform an overall branch analysis yourself, then spawn parallel Haiku sub-agents for each technology vertical, and finally consolidate their findings into a unified engineering review report. This command is **read-only** — it does not modify any files.
@@ -223,6 +225,8 @@ Output: "Run `/speckit.heal` to apply fixes for all findings (CRITICAL, HIGH, ME
 If no actionable findings exist (only NEEDS_REFACTOR or none): "No fixes needed. Optionally run `/speckit.dive` to generate code deep-dives, or `/speckit.conclude` to finalize the branch."
 
 **IMPORTANT**: `/speckit.review` is strictly read-only. It MUST NOT modify any source files. All fixes are applied by `/speckit.heal`.
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.review" -Status "completed"` to signal command completion.
 
 ## Operating Principles
 

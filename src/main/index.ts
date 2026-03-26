@@ -1,8 +1,15 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { registerIpcHandlers } from './ipc/handlers.js';
-import { loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS } from './config/config-manager.js';
+import { loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS, type SoundVolume } from './config/config-manager.js';
 import { watchProject, unwatchAll, type WatcherEvents } from './projects/file-watcher.js';
+import { readStatus } from './notifications/status-reader.js';
+import { showCompletionNotification } from './notifications/os-notifier.js';
+import { scanProject } from './projects/project-scanner.js';
+import { detectPhase } from './phase/phase-detector.js';
+import fs from 'fs';
+
+app.setAppUserModelId('com.speckit.walk-the-spec');
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -12,9 +19,53 @@ function sendToRenderer(channel: string, ...args: any[]) {
   }
 }
 
+async function handleStatusChange(projectId: string, projectPath: string): Promise<void> {
+  try {
+    const scan = scanProject(projectPath);
+    if (!scan.specDir) return;
+
+    const statusPath = path.join(scan.specDir, 'status.json');
+    const status = await readStatus(statusPath);
+    if (!status || status.status !== 'completed') return;
+
+    const config = loadConfig();
+    const project = config.projects.find((p) => p.id === projectId);
+    if (!project) return;
+
+    let tasksContent: string | undefined;
+    if (scan.artifactFiles.includes('tasks.md')) {
+      tasksContent = await fs.promises.readFile(path.join(scan.specDir, 'tasks.md'), 'utf-8');
+    }
+    const phase = detectPhase(scan.artifactFiles, tasksContent);
+
+    sendToRenderer('phase-changed', {
+      projectId,
+      projectName: project.name,
+      command: status.command,
+      phase,
+      timestamp: status.timestamp,
+    });
+
+    if (config.settings.osNotifications) {
+      showCompletionNotification({ projectName: project.name, command: status.command, mainWindow });
+    }
+  } catch (err: unknown) {
+    console.error('[notifications] status read error:', err);
+  }
+}
+
 const watcherEvents: WatcherEvents = {
   onSpecsChanged: (projectId, files) => {
     sendToRenderer('specs-changed', { projectId, files, timestamp: new Date().toISOString() });
+
+    // Check for status.json changes to trigger notifications
+    if (files.some((f) => f.endsWith('status.json'))) {
+      const config = loadConfig();
+      const project = config.projects.find((p) => p.id === projectId);
+      if (project) {
+        void handleStatusChange(projectId, project.path);
+      }
+    }
   },
   onBranchChanged: (projectId) => {
     sendToRenderer('branch-changed', { projectId, timestamp: new Date().toISOString() });
@@ -107,6 +158,38 @@ function buildMenu() {
         { role: 'toggleDevTools' as const },
         { type: 'separator' as const },
         { role: 'togglefullscreen' as const },
+      ],
+    },
+    {
+      label: 'Notifications',
+      submenu: [
+        { label: 'Sound Volume', enabled: false },
+        ...(['high', 'medium', 'low', 'off'] as const).map((level) => ({
+          label: level.charAt(0).toUpperCase() + level.slice(1),
+          type: 'radio' as const,
+          checked: config.settings.soundVolume === level,
+          click: () => {
+            const c = loadConfig();
+            c.settings = { ...c.settings, soundVolume: level as SoundVolume };
+            saveConfig(undefined, c);
+            sendToRenderer('settings-changed', { soundVolume: level });
+            buildMenu();
+          },
+        })),
+        { type: 'separator' as const },
+        {
+          label: 'OS Notifications',
+          type: 'checkbox' as const,
+          checked: config.settings.osNotifications,
+          click: () => {
+            const c = loadConfig();
+            const next = !c.settings.osNotifications;
+            c.settings = { ...c.settings, osNotifications: next };
+            saveConfig(undefined, c);
+            sendToRenderer('settings-changed', { osNotifications: next });
+            buildMenu();
+          },
+        },
       ],
     },
     { role: 'windowMenu' as const },

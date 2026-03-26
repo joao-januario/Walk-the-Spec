@@ -36,6 +36,7 @@ TypeScript 5.x: Follow standard conventions. Dark Radix Mauve theme for UI (acce
 - Native OS integration — folder picker, window management via Electron
 
 ## Recent Changes
+- 004-phase-change-notifications: Added Electron
 - 004-walk-the-spec-rebrand: Added Electron
 - 004-radix-mauve-theme: Added react-markdown, @tailwindcss/typography (new). @radix-ui/colors for color tokens. Existing stack unchanged.
 

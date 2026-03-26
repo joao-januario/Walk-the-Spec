@@ -45,6 +45,13 @@ const api = {
     return () => ipcRenderer.removeListener('settings-changed', sub);
   },
 
+  // Notification events — command completion
+  onPhaseChanged: (callback: (...args: any[]) => void) => {
+    const sub = (_event: any, ...args: any[]) => callback(...args);
+    ipcRenderer.on('phase-changed', sub);
+    return () => ipcRenderer.removeListener('phase-changed', sub);
+  },
+
   // File watcher events (Phase 8) — renderer listens
   onSpecsChanged: (callback: (...args: any[]) => void) => {
     const sub = (_event: any, ...args: any[]) => callback(...args);

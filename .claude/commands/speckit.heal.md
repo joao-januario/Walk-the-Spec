@@ -10,6 +10,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.heal" -Status "started"` to signal command start.
+
 ## Goal
 
 Read the review findings from `.claude/specs/<BRANCH_NAME>/review.md` and apply the proposed fixes for CRITICAL and HIGH severity findings. This is the counterpart to `/speckit.review` — review finds problems, heal applies corrections.
@@ -137,6 +139,8 @@ If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL find
 - **NEEDS_REFACTOR excluded** — these are architectural debt tracked in refactor-backlog.md, addressed in dedicated future branches
 - Each fix is applied independently — one broken fix doesn't block others
 - Tests are the safety net — if a fix breaks tests, revert it
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.heal" -Status "completed"` to signal command completion.
 
 ## Error Handling
 

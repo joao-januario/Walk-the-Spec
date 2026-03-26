@@ -31,6 +31,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.checklist" -Status "started"` to signal command start.
+
 ## Execution Steps
 
 1. **Setup**: Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json` from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS list.
@@ -219,6 +221,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 - Easy identification and navigation in the `checklists/` folder
 
 To avoid clutter, use descriptive types and clean up obsolete checklists when done.
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.checklist" -Status "completed"` to signal command completion.
 
 ## Example Checklist Types & Sample Items
 

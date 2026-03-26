@@ -52,6 +52,8 @@ You **MUST** consider the user input before proceeding (if not empty).
     ```
 - If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.specify" -Status "started"` to signal command start.
+
 ## Outline
 
 The text the user typed after `/speckit.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
@@ -206,6 +208,8 @@ Given that feature description, do this:
    d. **Update Checklist**: After each validation iteration, update the checklist file with current pass/fail status
 
 7. Report completion with branch name, spec file path, checklist results, and readiness for the next phase (`/speckit.clarify` or `/speckit.plan`).
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.specify" -Status "completed"` to signal command completion.
 
 8. **Check for extension hooks**: After reporting completion, check if `.claude/specify/extensions.yml` exists in the project root.
    - If it exists, read it and look for entries under the `hooks.after_specify` key

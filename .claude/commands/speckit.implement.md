@@ -44,6 +44,8 @@ You **MUST** consider the user input before proceeding (if not empty).
     ```
 - If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
 
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.implement" -Status "started"` to signal command start.
+
 ## Outline
 
 1. Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
@@ -197,6 +199,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 12. Suggest next steps: "Run `/speckit.review` or `/speckit.conclude`."
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
+
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.implement" -Status "completed"` to signal command completion.
 
 13. **Check for extension hooks**: After completion validation, check if `.claude/specify/extensions.yml` exists in the project root.
     - If it exists, read it and look for entries under the `hooks.after_implement` key

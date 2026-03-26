@@ -30,7 +30,7 @@ describe('config-manager', () => {
   describe('loadConfig', () => {
     it('creates config file with empty projects on first use', () => {
       const config = loadConfig(TEST_CONFIG_PATH);
-      expect(config).toEqual({ projects: [], settings: { fontSize: 16 } });
+      expect(config).toEqual({ projects: [], settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true } });
       expect(fs.existsSync(TEST_CONFIG_PATH)).toBe(true);
     });
 

@@ -9,11 +9,15 @@ export interface ProjectEntry {
   path: string;
 }
 
+export type SoundVolume = 'high' | 'medium' | 'low' | 'off';
+
 export interface AppSettings {
   fontSize: number;
+  soundVolume: SoundVolume;
+  osNotifications: boolean;
 }
 
-export const DEFAULT_SETTINGS: AppSettings = { fontSize: 16 };
+export const DEFAULT_SETTINGS: AppSettings = { fontSize: 16, soundVolume: 'medium', osNotifications: true };
 
 export interface WalkTheSpecConfig {
   projects: ProjectEntry[];
