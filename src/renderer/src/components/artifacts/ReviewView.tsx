@@ -4,7 +4,7 @@ import { cn } from '../../lib/utils.js';
 import { severityClasses, statusClasses } from '../../theme.js';
 import CodeBlock from '../elements/CodeBlock.js';
 import CodeTag from '../ui/CodeTag.js';
-import SectionLabel from '../ui/SectionLabel.js';
+import CollapsibleSection from '../ui/CollapsibleSection.js';
 import MarkdownContent from '../ui/MarkdownContent.js';
 import type { ReviewFinding, FindingSeverity, FindingStatus, HealSummary } from '../../types/index.js';
 
@@ -60,7 +60,7 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
         <div className="flex-1">
           <div
             className={cn(
-              'text-[0.9375rem]',
+              'text-[1rem]',
               finding.status === 'FIXED' ? 'text-board-text-muted line-through' : 'text-board-text',
             )}
           >
@@ -93,15 +93,15 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
           >
             <div className="bg-board-surface-elevated border-board-border/10 mb-2 ml-[30px] rounded-md border-l-2 p-4">
               {finding.why && (
-                <div className="mb-2">
-                  <SectionLabel sub color="text-board-purple">Why this severity</SectionLabel>
-                  <MarkdownContent content={finding.why} className="mt-0.5" />
+                <div className="mb-3">
+                  <CodeTag color="purple" className="mb-2">WHY THIS SEVERITY</CodeTag>
+                  <MarkdownContent content={finding.why} className="mt-2" />
                 </div>
               )}
               {finding.gain && (
-                <div className="mb-2">
-                  <SectionLabel sub color="text-board-green">What you gain</SectionLabel>
-                  <MarkdownContent content={finding.gain} className="mt-0.5" />
+                <div className="mb-3 border-t border-board-border/20 pt-3">
+                  <CodeTag color="green" className="mb-2">WHAT YOU GAIN</CodeTag>
+                  <MarkdownContent content={finding.gain} className="mt-2" />
                 </div>
               )}
               {finding.codeBlocks.length > 0 && (
@@ -130,7 +130,7 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
       <div className="py-[60px] text-center">
         <div className="mb-3 text-[2.5rem]">✅</div>
         <div className="text-board-green text-[1.1rem] font-semibold">Review passed — no issues found</div>
-        <div className="text-board-text-muted mt-1 text-[0.9375rem]">Run `/speckit.conclude` to finalize the branch.</div>
+        <div className="text-board-text-muted mt-1 text-[1rem]">Run `/speckit.conclude` to finalize the branch.</div>
       </div>
     );
   }
@@ -148,13 +148,15 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
     if (items.length > 0) grouped.set(sev, items);
   }
 
+  let num = 0;
+
   return (
     <div>
       {actionable.length > 0 && (
         <div className="mb-6 max-w-[400px]">
           <div
             className={cn(
-              'mb-1 text-[0.9375rem]',
+              'mb-1 text-[1rem]',
               isComplete ? 'text-board-green font-semibold' : 'text-board-text-muted font-normal',
             )}
           >
@@ -176,33 +178,45 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
         </div>
       )}
 
-      {Array.from(grouped.entries()).map(([severity, items]) => (
-        <section key={severity} className="mb-5">
-          <div className="mb-2 flex items-center gap-2">
-            <SeverityBadge severity={severity} />
-            <span className="text-board-text-muted text-[0.875rem]">
-              {items.length} finding{items.length > 1 ? 's' : ''}
-            </span>
-          </div>
-          {items.map((f) => (
-            <FindingRow key={f.number} finding={f} />
-          ))}
-        </section>
-      ))}
+      <div className="space-y-5">
+        {Array.from(grouped.entries()).map(([severity, items]) => (
+          <CollapsibleSection
+            key={severity}
+            id={`review-${severity}`}
+            heading={severity}
+            level="section"
+            number={++num}
+            trailing={
+              <span className="text-board-text-muted text-[0.875rem]">
+                {items.length} finding{items.length > 1 ? 's' : ''}
+              </span>
+            }
+          >
+            {items.map((f) => (
+              <FindingRow key={f.number} finding={f} />
+            ))}
+          </CollapsibleSection>
+        ))}
 
-      {refactorItems.length > 0 && (
-        <section className="border-board-border mt-7 border-t pt-4">
-          <div className="mb-2 flex items-center gap-2">
-            <SeverityBadge severity="NEEDS_REFACTOR" />
-            <span className="text-board-text-muted text-[0.875rem]">
-              Tracked in Refactor Backlog — not blocking this branch
-            </span>
-          </div>
-          {refactorItems.map((f) => (
-            <FindingRow key={f.number} finding={f} />
-          ))}
-        </section>
-      )}
+        {refactorItems.length > 0 && (
+          <CollapsibleSection
+            id="review-refactor"
+            heading="NEEDS_REFACTOR"
+            level="section"
+            number={++num}
+            defaultOpen={false}
+            trailing={
+              <span className="text-board-text-muted text-[0.875rem]">
+                Tracked in Refactor Backlog — not blocking
+              </span>
+            }
+          >
+            {refactorItems.map((f) => (
+              <FindingRow key={f.number} finding={f} />
+            ))}
+          </CollapsibleSection>
+        )}
+      </div>
     </div>
   );
 }

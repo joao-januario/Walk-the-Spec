@@ -52,4 +52,24 @@ describe('phase-detector', () => {
     const tasksContent = '- [x] T001 Done\n- [x] T002 Done';
     expect(detectPhase(['tasks.md', 'review.md'], tasksContent)).toBe('review');
   });
+
+  // Summary phase tests
+  it('returns "summary" when summary.md exists with checked tasks and no review.md', () => {
+    const tasksContent = '- [x] T001 Done\n- [ ] T002 Not done';
+    expect(detectPhase(['spec.md', 'plan.md', 'tasks.md', 'summary.md'], tasksContent)).toBe('summary');
+  });
+
+  it('returns "review" over "summary" when review.md is also present', () => {
+    const tasksContent = '- [x] T001 Done\n- [x] T002 Done';
+    expect(detectPhase(['tasks.md', 'summary.md', 'review.md'], tasksContent)).toBe('review');
+  });
+
+  it('returns "tasks" when summary.md exists but no tasks are checked', () => {
+    const tasksContent = '- [ ] T001 Not done';
+    expect(detectPhase(['spec.md', 'plan.md', 'tasks.md', 'summary.md'], tasksContent)).toBe('tasks');
+  });
+
+  it('returns "specify" when summary.md exists alone with spec.md', () => {
+    expect(detectPhase(['spec.md', 'summary.md'])).toBe('specify');
+  });
 });

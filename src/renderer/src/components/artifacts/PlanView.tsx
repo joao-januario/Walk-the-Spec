@@ -1,7 +1,7 @@
 import React from 'react';
-import DecisionSection from '../elements/DecisionSection.js';
 import CodeBlock from '../elements/CodeBlock.js';
-import SectionLabel from '../ui/SectionLabel.js';
+import CollapsibleSection from '../ui/CollapsibleSection.js';
+import CodeTag from '../ui/CodeTag.js';
 import MarkdownContent from '../ui/MarkdownContent.js';
 import type { Element, SectionContent, DecisionContent } from '../../types/index.js';
 
@@ -25,49 +25,75 @@ export default function PlanView({ elements }: { elements: Element[] }) {
     }
   }
 
+  let num = 0;
+
   return (
-    <div>
+    <div className="space-y-5">
       {summaryEl && (
-        <section className="mb-6">
-          <MarkdownContent content={(summaryEl.content as SectionContent).content} />
-        </section>
+        <CollapsibleSection id="plan-summary" heading="Summary" level="section" number={++num}>
+          <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
+            <MarkdownContent content={(summaryEl.content as SectionContent).content} />
+          </div>
+        </CollapsibleSection>
       )}
 
       {approachEl && (
-        <section className="mb-7">
-          <SectionLabel>Technical Approach</SectionLabel>
-          <MarkdownContent content={(approachEl.content as SectionContent).content} />
-        </section>
+        <CollapsibleSection id="plan-approach" heading="Technical Approach" level="section" number={++num}>
+          <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
+            <MarkdownContent content={(approachEl.content as SectionContent).content} />
+          </div>
+        </CollapsibleSection>
       )}
 
       {contextPairs.length > 0 && (
-        <section className="mb-7">
-          <SectionLabel>Technical Context</SectionLabel>
-          <div className="bg-board-surface border-board-border rounded-lg border px-4 py-[14px]">
+        <CollapsibleSection id="plan-context" heading="Technical Context" level="section" number={++num}>
+          <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
             {contextPairs.map(([key, value]) => (
               <div key={key} className="flex gap-4 py-1">
                 <span className="text-board-text-muted w-[140px] shrink-0 text-[0.875rem] font-semibold">{key}</span>
-                <MarkdownContent inline content={value} className="text-board-text text-[0.9375rem]" />
+                <MarkdownContent inline content={value} className="text-board-text text-[1rem]" />
               </div>
             ))}
           </div>
-        </section>
+        </CollapsibleSection>
       )}
 
       {decisions.length > 0 && (
-        <section className="mb-7">
-          <SectionLabel>Architecture Decisions</SectionLabel>
-          {decisions.map((e) => (
-            <DecisionSection key={e.id} content={e.content as DecisionContent} />
-          ))}
-        </section>
+        <CollapsibleSection id="plan-decisions" heading="Architecture Decisions" level="section" number={++num}>
+          <div className="space-y-3">
+            {decisions.map((e) => {
+              const d = e.content as DecisionContent;
+              return (
+                <CollapsibleSection key={e.id} id={`plan-decision-${e.id}`} heading={d.heading} level="subsection">
+                  <div>
+                    <CodeTag color="purple" className="mb-2">DECISION</CodeTag>
+                    <MarkdownContent content={d.content} className="mt-2" />
+                  </div>
+                  {d.rationale && (
+                    <div className="border-t border-board-border/20 pt-3 mt-3">
+                      <CodeTag color="purple" className="mb-2">RATIONALE</CodeTag>
+                      <MarkdownContent content={d.rationale} className="mt-2" />
+                    </div>
+                  )}
+                  {d.alternatives && (
+                    <div className="border-t border-board-border/20 pt-3 mt-3">
+                      <CodeTag color="muted" className="mb-2">ALTERNATIVES</CodeTag>
+                      <MarkdownContent content={d.alternatives} className="mt-2 text-board-text-muted" />
+                    </div>
+                  )}
+                </CollapsibleSection>
+              );
+            })}
+          </div>
+        </CollapsibleSection>
       )}
 
       {structureEl && (
-        <section>
-          <SectionLabel>Files Modified</SectionLabel>
-          <CodeBlock code={(structureEl.content as SectionContent).content} language="text" />
-        </section>
+        <CollapsibleSection id="plan-structure" heading="Files Modified" level="section" number={++num}>
+          <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
+            <CodeBlock code={(structureEl.content as SectionContent).content} language="text" />
+          </div>
+        </CollapsibleSection>
       )}
     </div>
   );

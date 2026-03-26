@@ -30,13 +30,13 @@ describe('config-manager', () => {
   describe('loadConfig', () => {
     it('creates config file with empty projects on first use', () => {
       const config = loadConfig(TEST_CONFIG_PATH);
-      expect(config).toEqual({ projects: [] });
+      expect(config).toEqual({ projects: [], settings: { fontSize: 16 } });
       expect(fs.existsSync(TEST_CONFIG_PATH)).toBe(true);
     });
 
     it('reads existing config from file', () => {
       fs.mkdirSync(TEST_CONFIG_DIR, { recursive: true });
-      const existing: SpecBoardConfig = {
+      const existing = {
         projects: [{ id: 'abc', name: 'test', path: '/tmp/test' }],
       };
       fs.writeFileSync(TEST_CONFIG_PATH, JSON.stringify(existing));

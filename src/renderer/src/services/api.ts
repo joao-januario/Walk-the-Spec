@@ -22,6 +22,10 @@ declare global {
         value: unknown,
       ) => Promise<any>;
       getRefactorBacklog: (projectId: string) => Promise<{ entries: import('../types/index.js').RefactorEntry[] }>;
+      getSettings: () => Promise<{ fontSize: number }>;
+      saveSettings: (partial: Record<string, unknown>) => Promise<{ fontSize: number }>;
+      getGlossary: (projectId: string) => Promise<{ terms: Record<string, string> }>;
+      onSettingsChanged: (callback: (...args: any[]) => void) => () => void;
       onSpecsChanged: (callback: (...args: any[]) => void) => () => void;
       onBranchChanged: (callback: (...args: any[]) => void) => () => void;
     };
@@ -88,6 +92,22 @@ export async function editField(
   value: unknown,
 ) {
   return window.api.editField(projectId, artifactType, elementId, field, value);
+}
+
+// --- Settings ---
+
+export async function getSettings() {
+  return window.api.getSettings();
+}
+
+export async function saveSettings(partial: Record<string, unknown>) {
+  return window.api.saveSettings(partial);
+}
+
+// --- Glossary ---
+
+export async function getGlossary(projectId: string) {
+  return window.api.getGlossary(projectId);
 }
 
 // --- Refactor Backlog ---

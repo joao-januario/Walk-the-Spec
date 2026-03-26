@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { cn } from '../../lib/utils.js';
 import UserStoryCard from '../elements/UserStoryCard.js';
 import RequirementRow from '../elements/RequirementRow.js';
 import CommentBadge from '../elements/CommentBadge.js';
 import CommentPanel from '../comments/CommentPanel.js';
 import CodeTag from '../ui/CodeTag.js';
+import CollapsibleSection from '../ui/CollapsibleSection.js';
 import SectionLabel from '../ui/SectionLabel.js';
 import MarkdownContent from '../ui/MarkdownContent.js';
 import type {
@@ -38,11 +38,12 @@ export default function SpecView({
 
   const getCommentsFor = (elementId: string) => comments.filter((c) => c.elementId === elementId);
 
+  let num = 0;
+
   return (
-    <div>
+    <div className="space-y-5">
       {stories.length > 0 && (
-        <section className="mb-7">
-          <SectionLabel>User Stories</SectionLabel>
+        <CollapsibleSection id="spec-stories" heading="User Stories" level="section" number={++num}>
           {stories.map((e) => (
             <div key={e.id}>
               <div className="flex items-start gap-2">
@@ -68,12 +69,11 @@ export default function SpecView({
               )}
             </div>
           ))}
-        </section>
+        </CollapsibleSection>
       )}
 
       {requirements.length > 0 && (
-        <section className="mb-7">
-          <SectionLabel>Functional Requirements</SectionLabel>
+        <CollapsibleSection id="spec-requirements" heading="Functional Requirements" level="section" number={++num}>
           {requirements.map((e, index) => (
             <div key={e.id}>
               {index > 0 && index % 5 === 0 && (
@@ -102,12 +102,11 @@ export default function SpecView({
               )}
             </div>
           ))}
-        </section>
+        </CollapsibleSection>
       )}
 
       {criteria.length > 0 && (
-        <section>
-          <SectionLabel>Success Criteria</SectionLabel>
+        <CollapsibleSection id="spec-criteria" heading="Success Criteria" level="section" number={++num}>
           {criteria.map((e, index) => {
             const sc = e.content as SuccessCriterionContent;
             return (
@@ -117,13 +116,14 @@ export default function SpecView({
                 )}
                 <div className="border-board-border/20 flex items-start gap-[10px] border-b py-[10px]">
                   <CodeTag color="green">{sc.id}</CodeTag>
-                  <MarkdownContent inline content={sc.text} className="text-board-text flex-1 text-[0.9375rem] leading-relaxed" />
+                  <MarkdownContent inline content={sc.text} className="text-board-text flex-1 text-[1rem] leading-relaxed" />
                 </div>
               </div>
             );
           })}
-        </section>
+        </CollapsibleSection>
       )}
+
       {/* Stale comments — referencing elements no longer in the artifact */}
       {(() => {
         const elementIds = new Set(elements.map((e) => e.id));
@@ -137,8 +137,7 @@ export default function SpecView({
         }
 
         return (
-          <section className="mt-7 opacity-70">
-            <SectionLabel color="text-board-yellow">Stale Comments (element removed)</SectionLabel>
+          <CollapsibleSection id="spec-stale" heading="Stale Comments (element removed)" level="section" defaultOpen={false}>
             {Array.from(grouped.entries()).map(([elementId, cmts]) => (
               <div
                 key={elementId}
@@ -154,7 +153,7 @@ export default function SpecView({
                 ))}
               </div>
             ))}
-          </section>
+          </CollapsibleSection>
         );
       })()}
     </div>

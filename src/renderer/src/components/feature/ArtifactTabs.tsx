@@ -9,6 +9,8 @@ const TAB_LABELS: Record<string, string> = {
   plan: 'Plan',
   tasks: 'Tasks',
   research: 'Research',
+  summary: 'Summary',
+  'deep-dives': 'Deep Dives',
   review: 'Review',
 };
 

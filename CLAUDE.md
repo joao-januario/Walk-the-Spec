@@ -38,7 +38,6 @@ TypeScript 5.x: Follow standard conventions. Dark Radix Mauve theme for UI (acce
 ## Recent Changes
 - 004-radix-mauve-theme: Added react-markdown, @tailwindcss/typography (new). @radix-ui/colors for color tokens. Existing stack unchanged.
 - 003-tailwind-migration: Added TypeScript 5.x (existing) + Tailwind CSS v4, @tailwindcss/vite (new). Electron, React 19, electron-vite (existing)
-- 003-review-heal-tracking: Added TypeScript 5.x (existing) + Electron, React 19, unified/remark, chokidar (all existing — no new deps)
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -9,8 +9,15 @@ export interface ProjectEntry {
   path: string;
 }
 
+export interface AppSettings {
+  fontSize: number;
+}
+
+export const DEFAULT_SETTINGS: AppSettings = { fontSize: 16 };
+
 export interface SpecBoardConfig {
   projects: ProjectEntry[];
+  settings: AppSettings;
 }
 
 const DEFAULT_CONFIG_DIR = path.join(os.homedir(), '.spec-board');
@@ -24,13 +31,18 @@ export function loadConfig(configPath: string = DEFAULT_CONFIG_PATH): SpecBoardC
   if (!fs.existsSync(configPath)) {
     const dir = path.dirname(configPath);
     fs.mkdirSync(dir, { recursive: true });
-    const empty: SpecBoardConfig = { projects: [] };
+    const empty: SpecBoardConfig = { projects: [], settings: { ...DEFAULT_SETTINGS } };
     fs.writeFileSync(configPath, JSON.stringify(empty, null, 2));
     return empty;
   }
 
   const raw = fs.readFileSync(configPath, 'utf-8');
-  return JSON.parse(raw) as SpecBoardConfig;
+  const parsed = JSON.parse(raw) as Partial<SpecBoardConfig>;
+  // Backward compat: ensure settings exists with defaults
+  return {
+    projects: parsed.projects ?? [],
+    settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+  };
 }
 
 export function saveConfig(configPath: string = DEFAULT_CONFIG_PATH, config: SpecBoardConfig): void {

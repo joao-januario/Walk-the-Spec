@@ -1,7 +1,7 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { registerIpcHandlers } from './ipc/handlers.js';
-import { loadConfig, getProjects } from './config/config-manager.js';
+import { loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS } from './config/config-manager.js';
 import { watchProject, unwatchAll, type WatcherEvents } from './projects/file-watcher.js';
 
 let mainWindow: BrowserWindow | null = null;
@@ -44,6 +44,77 @@ export function stopWatchingProject(projectId: string) {
   unwatchProject(projectId);
 }
 
+const MIN_FONT_SIZE = 14;
+const MAX_FONT_SIZE = 20;
+
+function changeFontSize(delta: number) {
+  const config = loadConfig();
+  const current = config.settings.fontSize;
+  const next = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, current + delta));
+  if (next === current) return;
+  config.settings = { ...config.settings, fontSize: next };
+  saveConfig(undefined, config);
+  sendToRenderer('settings-changed', { fontSize: next });
+  buildMenu();
+}
+
+function resetFontSize() {
+  const config = loadConfig();
+  config.settings = { ...config.settings, fontSize: DEFAULT_SETTINGS.fontSize };
+  saveConfig(undefined, config);
+  sendToRenderer('settings-changed', { fontSize: DEFAULT_SETTINGS.fontSize });
+  buildMenu();
+}
+
+function buildMenu() {
+  const config = loadConfig();
+  const currentSize = config.settings.fontSize;
+
+  const template: Electron.MenuItemConstructorOptions[] = [
+    ...(process.platform === 'darwin'
+      ? [{ role: 'appMenu' as const }]
+      : []),
+    { role: 'fileMenu' as const },
+    { role: 'editMenu' as const },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: `Increase Font Size`,
+          accelerator: 'CmdOrCtrl+=',
+          enabled: currentSize < MAX_FONT_SIZE,
+          click: () => changeFontSize(1),
+        },
+        {
+          label: `Decrease Font Size`,
+          accelerator: 'CmdOrCtrl+-',
+          enabled: currentSize > MIN_FONT_SIZE,
+          click: () => changeFontSize(-1),
+        },
+        {
+          label: `Reset Font Size (${DEFAULT_SETTINGS.fontSize}px)`,
+          accelerator: 'CmdOrCtrl+0',
+          click: () => resetFontSize(),
+        },
+        { type: 'separator' as const },
+        {
+          label: `Current: ${currentSize}px`,
+          enabled: false,
+        },
+        { type: 'separator' as const },
+        { role: 'reload' as const },
+        { role: 'forceReload' as const },
+        { role: 'toggleDevTools' as const },
+        { type: 'separator' as const },
+        { role: 'togglefullscreen' as const },
+      ],
+    },
+    { role: 'windowMenu' as const },
+  ];
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -73,6 +144,7 @@ function createWindow() {
 app.whenReady().then(() => {
   registerIpcHandlers();
   createWindow();
+  buildMenu();
   startWatchingAll();
 
   app.on('activate', () => {

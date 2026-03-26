@@ -8,25 +8,33 @@ import PlanView from '../artifacts/PlanView.js';
 import TasksView from '../artifacts/TasksView.js';
 import ResearchView from '../artifacts/ResearchView.js';
 import ReviewView from '../artifacts/ReviewView.js';
+import SummaryView from '../artifacts/SummaryView.js';
 import RefactorBacklogView from '../refactor/RefactorBacklogView.js';
 import EmptyState from '../common/EmptyState.js';
 import { useFeatureData, useArtifactData } from '../../hooks/useFeatureData.js';
 import { useComments } from '../../hooks/useComments.js';
+import { GlossaryProvider } from '../../context/GlossaryContext.js';
 import type { Project, ArtifactType, ReviewFinding } from '../../types/index.js';
 
-const TAB_ORDER: ArtifactType[] = ['spec', 'plan', 'research', 'tasks', 'review'];
+const TAB_ORDER: ArtifactType[] = ['spec', 'plan', 'research', 'tasks', 'summary', 'deep-dives', 'review'];
 
 const PHASE_HERO: Record<string, ArtifactType> = {
   specify: 'spec',
   plan: 'plan',
   tasks: 'tasks',
   implement: 'tasks',
+  summary: 'summary',
   review: 'review',
 };
 
 export default function FeatureDetail({ project }: { project: Project }) {
   const { feature, loading: featureLoading } = useFeatureData(project.id);
   const [showBacklog, setShowBacklog] = useState(false);
+  const [glossary, setGlossary] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    window.api.getGlossary(project.id).then((res) => setGlossary(res.terms)).catch(() => {});
+  }, [project.id]);
 
   const availableTypes = (feature?.artifacts ?? [])
     .map((a) => a.type)
@@ -125,7 +133,7 @@ export default function FeatureDetail({ project }: { project: Project }) {
       {showBacklog ? (
         <RefactorBacklogView projectId={project.id} />
       ) : (
-        <>
+        <GlossaryProvider value={glossary}>
           {availableTypes.length > 0 && activeTab && (
             <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} heroTab={heroType} phase={project.phase} />
           )}
@@ -144,13 +152,15 @@ export default function FeatureDetail({ project }: { project: Project }) {
           {artifact && activeTab === 'plan' && <PlanView elements={artifact.elements} />}
           {artifact && activeTab === 'tasks' && <TasksView elements={artifact.elements} onToggleTask={handleToggleTask} />}
           {artifact && activeTab === 'research' && <ResearchView elements={artifact.elements} />}
+          {artifact && activeTab === 'summary' && <SummaryView elements={artifact.elements} />}
+          {artifact && activeTab === 'deep-dives' && <SummaryView elements={artifact.elements} />}
           {artifact && activeTab === 'review' && (
             <ReviewView
               findings={artifact.elements.map((e) => e.content as ReviewFinding)}
               healSummary={artifact.reviewMeta?.healSummary ?? null}
             />
           )}
-        </>
+        </GlossaryProvider>
       )}
     </div>
   );

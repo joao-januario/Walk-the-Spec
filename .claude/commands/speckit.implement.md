@@ -166,16 +166,39 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
-10. **Commit implementation work**:
+10. **Generate implementation summary** (if not already present):
+   - Check if `summary.md` exists in FEATURE_DIR
+   - **If it already exists**: Log "Summary already exists — skipping generation" and proceed to step 11
+   - **If it does not exist**:
+     1. Read the summary template from `.claude/specify/templates/summary-template.md` — follow its structure EXACTLY
+     2. Read all available artifacts from FEATURE_DIR: spec.md, plan.md, tasks.md, research.md (if exists)
+     3. Review all code changes made during this implementation (use `git diff main` or the task list file paths)
+     4. Read the actual source files you created/modified — you need the real code for snippets
+     5. Generate `summary.md` in FEATURE_DIR following the template's mandatory section structure:
+        - **Overview**: What was built, mental model, prerequisites (NO code)
+        - **Architecture Walkthrough**: Numbered steps following the data flow, with actual code snippets at each step and **Why this matters** callouts
+        - **Code Deep-Dives**: Minimum 3 subsections, each with a real 10-30 line code snippet, **Line-by-line** annotations, and **What you'd miss skimming** callout
+        - **Design Decisions**: Numbered, each with **Chose/Over** format, with code comparison when applicable
+        - **Edge Cases & Gotchas**: Show the actual code and explain why it's non-obvious (omit section if none)
+     6. CRITICAL formatting rules:
+        - 60-70% of the document MUST be annotated code snippets from the actual implementation
+        - Every code snippet MUST use fenced blocks with language tags
+        - Every code snippet MUST be preceded by context and followed by line-by-line explanations
+        - Never list files as bullet points — walk through code as a narrative
+        - Never restate task descriptions or spec requirements — those exist in other tabs
+        - Write as an engineer explaining to another engineer during code review
+     7. Write the generated content to `FEATURE_DIR/summary.md`
+
+11. **Commit implementation work**:
    - Stage all changed files (`git add -A`)
    - Commit with message: `feat(<branch>): implement <feature summary>`
    - This ensures `/speckit.review` can diff the branch against main
 
-11. Suggest next steps: "Run `/speckit.review` or `/speckit.conclude`."
+12. Suggest next steps: "Run `/speckit.review` or `/speckit.conclude`."
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
 
-12. **Check for extension hooks**: After completion validation, check if `.claude/specify/extensions.yml` exists in the project root.
+13. **Check for extension hooks**: After completion validation, check if `.claude/specify/extensions.yml` exists in the project root.
     - If it exists, read it and look for entries under the `hooks.after_implement` key
     - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
     - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.

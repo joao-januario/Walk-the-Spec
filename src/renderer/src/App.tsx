@@ -4,10 +4,27 @@ import FeatureDetail from './components/feature/FeatureDetail.js';
 import EmptyState from './components/common/EmptyState.js';
 import type { Project } from './types/index.js';
 
+function applyFontSize(size: number): void {
+  document.documentElement.style.fontSize = `${size}px`;
+}
+
 export default function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
+
+  // Load saved font size on mount + listen for menu changes
+  useEffect(() => {
+    window.api.getSettings().then((settings) => {
+      applyFontSize(settings.fontSize);
+    }).catch(() => {});
+
+    const unsubSettings = window.api.onSettingsChanged((data: { fontSize: number }) => {
+      applyFontSize(data.fontSize);
+    });
+
+    return () => { unsubSettings(); };
+  }, []);
 
   useEffect(() => {
     const unsubSpecs = window.api.onSpecsChanged((data: any) => {

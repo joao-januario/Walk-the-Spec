@@ -30,6 +30,13 @@ export const phaseClasses = {
     border: 'border-phase-implement',
     label: 'Implement',
   },
+  summary: {
+    bg: 'bg-phase-summary/20',
+    text: 'text-phase-summary',
+    dot: 'bg-phase-summary',
+    border: 'border-phase-summary',
+    label: 'Summary',
+  },
   review: {
     bg: 'bg-phase-review/20',
     text: 'text-phase-review',

@@ -39,6 +39,8 @@
     "chokidar": "^4.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
+    "highlight.js": "^11.11.1",
+    "mermaid": "^11.13.0",
     "react-markdown": "^10.1.0",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",

@@ -31,6 +31,20 @@ const api = {
   // Refactor backlog (project-level)
   getRefactorBacklog: (projectId: string) => ipcRenderer.invoke('backlog:list', projectId),
 
+  // Settings
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+  saveSettings: (partial: Record<string, unknown>) => ipcRenderer.invoke('save-settings', partial),
+
+  // Glossary
+  getGlossary: (projectId: string) => ipcRenderer.invoke('get-glossary', projectId),
+
+  // Settings events — from native menu
+  onSettingsChanged: (callback: (...args: any[]) => void) => {
+    const sub = (_event: any, ...args: any[]) => callback(...args);
+    ipcRenderer.on('settings-changed', sub);
+    return () => ipcRenderer.removeListener('settings-changed', sub);
+  },
+
   // File watcher events (Phase 8) — renderer listens
   onSpecsChanged: (callback: (...args: any[]) => void) => {
     const sub = (_event: any, ...args: any[]) => callback(...args);

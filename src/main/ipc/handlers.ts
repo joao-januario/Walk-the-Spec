@@ -1,7 +1,8 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import fs from 'fs';
 import path from 'path';
-import { loadConfig, saveConfig, addProject, removeProject, getProjects } from '../config/config-manager.js';
+import { loadConfig, saveConfig, addProject, removeProject, getProjects, DEFAULT_SETTINGS } from '../config/config-manager.js';
+import type { AppSettings } from '../config/config-manager.js';
 import { scanProject } from '../projects/project-scanner.js';
 import { detectPhase } from '../phase/phase-detector.js';
 import { parseSpec } from '../parser/spec-parser.js';
@@ -10,6 +11,7 @@ import { parseTasks } from '../parser/tasks-parser.js';
 import { parseResearch } from '../parser/research-parser.js';
 import { parseComments } from '../parser/comment-parser.js';
 import { parseReview } from '../parser/review-parser.js';
+import { parseSummary } from '../parser/summary-parser.js';
 import { parseRefactorBacklog } from '../parser/refactor-backlog-parser.js';
 import { writeComment, updateComment, deleteComment } from '../writer/comment-writer.js';
 import { editTaskCheckbox, editRequirementText } from '../writer/artifact-writer.js';
@@ -226,6 +228,18 @@ export function registerIpcHandlers() {
         }));
         break;
       }
+      case 'summary':
+      case 'deep-dives': {
+        const parsed = parseSummary(content);
+        elements = parsed.sections.map((s) => ({
+          id: s.heading,
+          type: 'section' as const,
+          content: { type: 'section' as const, heading: s.heading, content: s.content },
+          editableFields: [],
+          commentCount: 0,
+        }));
+        break;
+      }
       case 'review': {
         const parsed = parseReview(content);
         elements = parsed.findings.map((f) => ({
@@ -378,5 +392,44 @@ export function registerIpcHandlers() {
 
     const content = fs.readFileSync(backlogPath, 'utf-8');
     return parseRefactorBacklog(content);
+  });
+
+  // --- Settings ---
+
+  ipcMain.handle('get-settings', () => {
+    const config = loadConfig();
+    return config.settings;
+  });
+
+  ipcMain.handle('save-settings', (_event, partial: Partial<AppSettings>) => {
+    const config = loadConfig();
+    config.settings = { ...config.settings, ...partial };
+    saveConfig(undefined, config);
+    return config.settings;
+  });
+
+  // --- Glossary ---
+
+  const GLOSSARY_ENTRY = /^- `([^`]+)` — (.+)$/gm;
+
+  ipcMain.handle('get-glossary', (_event, projectId: string) => {
+    const config = loadConfig();
+    const project = getProjects(config).find((p) => p.id === projectId);
+    if (!project) throw new Error('Project not found');
+
+    const scan = scanProject(project.path);
+    if (!scan.specDir) return { terms: {} };
+
+    const glossaryPath = path.join(scan.specDir, 'glossary.md');
+    if (!fs.existsSync(glossaryPath)) return { terms: {} };
+
+    const content = fs.readFileSync(glossaryPath, 'utf-8');
+    const terms: Record<string, string> = {};
+    let match: RegExpExecArray | null;
+    while ((match = GLOSSARY_ENTRY.exec(content)) !== null) {
+      terms[match[1]] = match[2];
+    }
+    GLOSSARY_ENTRY.lastIndex = 0;
+    return { terms };
   });
 }

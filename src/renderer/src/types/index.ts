@@ -1,8 +1,8 @@
 // Phase enum
-export type Phase = 'specify' | 'plan' | 'tasks' | 'implement' | 'review' | 'unknown';
+export type Phase = 'specify' | 'plan' | 'tasks' | 'implement' | 'summary' | 'review' | 'unknown';
 
 // Artifact types
-export type ArtifactType = 'spec' | 'plan' | 'tasks' | 'research' | 'review';
+export type ArtifactType = 'spec' | 'plan' | 'tasks' | 'research' | 'summary' | 'deep-dives' | 'review';
 
 // Review finding types
 export type FindingSeverity = 'NEEDS_REFACTOR' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
