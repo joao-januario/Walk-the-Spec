@@ -11,7 +11,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.analyze" -Phase analyze -Json` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.analyze" --phase analyze --json` to signal command start.
 
 ## Goal
 
@@ -27,7 +27,7 @@ Identify inconsistencies, duplications, ambiguities, and underspecified items ac
 
 ### 1. Initialize Analysis Context
 
-Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
+Run `bash .claude/specify/scripts/bash/check-prerequisites.sh --json` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
 
 - SPEC = FEATURE_DIR/spec.md
 - PLAN = FEATURE_DIR/plan.md
@@ -156,7 +156,7 @@ At end of report, output a concise Next Actions block:
 
 Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.analyze" -Json` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.analyze" --json` to signal command completion.
 
 ## Operating Principles
 

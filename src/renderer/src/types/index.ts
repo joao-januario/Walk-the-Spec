@@ -108,7 +108,6 @@ export interface Element {
   type: ElementType;
   content: ElementContent;
   editableFields: EditableField[];
-  commentCount: number;
 }
 
 export interface EditableField {
@@ -177,21 +176,6 @@ export interface SectionContent {
   type: 'section';
   heading: string;
   content: string;
-}
-
-// --- Comments ---
-
-export interface Comment {
-  id: string;
-  elementId: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CommentsResponse {
-  artifactType: ArtifactType;
-  comments: Comment[];
 }
 
 // --- WebSocket Messages ---

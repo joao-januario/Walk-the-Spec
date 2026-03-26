@@ -9,13 +9,13 @@ import { parseSpec } from '../parser/spec-parser.js';
 import { parsePlan } from '../parser/plan-parser.js';
 import { parseTasks } from '../parser/tasks-parser.js';
 import { parseResearch } from '../parser/research-parser.js';
-import { parseComments } from '../parser/comment-parser.js';
+
 import { parseReview } from '../parser/review-parser.js';
 import { parseSummary } from '../parser/summary-parser.js';
 import { parseRefactorBacklog } from '../parser/refactor-backlog-parser.js';
-import { writeComment, updateComment, deleteComment } from '../writer/comment-writer.js';
+
 import { editTaskCheckbox, editRequirementText } from '../writer/artifact-writer.js';
-import { v4 as uuidv4 } from 'uuid';
+
 
 function getProjectState(entry: { id: string; name: string; path: string }) {
   try {
@@ -149,19 +149,16 @@ export function registerIpcHandlers() {
               { fieldName: 'priority', fieldType: 'dropdown', options: ['P1', 'P2', 'P3', 'P4', 'P5'] },
               { fieldName: 'title', fieldType: 'text' },
             ],
-            commentCount: 0,
           })),
           ...parsed.requirements.map((r) => ({
             id: r.id, type: 'requirement',
             content: { type: 'requirement', ...r },
             editableFields: [{ fieldName: 'text', fieldType: 'text' }],
-            commentCount: 0,
           })),
           ...parsed.successCriteria.map((s) => ({
             id: s.id, type: 'success-criterion',
             content: { type: 'success-criterion', ...s },
             editableFields: [],
-            commentCount: 0,
           })),
         ];
         break;
@@ -169,22 +166,22 @@ export function registerIpcHandlers() {
       case 'plan': {
         const parsed = parsePlan(content);
         const planElements: typeof elements = [
-          { id: 'Summary', type: 'section', content: { type: 'section', heading: 'Summary', content: parsed.summary }, editableFields: [], commentCount: 0 },
+          { id: 'Summary', type: 'section', content: { type: 'section', heading: 'Summary', content: parsed.summary }, editableFields: [] },
         ];
         // New format: Technical Approach (prose)
         if (parsed.technicalApproach) {
-          planElements.push({ id: 'Technical Approach', type: 'section', content: { type: 'section', heading: 'Technical Approach', content: parsed.technicalApproach }, editableFields: [], commentCount: 0 });
+          planElements.push({ id: 'Technical Approach', type: 'section', content: { type: 'section', heading: 'Technical Approach', content: parsed.technicalApproach }, editableFields: [] });
         }
         // Old format fallback: Technical Context (key-value)
         if (!parsed.technicalApproach && Object.keys(parsed.technicalContext).length > 0) {
-          planElements.push({ id: 'Technical Context', type: 'section', content: { type: 'section', heading: 'Technical Context', content: JSON.stringify(parsed.technicalContext) }, editableFields: [], commentCount: 0 });
+          planElements.push({ id: 'Technical Context', type: 'section', content: { type: 'section', heading: 'Technical Context', content: JSON.stringify(parsed.technicalContext) }, editableFields: [] });
         }
         // New format: Architecture Decisions
         for (const ad of parsed.architectureDecisions) {
           planElements.push({
             id: `Decision: ${ad.heading}`, type: 'decision',
             content: { type: 'decision', heading: ad.heading, content: ad.decision, rationale: ad.rationale, alternatives: ad.alternativesRejected },
-            editableFields: [], commentCount: 0,
+            editableFields: [],
           });
         }
         // Old format fallback: Legacy decisions
@@ -192,7 +189,7 @@ export function registerIpcHandlers() {
           planElements.push({
             id: d.heading, type: 'decision',
             content: { type: 'decision', ...d },
-            editableFields: [], commentCount: 0,
+            editableFields: [],
           });
         }
         // Project Structure / Files modified
@@ -200,7 +197,7 @@ export function registerIpcHandlers() {
           planElements.push({
             id: 'Project Structure', type: 'section',
             content: { type: 'section', heading: 'Project Structure', content: parsed.fileStructure },
-            editableFields: [], commentCount: 0,
+            editableFields: [],
           });
         }
         elements = planElements;
@@ -213,7 +210,6 @@ export function registerIpcHandlers() {
             id: t.id, type: 'task',
             content: { type: 'task', ...t, phase: phase.name },
             editableFields: [{ fieldName: 'checked', fieldType: 'checkbox' }],
-            commentCount: 0,
           }))
         );
         break;
@@ -224,7 +220,6 @@ export function registerIpcHandlers() {
           id: d.heading, type: 'decision',
           content: { type: 'decision', heading: d.heading, content: d.decision, rationale: d.rationale, alternatives: d.alternatives?.join('; ') },
           editableFields: [],
-          commentCount: 0,
         }));
         break;
       }
@@ -236,7 +231,6 @@ export function registerIpcHandlers() {
           type: 'section' as const,
           content: { type: 'section' as const, heading: s.heading, content: s.content },
           editableFields: [],
-          commentCount: 0,
         }));
         break;
       }
@@ -247,7 +241,6 @@ export function registerIpcHandlers() {
           type: 'section' as const,
           content: f,
           editableFields: [],
-          commentCount: 0,
         }));
         // healSummary and branch returned as top-level reviewMeta field below
         break;
@@ -255,18 +248,6 @@ export function registerIpcHandlers() {
     }
     } catch (err: unknown) {
       parseWarning = `Partial parse: ${err instanceof Error ? err.message : String(err)}`;
-    }
-
-    // Enrich elements with comment counts
-    const commentsDir = path.join(scan.specDir!, 'comments');
-    const commentFileName = `${artifactType}-comments.md`;
-    const commentFilePath = path.join(commentsDir, commentFileName);
-    if (fs.existsSync(commentFilePath)) {
-      const commentContent = fs.readFileSync(commentFilePath, 'utf-8');
-      const comments = parseComments(commentContent);
-      for (const el of elements) {
-        el.commentCount = comments.filter((c) => c.elementId === el.id).length;
-      }
     }
 
     // For review artifacts, include healSummary as top-level metadata
@@ -282,70 +263,6 @@ export function registerIpcHandlers() {
       parseWarning,
       reviewMeta,
     };
-  });
-
-  // --- Comments ---
-
-  function getCommentsFilePath(projectPath: string, artifactType: string): { filePath: string; specDir: string; artifactName: string } {
-    const scan = scanProject(projectPath);
-    if (!scan.specDir) throw new Error('No speckit content');
-    const commentsDir = path.join(scan.specDir, 'comments');
-    return {
-      filePath: path.join(commentsDir, `${artifactType}-comments.md`),
-      specDir: scan.specDir,
-      artifactName: `${artifactType}.md`,
-    };
-  }
-
-  ipcMain.handle('get-comments', (_event, projectId: string, artifactType: string) => {
-    const config = loadConfig();
-    const project = getProjects(config).find((p) => p.id === projectId);
-    if (!project) throw new Error('Project not found');
-
-    const { filePath } = getCommentsFilePath(project.path, artifactType);
-    if (!fs.existsSync(filePath)) return { artifactType, comments: [] };
-
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const comments = parseComments(content).map((c) => ({
-      ...c,
-      updatedAt: c.createdAt,
-    }));
-    return { artifactType, comments };
-  });
-
-  ipcMain.handle('add-comment', (_event, projectId: string, artifactType: string, elementId: string, commentContent: string) => {
-    const config = loadConfig();
-    const project = getProjects(config).find((p) => p.id === projectId);
-    if (!project) throw new Error('Project not found');
-
-    const { filePath, artifactName } = getCommentsFilePath(project.path, artifactType);
-    const id = uuidv4().slice(0, 8);
-    const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
-
-    writeComment(filePath, artifactName, elementId, id, commentContent, timestamp);
-
-    return { id, elementId, content: commentContent, createdAt: timestamp, updatedAt: timestamp };
-  });
-
-  ipcMain.handle('update-comment', (_event, projectId: string, artifactType: string, commentId: string, newContent: string) => {
-    const config = loadConfig();
-    const project = getProjects(config).find((p) => p.id === projectId);
-    if (!project) throw new Error('Project not found');
-
-    const { filePath } = getCommentsFilePath(project.path, artifactType);
-    const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
-    updateComment(filePath, commentId, newContent, timestamp);
-
-    return { id: commentId, content: newContent, updatedAt: timestamp };
-  });
-
-  ipcMain.handle('delete-comment', (_event, projectId: string, artifactType: string, commentId: string) => {
-    const config = loadConfig();
-    const project = getProjects(config).find((p) => p.id === projectId);
-    if (!project) throw new Error('Project not found');
-
-    const { filePath } = getCommentsFilePath(project.path, artifactType);
-    deleteComment(filePath, commentId);
   });
 
   // --- Edits ---

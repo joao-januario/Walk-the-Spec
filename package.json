@@ -34,7 +34,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ]
     },
@@ -50,6 +53,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "highlight.js": "^11.11.1",
+    "lucide-react": "^1.7.0",
     "mermaid": "^11.13.0",
     "react-markdown": "^10.1.0",
     "remark-frontmatter": "^5.0.0",

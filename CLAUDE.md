@@ -38,7 +38,6 @@ TypeScript 5.x: Follow standard conventions. Dark Radix Mauve theme for UI (acce
 ## Recent Changes
 - 004-cross-platform-support: Added Electron
 - 004-fix-phase-notifications: Added Electron
-- 004-pipeline-speed: Added Electron
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -1,4 +1,4 @@
-import type { Project, Feature, Artifact, CommentsResponse, Comment, ArtifactType } from '../types/index.js';
+import type { Project, Feature, Artifact, ArtifactType } from '../types/index.js';
 
 // Access the Electron IPC bridge exposed via preload
 declare global {
@@ -10,10 +10,6 @@ declare global {
       showFolderPicker: () => Promise<{ path: string; isGitRepo: boolean } | null>;
       getFeature: (projectId: string) => Promise<Feature | null>;
       getArtifact: (projectId: string, type: string) => Promise<Artifact>;
-      getComments: (projectId: string, artifactType: string) => Promise<CommentsResponse>;
-      addComment: (projectId: string, artifactType: string, elementId: string, content: string) => Promise<Comment>;
-      updateComment: (projectId: string, artifactType: string, commentId: string, content: string) => Promise<Comment>;
-      deleteComment: (projectId: string, artifactType: string, commentId: string) => Promise<void>;
       editField: (
         projectId: string,
         artifactType: string,
@@ -62,24 +58,6 @@ export async function getFeature(projectId: string) {
 
 export async function getArtifact(projectId: string, type: ArtifactType) {
   return window.api.getArtifact(projectId, type);
-}
-
-// --- Comments ---
-
-export async function getComments(projectId: string, artifactType: ArtifactType) {
-  return window.api.getComments(projectId, artifactType);
-}
-
-export async function addComment(projectId: string, artifactType: ArtifactType, elementId: string, content: string) {
-  return window.api.addComment(projectId, artifactType, elementId, content);
-}
-
-export async function updateComment(projectId: string, artifactType: ArtifactType, commentId: string, content: string) {
-  return window.api.updateComment(projectId, artifactType, commentId, content);
-}
-
-export async function deleteComment(projectId: string, artifactType: ArtifactType, commentId: string) {
-  return window.api.deleteComment(projectId, artifactType, commentId);
 }
 
 // --- Edits ---

@@ -4,7 +4,14 @@ import CodeTag from '../ui/CodeTag.js';
 import MarkdownContent from '../ui/MarkdownContent.js';
 import type { Element, DecisionContent } from '../../types/index.js';
 
-export default function ResearchView({ elements }: { elements: Element[] }) {
+interface ResearchViewProps {
+  elements: Element[];
+  commentEnabled: boolean;
+  getComment: (heading: string) => string;
+  onCommentChange: (heading: string, text: string) => void;
+}
+
+export default function ResearchView({ elements, commentEnabled, getComment, onCommentChange }: ResearchViewProps) {
   const decisions = elements.filter((e) => e.type === 'decision');
 
   return (
@@ -12,7 +19,16 @@ export default function ResearchView({ elements }: { elements: Element[] }) {
       {decisions.map((e, idx) => {
         const d = e.content as DecisionContent;
         return (
-          <CollapsibleSection key={e.id} id={`research-${e.id}`} heading={d.heading} level="section" number={idx + 1}>
+          <CollapsibleSection
+            key={e.id}
+            id={`research-${e.id}`}
+            heading={d.heading}
+            level="section"
+            number={idx + 1}
+            commentEnabled={commentEnabled}
+            commentText={getComment(d.heading)}
+            onCommentChange={(text) => onCommentChange(d.heading, text)}
+          >
             <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
               <div>
                 <CodeTag color="purple" className="mb-2">DECISION</CodeTag>

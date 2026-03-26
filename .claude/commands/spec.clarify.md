@@ -15,7 +15,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "spec.clarify" -Status "started"` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/write-status.sh --command "spec.clarify" --status "started"` to signal command start.
 
 ## Outline
 
@@ -25,7 +25,7 @@ Note: This clarification workflow is expected to run (and be completed) BEFORE i
 
 Execution steps:
 
-1. Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly` from repo root **once** (combined `--json --paths-only` mode / `-Json -PathsOnly`). Parse minimal JSON payload fields:
+1. Run `bash .claude/specify/scripts/bash/check-prerequisites.sh --json --paths-only` from repo root **once** Parse minimal JSON payload fields:
    - `FEATURE_DIR`
    - `FEATURE_SPEC`
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
@@ -181,6 +181,6 @@ Behavior rules:
 - If no questions asked due to full coverage, output a compact coverage summary (all categories Clear) then suggest advancing.
 - If quota reached with unresolved high-impact categories remaining, explicitly flag them under Deferred with rationale.
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "spec.clarify" -Status "completed"` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/write-status.sh --command "spec.clarify" --status "completed"` to signal command completion.
 
 Context for prioritization: $ARGUMENTS

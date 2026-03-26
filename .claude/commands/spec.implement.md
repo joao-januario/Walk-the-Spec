@@ -12,7 +12,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Pre-Execution Checks
 
-**Bootstrap**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.implement" -Phase implement -Json` from repo root and parse JSON for FEATURE_DIR, AVAILABLE_DOCS, HAS_EXTENSIONS. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+**Bootstrap**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.implement" --phase implement --json` from repo root and parse JSON for FEATURE_DIR, AVAILABLE_DOCS, HAS_EXTENSIONS. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 ## Outline
 
@@ -151,4 +151,4 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 11. Suggest next steps: "Run `/spec.review` or `/spec.conclude`."
 
-**Teardown**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.implement" -Json` to signal command completion.
+**Teardown**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.implement" --json` to signal command completion.

@@ -74,7 +74,14 @@ function SubSectionContent({ content, parentId }: { content: string; parentId: s
   );
 }
 
-export default function SummaryView({ elements }: { elements: Element[] }) {
+interface SummaryViewProps {
+  elements: Element[];
+  commentEnabled: boolean;
+  getComment: (heading: string) => string;
+  onCommentChange: (heading: string, text: string) => void;
+}
+
+export default function SummaryView({ elements, commentEnabled, getComment, onCommentChange }: SummaryViewProps) {
   const sections = elements.filter((e) => e.type === 'section');
 
   if (sections.length === 0) {
@@ -98,6 +105,9 @@ export default function SummaryView({ elements }: { elements: Element[] }) {
             heading={section.heading}
             level="section"
             number={idx + 1}
+            commentEnabled={subs.length === 0 ? commentEnabled : false}
+            commentText={subs.length === 0 ? getComment(section.heading) : undefined}
+            onCommentChange={subs.length === 0 ? (text) => onCommentChange(section.heading, text) : undefined}
           >
             {preamble && subs.length === 0 && (
               <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
@@ -121,6 +131,9 @@ export default function SummaryView({ elements }: { elements: Element[] }) {
                       id={subId}
                       heading={sub.heading}
                       level="subsection"
+                      commentEnabled={commentEnabled}
+                      commentText={getComment(sub.heading)}
+                      onCommentChange={(text) => onCommentChange(sub.heading, text)}
                     >
                       <SubSectionContent content={sub.content} parentId={subId} />
                     </CollapsibleSection>

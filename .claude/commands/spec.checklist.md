@@ -32,11 +32,11 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.checklist" -Phase checklist -Json` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.checklist" --phase checklist --json` to signal command start.
 
 ## Execution Steps
 
-1. **Setup**: Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json` from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS list.
+1. **Setup**: Run `bash .claude/specify/scripts/bash/check-prerequisites.sh --json` from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS list.
    - All file paths must be absolute.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
@@ -221,7 +221,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 To avoid clutter, use descriptive types and clean up obsolete checklists when done.
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.checklist" -Json` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.checklist" --json` to signal command completion.
 
 ## Example Checklist Types & Sample Items
 

@@ -53,7 +53,7 @@ You **MUST** consider the user input before proceeding (if not empty).
     ```
 - If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "spec.specify" -Status "started"` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/write-status.sh --command "spec.specify" --status "started"` to signal command start.
 
 ## Outline
 
@@ -75,12 +75,11 @@ Given that feature description, do this:
 
 2. **Create the feature branch** by running the script with `--short-name` (and `--json`), and do NOT pass `--number` (the script auto-detects the next globally available number across all branches and spec directories):
 
-   - Bash example: `.claude/specify/scripts/powershell/create-new-feature.ps1 "$ARGUMENTS" --json --short-name "user-auth" "Add user authentication"`
-   - PowerShell example: `.claude/specify/scripts/powershell/create-new-feature.ps1 "$ARGUMENTS" -Json -ShortName "user-auth" "Add user authentication"`
+   - Example: `bash .claude/specify/scripts/bash/create-new-feature.sh "$ARGUMENTS" --json --short-name "user-auth" "Add user authentication"`
 
    **IMPORTANT**:
    - Do NOT pass `--number` — the script determines the correct next number automatically
-   - Always include the JSON flag (`--json` for Bash, `-Json` for PowerShell) so the output can be parsed reliably
+   - Always include `--json` so the output can be parsed reliably
    - You must only ever run this script once per feature
    - The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for
    - The JSON output will contain BRANCH_NAME and SPEC_FILE paths
@@ -208,9 +207,9 @@ Given that feature description, do this:
 
    d. **Update Checklist**: Write the final checklist pass/fail status once, after all validation is complete.
 
-7. Report completion with branch name, spec file path, checklist results, and readiness for the next phase (`/spec.clarify` or `/spec.plan`).
+7. Report completion with branch name, spec file path, and checklist results. **Always mention both next steps**: recommend `/spec.clarify` first (it is the expected workflow before planning), then `/spec.plan` as the alternative. The completion message MUST end with: "Next step: `/spec.clarify` to refine the spec, or `/spec.plan` to jump straight to planning."
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "spec.specify" -Status "completed"` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/write-status.sh --command "spec.specify" --status "completed"` to signal command completion.
 
 8. **Check for extension hooks**: After reporting completion, check if `.claude/specify/extensions.yml` exists in the project root.
    - If it exists, read it and look for entries under the `hooks.after_specify` key

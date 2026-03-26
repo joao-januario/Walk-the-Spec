@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPhaseClasses } from '../../theme.js';
 import { cn } from '../../lib/utils.js';
@@ -12,7 +13,9 @@ import SummaryView from '../artifacts/SummaryView.js';
 import RefactorBacklogView from '../refactor/RefactorBacklogView.js';
 import EmptyState from '../common/EmptyState.js';
 import { useFeatureData, useArtifactData } from '../../hooks/useFeatureData.js';
-import { useComments } from '../../hooks/useComments.js';
+import { useCommentStore } from '../../hooks/useCommentStore.js';
+import { usePhaseNotification } from '../../hooks/usePhaseNotification.js';
+import { formatComments } from '../../utils/format-comments.js';
 import { GlossaryProvider } from '../../context/GlossaryContext.js';
 import type { Project, ArtifactType, ReviewFinding } from '../../types/index.js';
 
@@ -31,6 +34,11 @@ export default function FeatureDetail({ project }: { project: Project }) {
   const { feature, loading: featureLoading } = useFeatureData(project.id);
   const [showBacklog, setShowBacklog] = useState(false);
   const [glossary, setGlossary] = useState<Record<string, string>>({});
+  const [clipboardFallback, setClipboardFallback] = useState<string | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState(false);
+
+  const { commentableTabs } = usePhaseNotification();
+  const commentStore = useCommentStore();
 
   useEffect(() => {
     window.api.getGlossary(project.id).then((res) => setGlossary(res.terms)).catch(() => {});
@@ -56,35 +64,38 @@ export default function FeatureDetail({ project }: { project: Project }) {
   }, [project.id, feature]);
 
   const { artifact, loading: artifactLoading, refetch: refetchArtifact } = useArtifactData(project.id, activeTab);
-  const {
-    comments,
-    add: addComment,
-    update: updateComment,
-    remove: removeComment,
-  } = useComments(project.id, activeTab);
-
-  const handleAddComment = async (elementId: string, content: string) => {
-    await addComment(elementId, content);
-    refetchArtifact();
-  };
-
-  const handleUpdateComment = async (commentId: string, content: string) => {
-    await updateComment(commentId, content);
-  };
-
-  const handleDeleteComment = async (commentId: string) => {
-    await removeComment(commentId);
-    refetchArtifact();
-  };
 
   const handleToggleTask = async (taskId: string, checked: boolean) => {
     try {
       await window.api.editField(project.id, 'tasks', taskId, 'checked', checked);
       refetchArtifact();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Edit failed:', err);
     }
   };
+
+  const isTabCommentable = useCallback(
+    (tab: ArtifactType | null): boolean => {
+      if (!tab) return false;
+      return commentableTabs.includes(tab);
+    },
+    [commentableTabs],
+  );
+
+  const handleCopyComments = useCallback(async () => {
+    const formatted = formatComments(commentStore.comments);
+    if (!formatted) return;
+
+    try {
+      await navigator.clipboard.writeText(formatted);
+      setClipboardFallback(null);
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 2000);
+    } catch (err: unknown) {
+      console.warn('Clipboard write failed:', err instanceof Error ? err.message : err);
+      setClipboardFallback(formatted);
+    }
+  }, [commentStore.comments]);
 
   if (featureLoading) {
     return <div className="text-board-text-muted text-[0.9375rem]">Loading feature...</div>;
@@ -95,6 +106,19 @@ export default function FeatureDetail({ project }: { project: Project }) {
   }
 
   const p = getPhaseClasses(project.phase);
+  const currentTabCommentable = isTabCommentable(activeTab);
+
+  const commentProps = currentTabCommentable && activeTab
+    ? {
+        commentEnabled: true,
+        getComment: (heading: string) => commentStore.getComment(activeTab, heading),
+        onCommentChange: (heading: string, text: string) => commentStore.setComment(activeTab, heading, text),
+      }
+    : {
+        commentEnabled: false,
+        getComment: (_heading: string) => '',
+        onCommentChange: (_heading: string, _text: string) => {},
+      };
 
   return (
     <div>
@@ -134,30 +158,80 @@ export default function FeatureDetail({ project }: { project: Project }) {
         <RefactorBacklogView projectId={project.id} />
       ) : (
         <GlossaryProvider value={glossary}>
+          {commentStore.hasAnyComments() && (
+            <button
+              type="button"
+              onClick={handleCopyComments}
+              className={cn(
+                'fixed top-4 right-6 z-50 flex items-center gap-1.5 rounded-lg px-4 py-2 text-[0.875rem] font-semibold shadow-lg transition-all',
+                'border cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-board-cyan',
+                copyFeedback
+                  ? 'bg-board-cyan/20 border-board-cyan/50 text-board-cyan'
+                  : 'bg-board-surface border-board-cyan/40 text-board-cyan hover:bg-board-cyan/10 hover:border-board-cyan/60',
+              )}
+            >
+              {copyFeedback ? (
+                <><Check size={15} /> Copied!</>
+              ) : (
+                <><Copy size={15} /> Copy comments</>
+              )}
+            </button>
+          )}
           {availableTypes.length > 0 && activeTab && (
-            <ArtifactTabs available={availableTypes} active={activeTab} onSelect={setActiveTab} heroTab={heroType} phase={project.phase} />
+            <ArtifactTabs
+              available={availableTypes}
+              active={activeTab}
+              onSelect={setActiveTab}
+              heroTab={heroType}
+              phase={project.phase}
+            />
+          )}
+
+          {clipboardFallback && (
+            <div className="mb-4 rounded-md border border-board-yellow/30 bg-board-yellow/[0.05] p-3">
+              <div className="text-board-yellow mb-2 text-[0.8125rem] font-semibold">
+                Clipboard write failed — copy manually:
+              </div>
+              <textarea
+                readOnly
+                value={clipboardFallback}
+                className="w-full rounded border border-board-border bg-board-bg p-2 text-[0.8125rem] text-board-text font-mono resize-y min-h-20"
+                rows={6}
+                onFocus={(e) => e.target.select()}
+              />
+              <button
+                type="button"
+                onClick={() => setClipboardFallback(null)}
+                className="mt-2 text-[0.75rem] text-board-text-muted underline bg-transparent border-none cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
           )}
 
           {artifactLoading && <div className="text-board-text-muted text-[0.9375rem]">Loading...</div>}
 
           {artifact && activeTab === 'spec' && (
-            <SpecView
-              elements={artifact.elements}
-              comments={comments}
-              onAddComment={handleAddComment}
-              onUpdateComment={handleUpdateComment}
-              onDeleteComment={handleDeleteComment}
-            />
+            <SpecView elements={artifact.elements} {...commentProps} />
           )}
-          {artifact && activeTab === 'plan' && <PlanView elements={artifact.elements} />}
+          {artifact && activeTab === 'plan' && (
+            <PlanView elements={artifact.elements} {...commentProps} />
+          )}
           {artifact && activeTab === 'tasks' && <TasksView elements={artifact.elements} onToggleTask={handleToggleTask} />}
-          {artifact && activeTab === 'research' && <ResearchView elements={artifact.elements} />}
-          {artifact && activeTab === 'summary' && <SummaryView elements={artifact.elements} />}
-          {artifact && activeTab === 'deep-dives' && <SummaryView elements={artifact.elements} />}
+          {artifact && activeTab === 'research' && (
+            <ResearchView elements={artifact.elements} {...commentProps} />
+          )}
+          {artifact && activeTab === 'summary' && (
+            <SummaryView elements={artifact.elements} {...commentProps} />
+          )}
+          {artifact && activeTab === 'deep-dives' && (
+            <SummaryView elements={artifact.elements} {...commentProps} />
+          )}
           {artifact && activeTab === 'review' && (
             <ReviewView
               findings={artifact.elements.map((e) => e.content as ReviewFinding)}
               healSummary={artifact.reviewMeta?.healSummary ?? null}
+              {...commentProps}
             />
           )}
         </GlossaryProvider>

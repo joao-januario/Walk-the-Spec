@@ -14,7 +14,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.constitution" -Phase constitution -Json -SkipPrereqs` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.constitution" --phase constitution --json --skip-prereqs` to signal command start.
 
 ## Outline
 
@@ -72,7 +72,7 @@ Follow this execution flow:
    - Any files flagged for manual follow-up.
    - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.constitution" -Json` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.constitution" --json` to signal command completion.
 
 Formatting & Style Requirements:
 

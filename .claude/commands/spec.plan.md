@@ -20,7 +20,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Pre-Execution Checks
 
-**Bootstrap**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.plan" -Phase plan -Json -CopyPlanTemplate` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH, HAS_EXTENSIONS. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+**Bootstrap**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.plan" --phase plan --json --copy-plan-template` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH, HAS_EXTENSIONS. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 ## Outline
 
@@ -42,7 +42,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 3. **Stop and report**: Command ends after Phase 2 planning. Report branch, IMPL_PLAN path, and generated artifacts. Next step is `/spec.implement`.
 
-**Teardown**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.plan" -Json` to signal command completion.
+**Teardown**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.plan" --json` to signal command completion.
 
 ## Phases
 
@@ -100,7 +100,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Skip if project is purely internal (build scripts, one-off tools, etc.)
 
 3. **Agent context update**:
-   - Run `.claude/specify/scripts/powershell/update-agent-context.ps1 -AgentType claude`
+   - Run `bash .claude/specify/scripts/bash/update-agent-context.sh --agent-type claude`
    - These scripts detect which AI agent is in use
    - Update the appropriate agent-specific context file
    - Add only new technology from current plan

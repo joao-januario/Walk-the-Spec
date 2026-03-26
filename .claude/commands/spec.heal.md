@@ -11,7 +11,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.heal" -Phase heal -Json` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.heal" --phase heal --json` to signal command start.
 
 ## Goal
 
@@ -121,7 +121,7 @@ If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL find
 - Each fix is applied independently — one broken fix doesn't block others
 - Tests are the safety net — if a fix breaks tests, revert it
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.heal" -Json` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.heal" --json` to signal command completion.
 
 ## Error Handling
 

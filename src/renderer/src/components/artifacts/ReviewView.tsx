@@ -122,9 +122,12 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
 interface ReviewViewProps {
   findings: ReviewFinding[];
   healSummary: HealSummary | null;
+  commentEnabled: boolean;
+  getComment: (heading: string) => string;
+  onCommentChange: (heading: string, text: string) => void;
 }
 
-export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
+export default function ReviewView({ findings, healSummary, commentEnabled, getComment, onCommentChange }: ReviewViewProps) {
   if (findings.length === 0) {
     return (
       <div className="py-[60px] text-center">
@@ -186,6 +189,9 @@ export default function ReviewView({ findings, healSummary }: ReviewViewProps) {
             heading={severity}
             level="section"
             number={++num}
+            commentEnabled={commentEnabled}
+            commentText={getComment(severity)}
+            onCommentChange={(text) => onCommentChange(severity, text)}
             trailing={
               <span className="text-board-text-muted text-[0.875rem]">
                 {items.length} finding{items.length > 1 ? 's' : ''}

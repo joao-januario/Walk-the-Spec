@@ -5,7 +5,14 @@ import CodeTag from '../ui/CodeTag.js';
 import MarkdownContent from '../ui/MarkdownContent.js';
 import type { Element, SectionContent, DecisionContent } from '../../types/index.js';
 
-export default function PlanView({ elements }: { elements: Element[] }) {
+interface PlanViewProps {
+  elements: Element[];
+  commentEnabled: boolean;
+  getComment: (heading: string) => string;
+  onCommentChange: (heading: string, text: string) => void;
+}
+
+export default function PlanView({ elements, commentEnabled, getComment, onCommentChange }: PlanViewProps) {
   const sections = elements.filter((e) => e.type === 'section');
   const decisions = elements.filter((e) => e.type === 'decision');
 
@@ -30,7 +37,15 @@ export default function PlanView({ elements }: { elements: Element[] }) {
   return (
     <div className="space-y-5">
       {summaryEl && (
-        <CollapsibleSection id="plan-summary" heading="Summary" level="section" number={++num}>
+        <CollapsibleSection
+          id="plan-summary"
+          heading="Summary"
+          level="section"
+          number={++num}
+          commentEnabled={commentEnabled}
+          commentText={getComment('Summary')}
+          onCommentChange={(text) => onCommentChange('Summary', text)}
+        >
           <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
             <MarkdownContent content={(summaryEl.content as SectionContent).content} />
           </div>
@@ -38,7 +53,15 @@ export default function PlanView({ elements }: { elements: Element[] }) {
       )}
 
       {approachEl && (
-        <CollapsibleSection id="plan-approach" heading="Technical Approach" level="section" number={++num}>
+        <CollapsibleSection
+          id="plan-approach"
+          heading="Technical Approach"
+          level="section"
+          number={++num}
+          commentEnabled={commentEnabled}
+          commentText={getComment('Technical Approach')}
+          onCommentChange={(text) => onCommentChange('Technical Approach', text)}
+        >
           <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
             <MarkdownContent content={(approachEl.content as SectionContent).content} />
           </div>
@@ -46,7 +69,15 @@ export default function PlanView({ elements }: { elements: Element[] }) {
       )}
 
       {contextPairs.length > 0 && (
-        <CollapsibleSection id="plan-context" heading="Technical Context" level="section" number={++num}>
+        <CollapsibleSection
+          id="plan-context"
+          heading="Technical Context"
+          level="section"
+          number={++num}
+          commentEnabled={commentEnabled}
+          commentText={getComment('Technical Context')}
+          onCommentChange={(text) => onCommentChange('Technical Context', text)}
+        >
           <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
             {contextPairs.map(([key, value]) => (
               <div key={key} className="flex gap-4 py-1">
@@ -59,12 +90,28 @@ export default function PlanView({ elements }: { elements: Element[] }) {
       )}
 
       {decisions.length > 0 && (
-        <CollapsibleSection id="plan-decisions" heading="Architecture Decisions" level="section" number={++num}>
+        <CollapsibleSection
+          id="plan-decisions"
+          heading="Architecture Decisions"
+          level="section"
+          number={++num}
+          commentEnabled={commentEnabled}
+          commentText={getComment('Architecture Decisions')}
+          onCommentChange={(text) => onCommentChange('Architecture Decisions', text)}
+        >
           <div className="space-y-3">
             {decisions.map((e) => {
               const d = e.content as DecisionContent;
               return (
-                <CollapsibleSection key={e.id} id={`plan-decision-${e.id}`} heading={d.heading} level="subsection">
+                <CollapsibleSection
+                  key={e.id}
+                  id={`plan-decision-${e.id}`}
+                  heading={d.heading}
+                  level="subsection"
+                  commentEnabled={commentEnabled}
+                  commentText={getComment(d.heading)}
+                  onCommentChange={(text) => onCommentChange(d.heading, text)}
+                >
                   <div>
                     <CodeTag color="purple" className="mb-2">DECISION</CodeTag>
                     <MarkdownContent content={d.content} className="mt-2" />
@@ -89,7 +136,15 @@ export default function PlanView({ elements }: { elements: Element[] }) {
       )}
 
       {structureEl && (
-        <CollapsibleSection id="plan-structure" heading="Files Modified" level="section" number={++num}>
+        <CollapsibleSection
+          id="plan-structure"
+          heading="Files Modified"
+          level="section"
+          number={++num}
+          commentEnabled={commentEnabled}
+          commentText={getComment('Files Modified')}
+          onCommentChange={(text) => onCommentChange('Files Modified', text)}
+        >
           <div className="bg-board-surface rounded-lg border border-board-border/50 px-4 py-3">
             <CodeBlock code={(structureEl.content as SectionContent).content} language="text" />
           </div>

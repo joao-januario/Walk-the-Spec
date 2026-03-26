@@ -11,7 +11,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.conclude" -Phase conclude -Json` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.conclude" --phase conclude --json` to signal command start.
 
 ## Goal
 
@@ -155,7 +155,7 @@ The feature is now on main. You can start a new feature with `/spec.specify`.
 - **Uncommitted changes on main**: Stop. User must stash or commit main changes first.
 - **User cancels**: Stop. No changes made.
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.conclude" -Json` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.conclude" --json` to signal command completion.
 
 ## Safety Rules
 

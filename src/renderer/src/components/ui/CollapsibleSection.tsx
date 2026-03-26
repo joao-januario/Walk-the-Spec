@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { cn } from '../../lib/utils.js';
 
 interface CollapsibleSectionProps {
@@ -10,6 +11,12 @@ interface CollapsibleSectionProps {
   children: React.ReactNode;
   /** Extra content shown to the right of the heading (badges, progress bars, etc.) */
   trailing?: React.ReactNode;
+  /** When true, show a comment icon in the heading row */
+  commentEnabled?: boolean;
+  /** Current comment text for this section */
+  commentText?: string;
+  /** Called when the user changes the comment text */
+  onCommentChange?: (text: string) => void;
 }
 
 /**
@@ -27,8 +34,50 @@ export default function CollapsibleSection({
   defaultOpen = true,
   children,
   trailing,
+  commentEnabled,
+  commentText,
+  onCommentChange,
 }: CollapsibleSectionProps) {
   const [open, setOpen] = useState(level === 'explainer' ? false : defaultOpen);
+  const [commentOpen, setCommentOpen] = useState(false);
+
+  const hasComment = (commentText ?? '').trim().length > 0;
+
+  const commentFooter = commentEnabled ? (
+    <div className="mt-4 pt-2 border-t border-board-border/15">
+      <button
+        type="button"
+        onClick={() => setCommentOpen(!commentOpen)}
+        aria-expanded={commentOpen}
+        className={cn(
+          'flex items-center gap-1.5 rounded-md px-2 py-1 text-[0.8125rem] font-medium transition-colors',
+          'bg-transparent border-none cursor-pointer',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-board-cyan/60',
+          hasComment
+            ? 'text-board-cyan'
+            : 'text-board-text-muted/60 hover:text-board-text-muted',
+        )}
+      >
+        <MessageSquare size={14} />
+        {hasComment ? 'Edit feedback' : 'Add feedback'}
+      </button>
+      {commentOpen && (
+        <textarea
+          value={commentText ?? ''}
+          onChange={(e) => onCommentChange?.(e.target.value)}
+          placeholder="Add your feedback for this section..."
+          className={cn(
+            'w-full rounded-md border px-3 py-2 text-[0.875rem] leading-relaxed mt-2',
+            'bg-board-bg border-board-border text-board-text',
+            'placeholder:text-board-text-muted/50',
+            'focus-visible:border-board-cyan focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-board-cyan/30',
+            'resize-y min-h-[60px]',
+          )}
+          rows={3}
+        />
+      )}
+    </div>
+  ) : null;
 
   if (level === 'explainer') {
     return (
@@ -66,7 +115,7 @@ export default function CollapsibleSection({
           </h4>
           {trailing}
         </button>
-        {open && <div className="pb-4 pt-1">{children}</div>}
+        {open && <div className="pb-4 pt-1">{children}{commentFooter}</div>}
       </div>
     );
   }
@@ -97,6 +146,7 @@ export default function CollapsibleSection({
       {open && (
         <div className="border-board-accent/20 border-l-2 ml-[9px] pl-6 pb-4 pt-2">
           {children}
+          {commentFooter}
         </div>
       )}
     </div>

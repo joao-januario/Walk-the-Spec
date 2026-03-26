@@ -11,7 +11,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.review" -Phase review -Json` to signal command start.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.review" --phase review --json` to signal command start.
 
 ## Goal
 
@@ -229,7 +229,7 @@ If no actionable findings exist (only NEEDS_REFACTOR or none): "No fixes needed.
 
 **IMPORTANT**: `/spec.review` is strictly read-only. It MUST NOT modify any source files. All fixes are applied by `/spec.heal`.
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.review" -Json` to signal command completion.
+**Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.review" --json` to signal command completion.
 
 ## Operating Principles
 
