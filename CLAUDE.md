@@ -25,9 +25,9 @@ Read the right doc for your task — don't read all source files.
 | `/spec.review` or code review | `docs/architecture.md` | Area guide for files under review |
 | Add/modify parser | `docs/parsers.md` | `docs/ipc.md` (to register handler) |
 | Add/modify IPC channel | `docs/ipc.md` | — |
-| Add/modify UI component | `docs/renderer.md` | `docs/ipc.md` (if new data needed) |
+| Add/modify UI component / theme | `docs/renderer.md` | `docs/ipc.md` (if new data needed) |
 | Modify artifact editing | `docs/writer.md` | `docs/ipc.md` (edit-field handler) |
-| Modify file watching / phase detection / notifications | `docs/architecture.md` (inline sections) | — |
+| Modify file watching / phase detection / notifications / settings | `docs/architecture.md` (inline sections) | — |
 
 ## Documentation
 
@@ -38,7 +38,7 @@ This table is the **single source of truth** for file-to-doc coverage. Do not du
 | `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/preload/` |
 | `docs/parsers.md` | `src/main/parser/` |
 | `docs/ipc.md` | `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/services/api.ts` |
-| `docs/renderer.md` | `src/renderer/src/components/`, `src/renderer/src/hooks/` |
+| `docs/renderer.md` | `src/renderer/src/components/`, `src/renderer/src/hooks/`, `src/renderer/src/themes/` |
 | `docs/writer.md` | `src/main/writer/` |
 
 **Doc rules**: CLAUDE.md owns the index (what covers what). Doc files contain only deep technical content — no "Key Files" tables, no file listings, no app descriptions that repeat this file. Reference source files inline in prose, not in summary tables.

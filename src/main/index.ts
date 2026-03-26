@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { registerIpcHandlers } from './ipc/handlers.js';
-import { loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS, type SoundVolume } from './config/config-manager.js';
+import { loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS, type SoundVolume, type AppSettings } from './config/config-manager.js';
 import { watchProject, unwatchAll, type WatcherEvents } from './projects/file-watcher.js';
 import { showCompletionNotification } from './notifications/os-notifier.js';
 import { playNotificationSound } from './notifications/sound-player.js';
@@ -107,6 +107,20 @@ export function stopWatchingProject(projectId: string) {
   unwatchProject(projectId);
 }
 
+// Theme menu items — matches the order in renderer/src/themes/themes.ts
+const THEME_MENU_ITEMS: readonly { id: string; name: string; category: 'dark' | 'light' }[] = [
+  { id: 'radix-mauve', name: 'Radix Mauve', category: 'dark' },
+  { id: 'dracula', name: 'Dracula', category: 'dark' },
+  { id: 'tokyo-night', name: 'Tokyo Night', category: 'dark' },
+  { id: 'one-dark', name: 'One Dark', category: 'dark' },
+  { id: 'rose-pine', name: 'Rosé Pine', category: 'dark' },
+  { id: 'catppuccin-mocha', name: 'Catppuccin Mocha', category: 'dark' },
+  { id: 'gruvbox-dark', name: 'Gruvbox Dark', category: 'dark' },
+  { id: 'solarized-dark', name: 'Solarized Dark', category: 'dark' },
+  { id: 'solarized-light', name: 'Solarized Light', category: 'light' },
+  { id: 'catppuccin-latte', name: 'Catppuccin Latte', category: 'light' },
+];
+
 const MIN_FONT_SIZE = 14;
 const MAX_FONT_SIZE = 20;
 
@@ -202,6 +216,23 @@ function buildMenu() {
             buildMenu();
           },
         },
+      ],
+    },
+    {
+      label: 'Theme',
+      submenu: [
+        ...THEME_MENU_ITEMS.map((theme) => ({
+          label: theme.name,
+          type: 'radio' as const,
+          checked: config.settings.theme === theme.id,
+          click: () => {
+            const c = loadConfig();
+            c.settings = { ...c.settings, theme: theme.id };
+            saveConfig(undefined, c);
+            sendToRenderer('settings-changed', { theme: theme.id });
+            buildMenu();
+          },
+        })),
       ],
     },
     { role: 'windowMenu' as const },

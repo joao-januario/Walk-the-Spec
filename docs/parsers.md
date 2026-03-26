@@ -68,6 +68,8 @@ Renderer requests artifact
 
 1. **Dual-format plan parsing**: `parsePlan` supports both new format (Technical Approach as prose, Architecture Decisions with Decision/Rationale/Alternatives) and legacy format (Technical Context as key-value pairs, generic decisions). New format takes precedence if present.
 
+   **Structured file structure**: Within plan parsing, `extractFileStructure()` parses the "Project Structure" section and returns `FileStructureSection[]` (typed data) instead of a raw string. The parser handles both flat file lists and tree-format (├──, └──) structures, strips tree characters, and infers operation type (added/modified/removed) from inline comments (with word-boundary keyword matching like `\badd\b`) or section headings as fallback. This structured data is wrapped in `FileStructureContent` with type 'file-structure' in the handler, enabling rich rendering in PlanView.
+
 2. **Raw content slicing**: Plan and summary parsers preserve markdown formatting by slicing the original `content` string using MDAST position offsets, rather than reconstructing from the AST. This preserves complex markdown (tables, code blocks, nested lists) exactly as written.
 
 3. **Review parser has two extraction strategies**: Tries modern block-based format (H4 headings per finding) first. Falls back to old table format if no findings found in block mode.

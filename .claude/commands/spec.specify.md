@@ -85,9 +85,11 @@ Given that feature description, do this:
    - The JSON output will contain BRANCH_NAME and SPEC_FILE paths
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot")
 
-3. Load `.claude/specify/templates/spec-template.md` to understand required sections.
+3. **Read the created spec file**: The script creates SPEC_FILE with template content. You MUST Read it now (using the Read tool) so that the Write tool will allow overwriting it later. This is a Claude Code safety guard — Write refuses to overwrite files that haven't been Read in the current conversation.
 
-4. Follow this execution flow:
+4. Load `.claude/specify/templates/spec-template.md` to understand required sections.
+
+5. Follow this execution flow:
 
     1. Parse user description from Input
        If empty: ERROR "No feature description provided"
@@ -113,9 +115,9 @@ Given that feature description, do this:
     7. Identify Key Entities (if data involved)
     8. Return: SUCCESS (spec ready for planning)
 
-5. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+6. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
 
-6. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
+7. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 
    a. **Create Spec Quality Checklist**: Generate a checklist file at `FEATURE_DIR/checklists/requirements.md` using the checklist template structure with these validation items:
 
@@ -207,11 +209,11 @@ Given that feature description, do this:
 
    d. **Update Checklist**: Write the final checklist pass/fail status once, after all validation is complete.
 
-7. Report completion with branch name, spec file path, and checklist results. **Always mention both next steps**: recommend `/spec.clarify` first (it is the expected workflow before planning), then `/spec.plan` as the alternative. The completion message MUST end with: "Next step: `/spec.clarify` to refine the spec, or `/spec.plan` to jump straight to planning."
+8. Report completion with branch name, spec file path, and checklist results. **Always mention both next steps**: recommend `/spec.clarify` first (it is the expected workflow before planning), then `/spec.plan` as the alternative. The completion message MUST end with: "Next step: `/spec.clarify` to refine the spec, or `/spec.plan` to jump straight to planning."
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/write-status.sh --command "spec.specify" --status "completed"` to signal command completion.
 
-8. **Check for extension hooks**: After reporting completion, check if `.claude/specify/extensions.yml` exists in the project root.
+9. **Check for extension hooks**: After reporting completion, check if `.claude/specify/extensions.yml` exists in the project root.
    - If it exists, read it and look for entries under the `hooks.after_specify` key
    - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
    - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.

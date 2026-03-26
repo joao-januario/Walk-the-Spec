@@ -193,10 +193,10 @@ export function registerIpcHandlers() {
           });
         }
         // Project Structure / Files modified
-        if (parsed.fileStructure) {
+        if (parsed.fileStructure.length > 0) {
           planElements.push({
-            id: 'Project Structure', type: 'section',
-            content: { type: 'section', heading: 'Project Structure', content: parsed.fileStructure },
+            id: 'Project Structure', type: 'file-structure',
+            content: { type: 'file-structure', heading: 'Project Structure', sections: parsed.fileStructure },
             editableFields: [],
           });
         }

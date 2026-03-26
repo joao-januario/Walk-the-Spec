@@ -3,6 +3,8 @@ import BoardView from './components/board/BoardView.js';
 import FeatureDetail from './components/feature/FeatureDetail.js';
 import EmptyState from './components/common/EmptyState.js';
 import { usePhaseNotification } from './hooks/usePhaseNotification.js';
+import { applyTheme } from './themes/apply-theme.js';
+import { DEFAULT_THEME_ID } from './themes/themes.js';
 import type { Project } from './types/index.js';
 
 function applyFontSize(size: number): void {
@@ -16,14 +18,16 @@ export default function App() {
 
   usePhaseNotification();
 
-  // Load saved font size on mount + listen for menu changes
+  // Load saved settings (font size + theme) on mount + listen for menu changes
   useEffect(() => {
     window.api.getSettings().then((settings) => {
       applyFontSize(settings.fontSize);
+      applyTheme(settings.theme ?? DEFAULT_THEME_ID);
     }).catch(() => {});
 
-    const unsubSettings = window.api.onSettingsChanged((data: { fontSize: number }) => {
-      applyFontSize(data.fontSize);
+    const unsubSettings = window.api.onSettingsChanged((data: { fontSize?: number; theme?: string }) => {
+      if (data.fontSize !== undefined) applyFontSize(data.fontSize);
+      if (data.theme !== undefined) applyTheme(data.theme);
     });
 
     return () => { unsubSettings(); };

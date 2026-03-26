@@ -57,6 +57,52 @@ code.hljs {
   background: transparent;
 }
 
+/*
+ * Light-mode hljs overrides — sourced from highlight.js github-light theme.
+ * Scoped to html[data-theme-mode="light"] so they only apply when a light theme is active.
+ */
+html[data-theme-mode="light"] .hljs {
+  color: #24292e;
+}
+html[data-theme-mode="light"] .hljs-keyword,
+html[data-theme-mode="light"] .hljs-selector-tag {
+  color: #d73a49;
+}
+html[data-theme-mode="light"] .hljs-string,
+html[data-theme-mode="light"] .hljs-addition {
+  color: #032f62;
+}
+html[data-theme-mode="light"] .hljs-comment,
+html[data-theme-mode="light"] .hljs-quote {
+  color: #6a737d;
+}
+html[data-theme-mode="light"] .hljs-number,
+html[data-theme-mode="light"] .hljs-literal {
+  color: #005cc5;
+}
+html[data-theme-mode="light"] .hljs-built_in,
+html[data-theme-mode="light"] .hljs-type {
+  color: #6f42c1;
+}
+html[data-theme-mode="light"] .hljs-title,
+html[data-theme-mode="light"] .hljs-section {
+  color: #6f42c1;
+}
+html[data-theme-mode="light"] .hljs-variable,
+html[data-theme-mode="light"] .hljs-template-variable {
+  color: #e36209;
+}
+html[data-theme-mode="light"] .hljs-attr,
+html[data-theme-mode="light"] .hljs-attribute {
+  color: #005cc5;
+}
+html[data-theme-mode="light"] .hljs-deletion {
+  color: #b31d28;
+}
+html[data-theme-mode="light"] .hljs-meta {
+  color: #005cc5;
+}
+
 @layer base {
   html {
     @apply bg-board-bg text-board-text antialiased;

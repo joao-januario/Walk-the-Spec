@@ -114,14 +114,15 @@ export default function MarkdownContent({ content, inline, className }: Markdown
   return (
     <div
       className={cn(
-        'prose prose-invert max-w-none text-[1rem] leading-relaxed',
+        'prose max-w-none text-[1rem] leading-relaxed text-board-text',
         'prose-headings:text-board-text-bright',
+        'prose-p:text-board-text',
         'prose-a:text-board-accent',
         'prose-strong:text-board-text-bright prose-strong:font-semibold',
         'prose-code:before:content-none prose-code:after:content-none',
         'prose-pre:bg-board-bg prose-pre:border prose-pre:border-board-border',
         'prose-blockquote:border-board-border prose-blockquote:text-board-text-muted',
-        'prose-li:marker:text-board-text-muted',
+        'prose-li:text-board-text prose-li:marker:text-board-text-muted',
         'prose-hr:border-board-border',
         'prose-th:text-board-text-bright',
         'prose-td:text-board-text',

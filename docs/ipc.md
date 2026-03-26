@@ -95,13 +95,15 @@ All three files must be updated together. Missing any one causes a runtime error
 
 ## The `get-artifact` Handler (Most Complex)
 
-This is the largest handler (~110 lines). It:
+This is the largest handler (~120 lines). It:
 1. Looks up the project from config
 2. Scans the project for its spec directory
 3. Reads the artifact file from disk
 4. Switches on `artifactType` to call the right parser
 5. Wraps parsed elements in a standardized `Artifact` envelope
 6. Attaches `reviewMeta` (heal summary, branch) for review artifacts
+
+For the 'plan' artifact type specifically: After parsing summary, technical approach, decisions, and legacy sections, the handler checks if `parsed.fileStructure.length > 0`. If file structure data exists, it wraps the `FileStructureSection[]` array in a `FileStructureContent` element with type 'file-structure', enabling PlanView to render a styled, color-coded file list instead of a raw code block.
 
 Supported artifact types: `spec`, `plan`, `tasks`, `research`, `summary`, `deep-dives`, `review`.
 

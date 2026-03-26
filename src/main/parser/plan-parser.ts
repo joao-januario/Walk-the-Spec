@@ -14,12 +14,27 @@ export interface Decision {
   content: string;
 }
 
+export type OperationType = 'added' | 'modified' | 'removed' | 'unknown';
+
+export interface FileStructureEntry {
+  filePath: string;
+  directory: string;
+  filename: string;
+  comment: string | null;
+  operation: OperationType;
+}
+
+export interface FileStructureSection {
+  title: string;
+  entries: FileStructureEntry[];
+}
+
 export interface PlanParseResult {
   summary: string;
   technicalApproach: string;
   technicalContext: Record<string, string>;
   architectureDecisions: ArchitectureDecision[];
-  fileStructure: string;
+  fileStructure: FileStructureSection[];
   decisions: Decision[];
 }
 
@@ -221,7 +236,7 @@ function extractTechnicalContext(tree: Root): Record<string, string> {
   return context;
 }
 
-function extractFileStructure(tree: Root): string {
+function extractFileStructure(tree: Root): FileStructureSection[] {
   let inSection = false;
   const blocks: string[] = [];
 
@@ -245,7 +260,121 @@ function extractFileStructure(tree: Root): string {
     }
   }
 
-  return blocks.join('\n\n');
+  return parseFileStructureContent(blocks.join('\n\n'));
+}
+
+// --- File structure line parsing ---
+
+const TREE_CHARS_RE = /[├└│─┬┤┼╔╗╚╝║═]+\s*/g;
+const ADDED_KEYWORDS = /\b(?:new|add|create)\b/i;
+const MODIFIED_KEYWORDS = /\b(?:update|modify|replace|change|refactor)\b/i;
+const REMOVED_KEYWORDS = /\b(?:remove|delete)\b/i;
+
+function inferOperation(text: string): OperationType {
+  if (ADDED_KEYWORDS.test(text)) return 'added';
+  if (MODIFIED_KEYWORDS.test(text)) return 'modified';
+  if (REMOVED_KEYWORDS.test(text)) return 'removed';
+  return 'unknown';
+}
+
+function splitPathAndComment(line: string): { path: string; comment: string | null } {
+  // Match path followed by optional # comment (at least one space before #, space after)
+  const commentMatch = line.match(/^(.+?)\s+#\s+(.+)$/);
+  if (commentMatch) {
+    return { path: commentMatch[1].trim(), comment: commentMatch[2].trim() };
+  }
+  return { path: line.trim(), comment: null };
+}
+
+function splitFilePath(filePath: string): { directory: string; filename: string } {
+  const lastSlash = filePath.lastIndexOf('/');
+  if (lastSlash === -1) {
+    return { directory: '', filename: filePath };
+  }
+  return {
+    directory: filePath.slice(0, lastSlash + 1),
+    filename: filePath.slice(lastSlash + 1),
+  };
+}
+
+function isSectionHeading(line: string): boolean {
+  // A section heading is a line that starts with # and has no file path characters
+  // (no dots suggesting a file extension, no slashes suggesting a path)
+  const trimmed = line.trim();
+  if (!trimmed.startsWith('#')) return false;
+  const text = trimmed.slice(1).trim();
+  // If it looks like a file path or is empty, it's not a section heading
+  return text.length > 0 && !text.includes('/') && !text.match(/\.\w{1,10}$/);
+}
+
+export function parseFileStructureContent(raw: string): FileStructureSection[] {
+  if (!raw.trim()) return [];
+
+  const lines = raw.split('\n');
+  const sections: FileStructureSection[] = [];
+  let currentSection: FileStructureSection | null = null;
+  let currentSectionHeading: string | null = null;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // Check if this is a section heading (# Comment style)
+    if (isSectionHeading(line)) {
+      // Save previous section if it has entries
+      if (currentSection && currentSection.entries.length > 0) {
+        sections.push(currentSection);
+      }
+      currentSectionHeading = line.slice(1).trim();
+      currentSection = { title: currentSectionHeading, entries: [] };
+      continue;
+    }
+
+    // Strip tree-drawing characters
+    let cleaned = line.replace(TREE_CHARS_RE, '').trim();
+    if (!cleaned) continue;
+
+    // Skip lines that are just directory names ending with /
+    if (cleaned.endsWith('/') && !cleaned.includes('#')) continue;
+
+    // Split into path and comment
+    const { path: filePath, comment } = splitPathAndComment(cleaned);
+    if (!filePath) continue;
+
+    // Skip lines that look like template placeholders
+    if (filePath.startsWith('[') && filePath.endsWith(']')) continue;
+
+    // Infer operation: comment first, section heading fallback
+    let operation: OperationType = 'unknown';
+    if (comment) {
+      operation = inferOperation(comment);
+    }
+    if (operation === 'unknown' && currentSectionHeading) {
+      operation = inferOperation(currentSectionHeading);
+    }
+
+    const { directory, filename } = splitFilePath(filePath);
+
+    // Ensure default section exists for entries before any heading
+    if (!currentSection) {
+      currentSection = { title: 'Files', entries: [] };
+    }
+
+    currentSection.entries.push({
+      filePath,
+      directory,
+      filename,
+      comment,
+      operation,
+    });
+  }
+
+  // Push the last section
+  if (currentSection && currentSection.entries.length > 0) {
+    sections.push(currentSection);
+  }
+
+  return sections;
 }
 
 function extractLegacyDecisions(tree: Root): Decision[] {

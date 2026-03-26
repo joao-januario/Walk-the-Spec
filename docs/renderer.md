@@ -20,7 +20,7 @@ App
     │   │
     │   └── Active artifact view (one of):
     │       ├── SpecView → UserStoryCard[], RequirementRow[], SuccessCriterion[]
-    │       ├── PlanView → DecisionSection[], CodeBlock[], MarkdownContent
+    │       ├── PlanView → FileStructureView (if file-structure type), DecisionSection[], CodeBlock[], MarkdownContent
     │       ├── TasksView → TaskRow[] grouped by Phase
     │       ├── ResearchView → DecisionSection[]
     │       ├── SummaryView → MarkdownContent sections
@@ -29,6 +29,10 @@ App
     │
     └── EmptyState (when no project selected)
 ```
+
+## Key Components
+
+**FileStructureView** (`src/renderer/src/components/elements/FileStructureView.tsx`): Renders structured file lists with color-coded operation types (added/modified/removed). Receives `FileStructureSection[]` from the plan parser via PlanView. Uses collapsible section groups with file count badges, and each file entry displays a colored left border, file icon, directory-dimmed filename, operation label, and optional comment. Operation colors are mapped via `operationClasses` in `theme.ts`.
 
 ## State Management
 

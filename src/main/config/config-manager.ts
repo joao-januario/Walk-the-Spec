@@ -16,9 +16,10 @@ export interface AppSettings {
   fontSize: number;
   soundVolume: SoundVolume;
   osNotifications: boolean;
+  theme: string;
 }
 
-export const DEFAULT_SETTINGS: AppSettings = { fontSize: 16, soundVolume: 'medium', osNotifications: true };
+export const DEFAULT_SETTINGS: AppSettings = { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' };
 
 export interface WalkTheSpecConfig {
   projects: ProjectEntry[];

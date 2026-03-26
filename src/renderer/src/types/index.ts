@@ -59,6 +59,7 @@ export type ElementType =
   | 'task'
   | 'decision'
   | 'section'
+  | 'file-structure'
   | 'edge-case';
 
 // Field types for structured editing
@@ -123,7 +124,8 @@ export type ElementContent =
   | SuccessCriterionContent
   | TaskContent
   | DecisionContent
-  | SectionContent;
+  | SectionContent
+  | FileStructureContent;
 
 export interface UserStoryContent {
   type: 'user-story';
@@ -176,6 +178,28 @@ export interface SectionContent {
   type: 'section';
   heading: string;
   content: string;
+}
+
+// File structure types for plan view
+export type OperationType = 'added' | 'modified' | 'removed' | 'unknown';
+
+export interface FileStructureEntry {
+  filePath: string;
+  directory: string;
+  filename: string;
+  comment: string | null;
+  operation: OperationType;
+}
+
+export interface FileStructureSection {
+  title: string;
+  entries: FileStructureEntry[];
+}
+
+export interface FileStructureContent {
+  type: 'file-structure';
+  heading: string;
+  sections: FileStructureSection[];
 }
 
 // --- WebSocket Messages ---

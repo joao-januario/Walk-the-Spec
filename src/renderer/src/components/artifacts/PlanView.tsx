@@ -1,9 +1,10 @@
 import React from 'react';
 import CodeBlock from '../elements/CodeBlock.js';
+import FileStructureView from '../elements/FileStructureView.js';
 import CollapsibleSection from '../ui/CollapsibleSection.js';
 import CodeTag from '../ui/CodeTag.js';
 import MarkdownContent from '../ui/MarkdownContent.js';
-import type { Element, SectionContent, DecisionContent } from '../../types/index.js';
+import type { Element, SectionContent, DecisionContent, FileStructureContent } from '../../types/index.js';
 
 interface PlanViewProps {
   elements: Element[];
@@ -15,6 +16,7 @@ interface PlanViewProps {
 export default function PlanView({ elements, commentEnabled, getComment, onCommentChange }: PlanViewProps) {
   const sections = elements.filter((e) => e.type === 'section');
   const decisions = elements.filter((e) => e.type === 'decision');
+  const fileStructureEl = elements.find((e) => e.type === 'file-structure');
 
   const summaryEl = sections.find((e) => e.id === 'Summary');
   const approachEl = sections.find((e) => e.id === 'Technical Approach');
@@ -135,7 +137,21 @@ export default function PlanView({ elements, commentEnabled, getComment, onComme
         </CollapsibleSection>
       )}
 
-      {structureEl && (
+      {fileStructureEl && (
+        <CollapsibleSection
+          id="plan-structure"
+          heading="Files Modified"
+          level="section"
+          number={++num}
+          commentEnabled={commentEnabled}
+          commentText={getComment('Files Modified')}
+          onCommentChange={(text) => onCommentChange('Files Modified', text)}
+        >
+          <FileStructureView sections={(fileStructureEl.content as FileStructureContent).sections} />
+        </CollapsibleSection>
+      )}
+
+      {structureEl && !fileStructureEl && (
         <CollapsibleSection
           id="plan-structure"
           heading="Files Modified"

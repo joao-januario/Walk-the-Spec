@@ -92,6 +92,18 @@ export function getPriorityMeta(priority: string): PriorityMeta {
   return priorityMeta[priority] ?? { label: priority, description: '' };
 }
 
+// File structure operation classes
+export const operationClasses = {
+  added: { bg: 'bg-board-green/10', text: 'text-board-green', border: 'border-l-board-green', label: 'added' },
+  modified: { bg: 'bg-board-yellow/10', text: 'text-board-yellow', border: 'border-l-board-yellow', label: 'modified' },
+  removed: { bg: 'bg-board-red/10', text: 'text-board-red', border: 'border-l-board-red', label: 'removed' },
+  unknown: { bg: '', text: 'text-board-text-muted', border: 'border-l-board-border', label: '' },
+} as const;
+
+export function getOperationClasses(operation: string) {
+  return operationClasses[operation as keyof typeof operationClasses] ?? operationClasses.unknown;
+}
+
 // Priority badge classes
 export const priorityClasses: Record<string, string> = {
   P1: 'bg-board-red/20 text-board-red',
