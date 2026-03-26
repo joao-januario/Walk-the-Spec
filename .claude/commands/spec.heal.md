@@ -35,27 +35,7 @@ Parse the findings table and proposed fixes sections. Extract all findings excep
 
 If no actionable findings exist (only NEEDS_REFACTOR or none): "Nothing to heal. Run `/spec.conclude` to finalize."
 
-### Step 2: Present Fix Plan
-
-Show the user what will be changed:
-
-```markdown
-## Heal Plan
-
-**Review**: .claude/specs/<BRANCH>/review.md
-**Findings to fix**: N CRITICAL, N HIGH
-
-| # | Rule | Category | File | Summary |
-|---|------|----------|------|---------|
-| 1 | ES04 | CRITICAL | src/preload/index.ts | Raw ipcRenderer exposed |
-| 2 | RT03 | HIGH | src/renderer/src/App.tsx | Uses `any` type |
-
-Proceed? (yes/no)
-```
-
-Wait for user confirmation. If no, stop.
-
-### Step 3: Apply Fixes via Sonnet Agents
+### Step 2: Apply Fixes via Sonnet Agents
 
 Group findings by file. For each file (or small group of related files), spawn a **Sonnet sub-agent** using the Agent tool with `model: "sonnet"`. Launch independent file groups **in parallel**.
 
@@ -79,7 +59,7 @@ You are applying code fixes. For each finding:
 
 After all sub-agents return, collect results — which fixes were applied, which were skipped.
 
-### Step 4: Run Tests
+### Step 3: Run Tests
 
 After ALL fixes are applied:
 
@@ -87,7 +67,7 @@ After ALL fixes are applied:
 npm test
 ```
 
-- If tests **pass**: Continue to Step 5.
+- If tests **pass**: Continue to Step 4.
 - If tests **fail**:
   1. Report which tests failed
   2. Identify which fix likely caused the failure (by file/module)
@@ -96,7 +76,7 @@ npm test
   5. Mark that finding as "Fix requires manual intervention — broke tests"
   6. Continue with remaining passing fixes
 
-### Step 5: Update Review Artifact
+### Step 4: Update Review Artifact
 
 Update `.claude/specs/<BRANCH_NAME>/review.md`:
 
@@ -118,7 +98,7 @@ Update `.claude/specs/<BRANCH_NAME>/review.md`:
 | 2 | RT03 | MANUAL | Fix broke TaskRow.test.ts |
 ```
 
-### Step 6: Report Completion
+### Step 5: Report Completion
 
 ```markdown
 ## Heal Complete

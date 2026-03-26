@@ -3,8 +3,9 @@ import path from 'path';
 import { registerIpcHandlers } from './ipc/handlers.js';
 import { loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS, type SoundVolume } from './config/config-manager.js';
 import { watchProject, unwatchAll, type WatcherEvents } from './projects/file-watcher.js';
-import { readStatus } from './notifications/status-reader.js';
 import { showCompletionNotification } from './notifications/os-notifier.js';
+import { playNotificationSound } from './notifications/sound-player.js';
+import { startNotifyServer, stopNotifyServer, type NotifyPayload } from './notifications/notify-server.js';
 import { scanProject } from './projects/project-scanner.js';
 import { detectPhase } from './phase/phase-detector.js';
 import fs from 'fs';
@@ -19,53 +20,56 @@ function sendToRenderer(channel: string, ...args: any[]) {
   }
 }
 
-async function handleStatusChange(projectId: string, projectPath: string): Promise<void> {
+async function handleNotify(payload: NotifyPayload): Promise<void> {
   try {
-    const scan = scanProject(projectPath);
-    if (!scan.specDir) return;
-
-    const statusPath = path.join(scan.specDir, 'status.json');
-    const status = await readStatus(statusPath);
-    if (!status || status.status !== 'completed') return;
+    if (payload.status !== 'completed') return;
 
     const config = loadConfig();
-    const project = config.projects.find((p) => p.id === projectId);
-    if (!project) return;
+    // Find project by matching path
+    const normalise = (p: string) => p.replace(/\\/g, '/').toLowerCase();
+    const project = config.projects.find(
+      (p) => normalise(p.path) === normalise(payload.projectPath),
+    );
+    if (!project) {
+      console.log(`[notifications] no project matched path ${payload.projectPath} — skipping`);
+      return;
+    }
 
+    const scan = scanProject(project.path);
     let tasksContent: string | undefined;
-    if (scan.artifactFiles.includes('tasks.md')) {
-      tasksContent = await fs.promises.readFile(path.join(scan.specDir, 'tasks.md'), 'utf-8');
+    if (scan.specDir && scan.artifactFiles.includes('tasks.md')) {
+      try {
+        tasksContent = await fs.promises.readFile(path.join(scan.specDir, 'tasks.md'), 'utf-8');
+      } catch (err: unknown) {
+        console.warn('[notifications] could not read tasks.md — phase detection may be imprecise:', err);
+      }
     }
     const phase = detectPhase(scan.artifactFiles, tasksContent);
+    const timestamp = new Date().toISOString();
+
+    console.log(`[notifications] phase-changed: ${project.name} → ${phase} (${payload.command})`);
 
     sendToRenderer('phase-changed', {
-      projectId,
+      projectId: project.id,
       projectName: project.name,
-      command: status.command,
+      command: payload.command,
       phase,
-      timestamp: status.timestamp,
+      timestamp,
     });
 
+    void playNotificationSound(config.settings.soundVolume, payload.command);
+
     if (config.settings.osNotifications) {
-      showCompletionNotification({ projectName: project.name, command: status.command, mainWindow });
+      showCompletionNotification({ projectName: project.name, command: payload.command, mainWindow });
     }
   } catch (err: unknown) {
-    console.error('[notifications] status read error:', err);
+    console.error('[notifications] notify error:', err);
   }
 }
 
 const watcherEvents: WatcherEvents = {
   onSpecsChanged: (projectId, files) => {
     sendToRenderer('specs-changed', { projectId, files, timestamp: new Date().toISOString() });
-
-    // Check for status.json changes to trigger notifications
-    if (files.some((f) => f.endsWith('status.json'))) {
-      const config = loadConfig();
-      const project = config.projects.find((p) => p.id === projectId);
-      if (project) {
-        void handleStatusChange(projectId, project.path);
-      }
-    }
   },
   onBranchChanged: (projectId) => {
     sendToRenderer('branch-changed', { projectId, timestamp: new Date().toISOString() });
@@ -230,6 +234,7 @@ app.whenReady().then(() => {
   createWindow();
   buildMenu();
   startWatchingAll();
+  startNotifyServer(handleNotify);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -238,5 +243,6 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   unwatchAll();
+  stopNotifyServer();
   if (process.platform !== 'darwin') app.quit();
 });

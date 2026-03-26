@@ -1,6 +1,5 @@
 #!/usr/bin/env pwsh
-# Writes a status.json file to the current feature's specs directory.
-# Used by spec commands to signal start/completion to the Walk the Spec app.
+# Sends a phase notification to the Walk the Spec app via HTTP API.
 #
 # Usage:
 #   write-status.ps1 -Command "spec.plan" -Status "started"
@@ -23,26 +22,8 @@ $ErrorActionPreference = 'Stop'
 
 $paths = Get-FeaturePathsEnv
 
-# Exit silently if no feature directory found (not all commands run inside a feature branch)
-if (-not (Test-Path $paths.FEATURE_DIR)) {
-    if ($Json) {
-        Write-Output '{"ok":false,"reason":"no feature directory"}'
-    }
-    exit 0
-}
-
-$statusFile = Join-Path $paths.FEATURE_DIR 'status.json'
-$timestamp = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
-
-$statusObj = @{
-    command   = $Command
-    status    = $Status
-    timestamp = $timestamp
-}
-
-$jsonContent = $statusObj | ConvertTo-Json -Compress
-Set-Content -Path $statusFile -Value $jsonContent -Encoding UTF8 -NoNewline
+Send-PhaseNotify -Command $Command -Status $Status -RepoRoot $paths.REPO_ROOT
 
 if ($Json) {
-    Write-Output $jsonContent
+    Write-Output "{`"ok`":true,`"command`":`"$Command`",`"status`":`"$Status`"}"
 }

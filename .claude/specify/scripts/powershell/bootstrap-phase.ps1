@@ -48,14 +48,8 @@ OPTIONS:
 # Get feature paths (called ONCE for the entire bootstrap)
 $paths = Get-FeaturePathsEnv
 
-# --- 1. Write status "started" ---
-if (Test-Path $paths.FEATURE_DIR) {
-    $statusFile = Join-Path $paths.FEATURE_DIR 'status.json'
-    $timestamp = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
-    $statusObj = @{ command = $Command; status = 'started'; timestamp = $timestamp }
-    $jsonContent = $statusObj | ConvertTo-Json -Compress
-    Set-Content -Path $statusFile -Value $jsonContent -Encoding UTF8 -NoNewline
-}
+# --- 1. Notify app: phase started ---
+Send-PhaseNotify -Command $Command -Status 'started' -RepoRoot $paths.REPO_ROOT
 
 # --- 2. Validate branch ---
 if ($paths.HAS_GIT -and -not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit $paths.HAS_GIT)) {

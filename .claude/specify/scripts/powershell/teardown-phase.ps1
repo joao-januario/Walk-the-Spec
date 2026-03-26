@@ -35,14 +35,8 @@ OPTIONS:
 
 $paths = Get-FeaturePathsEnv
 
-# --- 1. Write status "completed" ---
-if (Test-Path $paths.FEATURE_DIR) {
-    $statusFile = Join-Path $paths.FEATURE_DIR 'status.json'
-    $timestamp = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
-    $statusObj = @{ command = $Command; status = 'completed'; timestamp = $timestamp }
-    $jsonContent = $statusObj | ConvertTo-Json -Compress
-    Set-Content -Path $statusFile -Value $jsonContent -Encoding UTF8 -NoNewline
-}
+# --- 1. Notify app: phase completed ---
+Send-PhaseNotify -Command $Command -Status 'completed' -RepoRoot $paths.REPO_ROOT
 
 # --- 2. Check extensions.yml for after-hooks ---
 $hasExtensions = $false

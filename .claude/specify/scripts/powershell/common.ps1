@@ -213,3 +213,21 @@ function Resolve-Template {
 
     return $null
 }
+
+function Send-PhaseNotify {
+    param(
+        [Parameter(Mandatory=$true)][string]$Command,
+        [Parameter(Mandatory=$true)][ValidateSet('started','completed')][string]$Status,
+        [Parameter(Mandatory=$true)][string]$RepoRoot
+    )
+    $payload = @{
+        command     = $Command
+        status      = $Status
+        projectPath = $RepoRoot -replace '\\','/'
+    } | ConvertTo-Json -Compress
+    try {
+        Invoke-RestMethod -Uri 'http://127.0.0.1:3847/notify' -Method Post -ContentType 'application/json' -Body $payload -TimeoutSec 2 | Out-Null
+    } catch {
+        # App might not be running — fail silently
+    }
+}
