@@ -1,44 +1,71 @@
-﻿# walk-the-spec Development Guidelines
+# walk-the-spec Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-26
+Electron desktop app that monitors local projects for speckit artifacts (`.claude/specs/<branch>/*.md`) and renders them as an interactive dashboard.
 
-## Active Technologies
-- TypeScript 5.x (existing) + Electron, React 19, unified/remark, chokidar (all existing — no new deps) (003-review-heal-tracking)
-- Filesystem only (review.md per branch, refactor-backlog.md per project) (003-review-heal-tracking)
-- TypeScript 5.x (existing) + Tailwind CSS v4, @tailwindcss/vite (new). Electron, React 19, electron-vite (existing) (003-tailwind-migration)
-- N/A (styling refactor) (003-tailwind-migration)
+## Architecture
 
-- TypeScript 5.x (shared across main process and renderer) + Electron (desktop shell), React 19 (renderer UI), electron-vite (build tooling), chokidar (file watching), unified/remark (markdown parsing) (002-spec-board)
-
-## Project Structure
+Two-process Electron app: main process (filesystem, parsing, IPC) + renderer (React 19 SPA).
 
 ```text
-src/main/       # Electron main process (IPC handlers, parsers, filesystem)
-src/preload/    # Preload script (contextBridge IPC exposure)
-src/renderer/   # React UI (components, hooks, services)
-tests/          # Vitest unit + integration tests
+src/main/          # Electron main process — IPC handlers, 8 parsers, file watchers, notifications
+src/preload/       # contextBridge — thin IPC bridge (no business logic)
+src/renderer/      # React 19 SPA — components, hooks, services
+tests/             # Vitest unit + integration tests
 ```
+
+**Data flow**: File change → chokidar (300ms debounce) → IPC event → React re-render → hooks fetch via IPC → parsers extract elements → components render.
+
+## Context Routing Table
+
+Read the right doc for your task — don't read all source files.
+
+| Workflow | Read first | Also read if needed |
+|----------|-----------|-------------------|
+| New feature / general orientation | `docs/architecture.md` | — |
+| `/spec.review` or code review | `docs/architecture.md` | Area guide for files under review |
+| Add/modify parser | `docs/parsers.md` | `docs/ipc.md` (to register handler) |
+| Add/modify IPC channel | `docs/ipc.md` | — |
+| Add/modify UI component | `docs/renderer.md` | `docs/ipc.md` (if new data needed) |
+| Modify artifact editing | `docs/writer.md` | `docs/ipc.md` (edit-field handler) |
+| Modify file watching / phase detection / notifications | `docs/architecture.md` (inline sections) | — |
+
+## Documentation
+
+This table is the **single source of truth** for file-to-doc coverage. Do not duplicate this mapping in doc files.
+
+| File | Covers source paths |
+|------|---------------------|
+| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/preload/` |
+| `docs/parsers.md` | `src/main/parser/` |
+| `docs/ipc.md` | `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/services/api.ts` |
+| `docs/renderer.md` | `src/renderer/src/components/`, `src/renderer/src/hooks/` |
+| `docs/writer.md` | `src/main/writer/` |
+
+**Doc rules**: CLAUDE.md owns the index (what covers what). Doc files contain only deep technical content — no "Key Files" tables, no file listings, no app descriptions that repeat this file. Reference source files inline in prose, not in summary tables.
+
+## Tech Stack
+
+TypeScript 5.x, Electron, React 19, electron-vite, Tailwind CSS v4, chokidar (file watching), unified/remark (markdown parsing), Vitest (testing).
 
 ## Commands
 
-npm test; npm run dev; npm run build
+```
+npm run dev      # Start dev server (electron-vite)
+npm run build    # Production build
+npm test         # Run Vitest tests
+```
 
 ## Code Style
 
-TypeScript 5.x: Follow standard conventions. Dark Radix Mauve theme for UI (accessibility-tested).
+TypeScript strict mode. Dark Radix Mauve theme (accessibility-tested). See `.claude/specify/memory/constitution.md` for full engineering standards.
 
 ## Design Principles
 
-- No wasted space — every pixel should serve a purpose
-- Colorful dark theme — fun and easy on the eyes for night sessions
-- Persistent project sidebar — all projects visible at all times with phase status
-- 1-click project switching — sidebar is always visible regardless of view
-- Native OS integration — folder picker, window management via Electron
-
-## Recent Changes
-- 004-cross-platform-support: Added Electron
-- 004-fix-phase-notifications: Added Electron
-
+- No wasted space — every pixel serves a purpose
+- Colorful dark theme — easy on eyes for night sessions
+- Persistent project sidebar — always visible with phase status
+- 1-click project switching
+- Native OS integration (folder picker, window management)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

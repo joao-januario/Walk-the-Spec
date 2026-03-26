@@ -1,4 +1,6 @@
-# API Contracts: Spec Board
+# API Contracts: Spec Board (SUPERSEDED)
+
+> **This document is outdated.** It describes REST/WebSocket contracts from the original Express backend. The app now uses Electron IPC. See `docs/ipc.md` for the current IPC channel registry.
 
 **Branch**: `002-spec-board` | **Date**: 2026-03-24
 

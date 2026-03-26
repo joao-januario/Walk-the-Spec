@@ -1,4 +1,6 @@
-# Quickstart: Spec Board
+# Quickstart: Spec Board (SUPERSEDED)
+
+> **This document is outdated.** It describes the original Express + backend/frontend architecture which has been replaced by Electron. See `docs/architecture.md` for the current architecture.
 
 **Branch**: `002-spec-board` | **Date**: 2026-03-24
 

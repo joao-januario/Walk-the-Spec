@@ -43,11 +43,26 @@ npm test
 - If **tests fail**: STOP. Report failures. Say: "Tests must pass before concluding. Fix the failing tests and try again."
 - If both **pass**: Continue.
 
-### Step 3: Proceed
+### Step 3: Update Documentation
 
-Tests passed — proceed immediately. No confirmation needed. The user already invoked the command.
+If the project's agent context file (e.g., `CLAUDE.md`) has a Documentation section with file coverage mappings, update any docs affected by this feature:
 
-### Step 4: Stage All Current Work
+1. Run `git diff main --name-only` to see all files changed in this feature branch
+2. Read the Documentation table in `CLAUDE.md` (or equivalent agent context file) — this is the single source of truth for which docs cover which source paths
+3. Cross-reference the changed files against the coverage mappings. For each doc that covers changed files, update only the specific sections affected
+4. If docs were updated, verify the Documentation table and Context Routing Table in `CLAUDE.md` are still accurate
+5. If no documentation table exists or no documented areas were touched, report "No doc changes needed" and proceed
+
+**Rules**:
+- Only update the specific sections affected by the feature changes — do not rewrite entire docs
+- The agent context file (e.g., `CLAUDE.md`) owns the index: file-to-doc coverage mapping, routing table, directory overview. Do not duplicate this information in doc files (no "Key Files" tables, no file listing summaries, no app descriptions that repeat the index)
+- Doc files contain deep technical content only — reference source files inline in prose, not in summary tables
+
+### Step 4: Proceed
+
+Tests passed, docs updated — proceed immediately. No confirmation needed. The user already invoked the command.
+
+### Step 5: Stage All Current Work
 
 Stage all changes that represent the feature work:
 
@@ -57,7 +72,7 @@ git add -A
 
 Review what's staged. If there are files that look like they shouldn't be committed (`.env`, credentials, large binaries), warn the user before proceeding.
 
-### Step 5: Delete Branch-Specific Artifacts
+### Step 6: Delete Branch-Specific Artifacts
 
 Delete the entire feature spec directory:
 
@@ -90,7 +105,7 @@ Stage the deletions:
 git add -A
 ```
 
-### Step 6: Commit
+### Step 7: Commit
 
 Create a single commit with all work + artifact cleanup:
 
@@ -112,7 +127,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 
 Use a HEREDOC for the message to preserve formatting.
 
-### Step 7: Squash Merge to Main
+### Step 8: Squash Merge to Main
 
 ```bash
 git checkout main && git merge --squash <BRANCH_NAME> && git commit -m "<same commit message as step 6>"
@@ -125,7 +140,7 @@ If there are merge conflicts:
 - Do NOT attempt to resolve them automatically
 - Say: "Merge conflicts detected. Resolve them manually, then run `/spec.conclude` again."
 
-### Step 8: Clean Up Branch
+### Step 9: Clean Up Branch
 
 After successful merge:
 
@@ -133,7 +148,7 @@ After successful merge:
 git branch -d <BRANCH_NAME>
 ```
 
-### Step 9: Report Completion
+### Step 10: Report Completion
 
 ```markdown
 ## Feature Concluded

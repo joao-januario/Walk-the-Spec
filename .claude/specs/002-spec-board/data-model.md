@@ -1,4 +1,6 @@
-# Data Model: Spec Board
+# Data Model: Spec Board (SUPERSEDED)
+
+> **This document is outdated.** The entity model described here is largely still accurate but file paths and storage mechanisms have changed. See `docs/architecture.md` for the current architecture and `src/renderer/src/types/index.ts` for current type definitions.
 
 **Branch**: `002-spec-board` | **Date**: 2026-03-24
 

@@ -57,6 +57,14 @@ async function handleNotify(payload: NotifyPayload): Promise<void> {
       timestamp,
     });
 
+    // Flash taskbar (Windows) or bounce dock icon (macOS) to grab attention
+    if (mainWindow && !mainWindow.isFocused()) {
+      mainWindow.flashFrame(true);
+      if (process.platform === 'darwin') {
+        app.dock?.bounce('informational');
+      }
+    }
+
     void playNotificationSound(config.settings.soundVolume, payload.command);
 
     if (config.settings.osNotifications) {
