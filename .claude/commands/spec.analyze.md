@@ -1,5 +1,6 @@
 ---
-description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.
+description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md and plan.md after plan generation.
+model: sonnet
 ---
 
 ## User Input
@@ -10,27 +11,26 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.analyze" -Status "started"` to signal command start.
+**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.analyze" -Phase analyze -Json` to signal command start.
 
 ## Goal
 
-Identify inconsistencies, duplications, ambiguities, and underspecified items across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/speckit.tasks` has successfully produced a complete `tasks.md`.
+Identify inconsistencies, duplications, ambiguities, and underspecified items across the two core artifacts (`spec.md`, `plan.md`) before implementation. This command MUST run only after `/spec.plan` has successfully produced a complete `plan.md`.
 
 ## Operating Constraints
 
 **STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
 
-**Constitution Authority**: The project constitution (`.claude/specify/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/speckit.analyze`.
+**Constitution Authority**: The project constitution (`.claude/specify/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/spec.analyze`.
 
 ## Execution Steps
 
 ### 1. Initialize Analysis Context
 
-Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
+Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
 
 - SPEC = FEATURE_DIR/spec.md
 - PLAN = FEATURE_DIR/plan.md
-- TASKS = FEATURE_DIR/tasks.md
 
 Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
@@ -54,14 +54,6 @@ Load only the minimal necessary context from each artifact:
 - Phases
 - Technical constraints
 
-**From tasks.md:**
-
-- Task IDs
-- Descriptions
-- Phase grouping
-- Parallel markers [P]
-- Referenced file paths
-
 **From constitution:**
 
 - Load `.claude/specify/memory/constitution.md` for principle validation
@@ -72,7 +64,7 @@ Create internal representations (do not include raw artifacts in output):
 
 - **Requirements inventory**: Each functional + non-functional requirement with a stable key (derive slug based on imperative phrase; e.g., "User can upload file" → `user-can-upload-file`)
 - **User story/action inventory**: Discrete user actions with acceptance criteria
-- **Task coverage mapping**: Map each task to one or more requirements or stories (inference by keyword / explicit reference patterns like IDs or key phrases)
+- **Plan coverage mapping**: Map each plan phase/component to one or more requirements or stories (inference by keyword / explicit reference patterns like IDs or key phrases)
 - **Constitution rule set**: Extract principle names and MUST/SHOULD normative statements
 
 ### 4. Detection Passes (Token-Efficient Analysis)
@@ -93,7 +85,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 
 - Requirements with verbs but missing object or measurable outcome
 - User stories missing acceptance criteria alignment
-- Tasks referencing files or components not defined in spec/plan
+- Plan phases referencing files or components not defined in spec
 
 #### D. Constitution Alignment
 
@@ -102,15 +94,15 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 
 #### E. Coverage Gaps
 
-- Requirements with zero associated tasks
-- Tasks with no mapped requirement/story
-- Non-functional requirements not reflected in tasks (e.g., performance, security)
+- Requirements with zero associated plan phases/components
+- Plan phases with no mapped requirement/story
+- Non-functional requirements not reflected in plan (e.g., performance, security)
 
 #### F. Inconsistency
 
 - Terminology drift (same concept named differently across files)
 - Data entities referenced in plan but absent in spec (or vice versa)
-- Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note)
+- Phase ordering contradictions (e.g., integration phases before foundational setup phases without dependency note)
 - Conflicting requirements (e.g., one requires Next.js while other specifies Vue)
 
 ### 5. Severity Assignment
@@ -119,7 +111,7 @@ Use this heuristic to prioritize findings:
 
 - **CRITICAL**: Violates constitution MUST, missing core spec artifact, or requirement with zero coverage that blocks baseline functionality
 - **HIGH**: Duplicate or conflicting requirement, ambiguous security/performance attribute, untestable acceptance criterion
-- **MEDIUM**: Terminology drift, missing non-functional task coverage, underspecified edge case
+- **MEDIUM**: Terminology drift, missing non-functional plan coverage, underspecified edge case
 - **LOW**: Style/wording improvements, minor redundancy not affecting execution order
 
 ### 6. Produce Compact Analysis Report
@@ -136,18 +128,18 @@ Output a Markdown report (no file writes) with the following structure:
 
 **Coverage Summary Table:**
 
-| Requirement Key | Has Task? | Task IDs | Notes |
-|-----------------|-----------|----------|-------|
+| Requirement Key | Has Plan Coverage? | Plan Phase/Component | Notes |
+|-----------------|-------------------|---------------------|-------|
 
 **Constitution Alignment Issues:** (if any)
 
-**Unmapped Tasks:** (if any)
+**Unmapped Plan Phases:** (if any)
 
 **Metrics:**
 
 - Total Requirements
-- Total Tasks
-- Coverage % (requirements with >=1 task)
+- Total Plan Phases/Components
+- Coverage % (requirements with >=1 plan phase)
 - Ambiguity Count
 - Duplication Count
 - Critical Issues Count
@@ -156,15 +148,15 @@ Output a Markdown report (no file writes) with the following structure:
 
 At end of report, output a concise Next Actions block:
 
-- If CRITICAL issues exist: Recommend resolving before `/speckit.implement`
+- If CRITICAL issues exist: Recommend resolving before `/spec.implement`
 - If only LOW/MEDIUM: User may proceed, but provide improvement suggestions
-- Provide explicit command suggestions: e.g., "Run /speckit.specify with refinement", "Run /speckit.plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'"
+- Provide explicit command suggestions: e.g., "Run /spec.specify with refinement", "Run /spec.plan to adjust architecture"
 
 ### 8. Offer Remediation
 
 Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.analyze" -Status "completed"` to signal command completion.
+**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.analyze" -Json` to signal command completion.
 
 ## Operating Principles
 

@@ -1,5 +1,5 @@
 ---
-description: Generate code deep-dives for notable implementation pieces — optional step after /speckit.implement
+description: Generate code deep-dives for notable implementation pieces — optional step after /spec.implement
 ---
 
 ## User Input
@@ -10,7 +10,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.dive" -Status "started"` to signal command start.
+**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.dive" -Phase dive -Json` to signal command start.
 
 ## Outline
 
@@ -70,6 +70,6 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 9. **Update glossary.md** — add any new terms that appear in the deep-dives.
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.dive" -Status "completed"` to signal command completion.
+**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.dive" -Json` to signal command completion.
 
-10. **Report completion**: List which overview steps got deep-dives and which didn't (with reasoning). Suggest `/speckit.review` or `/speckit.conclude` as next steps.
+10. **Report completion**: List which overview steps got deep-dives and which didn't (with reasoning). Suggest `/spec.review` or `/spec.conclude` as next steps.

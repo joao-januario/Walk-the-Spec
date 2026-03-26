@@ -1,10 +1,10 @@
 #!/usr/bin/env pwsh
 # Writes a status.json file to the current feature's specs directory.
-# Used by speckit commands to signal start/completion to the Walk the Spec app.
+# Used by spec commands to signal start/completion to the Walk the Spec app.
 #
 # Usage:
-#   write-status.ps1 -Command "speckit.plan" -Status "started"
-#   write-status.ps1 -Command "speckit.plan" -Status "completed" -Json
+#   write-status.ps1 -Command "spec.plan" -Status "started"
+#   write-status.ps1 -Command "spec.plan" -Status "completed" -Json
 
 param(
     [Parameter(Mandatory=$true)]

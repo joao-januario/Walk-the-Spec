@@ -1,5 +1,6 @@
 ---
-description: Apply fixes for all actionable findings (CRITICAL, HIGH, MEDIUM, LOW) from the most recent /speckit.review. NEEDS_REFACTOR is excluded (tracked in refactor-backlog.md).
+description: Apply fixes for all actionable findings (CRITICAL, HIGH, MEDIUM, LOW) from the most recent /spec.review. NEEDS_REFACTOR is excluded (tracked in refactor-backlog.md).
+model: sonnet
 ---
 
 ## User Input
@@ -10,11 +11,11 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.heal" -Status "started"` to signal command start.
+**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.heal" -Phase heal -Json` to signal command start.
 
 ## Goal
 
-Read the review findings from `.claude/specs/<BRANCH_NAME>/review.md` and apply the proposed fixes for CRITICAL and HIGH severity findings. This is the counterpart to `/speckit.review` — review finds problems, heal applies corrections.
+Read the review findings from `.claude/specs/<BRANCH_NAME>/review.md` and apply the proposed fixes for CRITICAL and HIGH severity findings. This is the counterpart to `/spec.review` — review finds problems, heal applies corrections.
 
 ## Execution Steps
 
@@ -28,11 +29,11 @@ git rev-parse --abbrev-ref HEAD
 
 Read `.claude/specs/<BRANCH_NAME>/review.md`.
 
-If the file doesn't exist: ERROR — "No review found. Run `/speckit.review` first."
+If the file doesn't exist: ERROR — "No review found. Run `/spec.review` first."
 
 Parse the findings table and proposed fixes sections. Extract all findings except NEEDS_REFACTOR.
 
-If no actionable findings exist (only NEEDS_REFACTOR or none): "Nothing to heal. Run `/speckit.conclude` to finalize."
+If no actionable findings exist (only NEEDS_REFACTOR or none): "Nothing to heal. Run `/spec.conclude` to finalize."
 
 ### Step 2: Present Fix Plan
 
@@ -128,10 +129,10 @@ Update `.claude/specs/<BRANCH_NAME>/review.md`:
 Remaining findings (MEDIUM/LOW — optional to fix):
 - ...
 
-Run `/speckit.conclude` or `/speckit.review`.
+Run `/spec.conclude` or `/spec.review`.
 ```
 
-If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL findings remain. Run `/speckit.review` to re-assess."
+If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL findings remain. Run `/spec.review` to re-assess."
 
 ## Scope Rules
 
@@ -140,12 +141,12 @@ If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL find
 - Each fix is applied independently — one broken fix doesn't block others
 - Tests are the safety net — if a fix breaks tests, revert it
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.heal" -Status "completed"` to signal command completion.
+**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.heal" -Json` to signal command completion.
 
 ## Error Handling
 
-- **No review.md**: Stop. Tell user to run `/speckit.review` first.
-- **No CRITICAL/HIGH findings**: Nothing to do. Suggest `/speckit.conclude`.
+- **No review.md**: Stop. Tell user to run `/spec.review` first.
+- **No CRITICAL/HIGH findings**: Nothing to do. Suggest `/spec.conclude`.
 - **File changed since review**: Skip that fix, note it.
 - **Fix breaks tests**: Revert, mark as manual, continue.
 - **All fixes fail**: Report all as manual. User must fix by hand.

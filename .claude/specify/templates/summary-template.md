@@ -89,7 +89,7 @@
     is WHY — why this approach, what constraints shaped it, what tradeoffs.
     Support with code, diagrams, folder trees — text alone is often not
     enough.
-  - CODE DEEP-DIVES: Generated separately via `/speckit.dive`. Not part
+  - CODE DEEP-DIVES: Generated separately via `/spec.dive`. Not part
     of the summary.
   - EDGE CASES & GOTCHAS: Non-obvious things a future developer needs to know.
 
@@ -216,7 +216,7 @@
 [Risks and limitations]
 
 <!--
-  CODE DEEP-DIVES are generated separately via `/speckit.dive` and stored
+  CODE DEEP-DIVES are generated separately via `/spec.dive` and stored
   in `deep-dives.md` as a separate artifact with its own tab. They are NOT
   part of this summary document. The summary focuses on overview, design
   decisions, and edge cases. Deep-dives are optional and generated on demand.

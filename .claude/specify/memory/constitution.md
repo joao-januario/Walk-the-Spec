@@ -118,7 +118,7 @@ No wasted space. Every pixel serves a purpose.
 - **MUST** support 1-click project switching — the sidebar is the primary navigation.
 - **MUST** use native OS integration where available (folder picker, window management).
 - **MUST NOT** add a top bar, header, or chrome that wastes vertical space without adding function.
-- **SHOULD** show phase-adaptive hero content — the most relevant info for the current speckit phase front and center.
+- **SHOULD** show phase-adaptive hero content — the most relevant info for the current spec phase front and center.
 
 ## Governance
 
@@ -127,7 +127,7 @@ This constitution defines the non-negotiable engineering standards for Spec Boar
 - All code reviews MUST verify compliance with these principles.
 - Violations MUST be justified with a documented rationale and a comment in the code explaining why.
 - Amendments require updating this file, incrementing the version, and propagating changes to dependent templates.
-- The `/speckit.analyze` command validates artifacts against these principles.
+- The `/spec.analyze` command validates artifacts against these principles.
 - Use CLAUDE.md for runtime development guidance that supplements (but does not override) this constitution.
 
 **Version**: 1.1.0 | **Ratified**: 2026-03-24 | **Last Amended**: 2026-03-25

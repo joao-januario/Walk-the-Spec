@@ -9,14 +9,17 @@ export function detectPhase(artifactFiles: string[], tasksContent?: string): Pha
   const hasReview = artifactFiles.includes('review.md');
   const hasSummary = artifactFiles.includes('summary.md');
 
-  if (hasReview && hasTasks && tasksContent && CHECKED_PATTERN.test(tasksContent)) {
+  // Review phase: review.md exists after implementation
+  if (hasReview && (hasSummary || (hasTasks && tasksContent && CHECKED_PATTERN.test(tasksContent)))) {
     return 'review';
   }
 
-  if (hasSummary && hasTasks && tasksContent && CHECKED_PATTERN.test(tasksContent)) {
+  // Summary phase: summary.md exists (implementation complete)
+  if (hasSummary) {
     return 'summary';
   }
 
+  // Legacy support: tasks.md still works for older branches
   if (hasTasks) {
     if (tasksContent && CHECKED_PATTERN.test(tasksContent)) {
       return 'implement';

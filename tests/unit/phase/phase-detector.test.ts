@@ -54,7 +54,11 @@ describe('phase-detector', () => {
   });
 
   // Summary phase tests
-  it('returns "summary" when summary.md exists with checked tasks and no review.md', () => {
+  it('returns "summary" when summary.md exists without tasks.md (new pipeline)', () => {
+    expect(detectPhase(['spec.md', 'plan.md', 'summary.md'])).toBe('summary');
+  });
+
+  it('returns "summary" when summary.md exists with checked tasks (legacy)', () => {
     const tasksContent = '- [x] T001 Done\n- [ ] T002 Not done';
     expect(detectPhase(['spec.md', 'plan.md', 'tasks.md', 'summary.md'], tasksContent)).toBe('summary');
   });
@@ -64,12 +68,11 @@ describe('phase-detector', () => {
     expect(detectPhase(['tasks.md', 'summary.md', 'review.md'], tasksContent)).toBe('review');
   });
 
-  it('returns "tasks" when summary.md exists but no tasks are checked', () => {
-    const tasksContent = '- [ ] T001 Not done';
-    expect(detectPhase(['spec.md', 'plan.md', 'tasks.md', 'summary.md'], tasksContent)).toBe('tasks');
+  it('returns "review" when review.md and summary.md exist without tasks.md (new pipeline)', () => {
+    expect(detectPhase(['spec.md', 'plan.md', 'summary.md', 'review.md'])).toBe('review');
   });
 
-  it('returns "specify" when summary.md exists alone with spec.md', () => {
-    expect(detectPhase(['spec.md', 'summary.md'])).toBe('specify');
+  it('returns "summary" when summary.md exists alone with spec.md', () => {
+    expect(detectPhase(['spec.md', 'summary.md'])).toBe('summary');
   });
 });

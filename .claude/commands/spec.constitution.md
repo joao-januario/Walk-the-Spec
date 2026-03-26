@@ -2,7 +2,7 @@
 description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
 handoffs: 
   - label: Build Specification
-    agent: speckit.specify
+    agent: spec.specify
     prompt: Implement the feature specification based on the updated constitution. I want to build...
 ---
 
@@ -14,7 +14,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.constitution" -Status "started"` to signal command start.
+**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.constitution" -Phase constitution -Json -SkipPrereqs` to signal command start.
 
 ## Outline
 
@@ -72,7 +72,7 @@ Follow this execution flow:
    - Any files flagged for manual follow-up.
    - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.constitution" -Status "completed"` to signal command completion.
+**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.constitution" -Json` to signal command completion.
 
 Formatting & Style Requirements:
 

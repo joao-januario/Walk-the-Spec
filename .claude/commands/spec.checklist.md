@@ -1,5 +1,6 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
+model: sonnet
 ---
 
 ## Checklist Purpose: "Unit Tests for English"
@@ -31,7 +32,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.checklist" -Status "started"` to signal command start.
+**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.checklist" -Phase checklist -Json` to signal command start.
 
 ## Execution Steps
 
@@ -40,7 +41,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Clarify intent (dynamic)**: Derive up to THREE initial contextual clarifying questions (no pre-baked catalog). They MUST:
-   - Be generated from the user's phrasing + extracted signals from spec/plan/tasks
+   - Be generated from the user's phrasing + extracted signals from spec/plan
    - Only ask about information that materially changes checklist content
    - Be skipped individually if already unambiguous in `$ARGUMENTS`
    - Prefer precision over breadth
@@ -75,13 +76,11 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Derive checklist theme (e.g., security, review, deploy, ux)
    - Consolidate explicit must-have items mentioned by user
    - Map focus selections to category scaffolding
-   - Infer any missing context from spec/plan/tasks (do NOT hallucinate)
+   - Infer any missing context from spec/plan (do NOT hallucinate)
 
 4. **Load feature context**: Read from FEATURE_DIR:
    - spec.md: Feature requirements and scope
    - plan.md (if exists): Technical details, dependencies
-   - tasks.md (if exists): Implementation tasks
-
    **Context Loading Strategy**:
    - Load only necessary portions relevant to active focus areas (avoid full-file dumping)
    - Prefer summarizing long sections into concise scenario/requirement bullets
@@ -214,7 +213,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Actor/timing
    - Any explicit user-specified must-have items incorporated
 
-**Important**: Each `/speckit.checklist` command invocation uses a short, descriptive checklist filename and either creates a new file or appends to an existing one. This allows:
+**Important**: Each `/spec.checklist` command invocation uses a short, descriptive checklist filename and either creates a new file or appends to an existing one. This allows:
 
 - Multiple checklists of different types (e.g., `ux.md`, `test.md`, `security.md`)
 - Simple, memorable filenames that indicate checklist purpose
@@ -222,7 +221,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 To avoid clutter, use descriptive types and clean up obsolete checklists when done.
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.checklist" -Status "completed"` to signal command completion.
+**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.checklist" -Json` to signal command completion.
 
 ## Example Checklist Types & Sample Items
 

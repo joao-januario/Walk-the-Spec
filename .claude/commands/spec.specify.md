@@ -1,11 +1,12 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
+model: sonnet
 handoffs: 
   - label: Build Technical Plan
-    agent: speckit.plan
+    agent: spec.plan
     prompt: Create a plan for the spec. I am building with...
   - label: Clarify Spec Requirements
-    agent: speckit.clarify
+    agent: spec.clarify
     prompt: Clarify specification requirements
     send: true
 ---
@@ -52,11 +53,11 @@ You **MUST** consider the user input before proceeding (if not empty).
     ```
 - If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.specify" -Status "started"` to signal command start.
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "spec.specify" -Status "started"` to signal command start.
 
 ## Outline
 
-The text the user typed after `/speckit.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
+The text the user typed after `/spec.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
 Given that feature description, do this:
 
@@ -153,7 +154,7 @@ Given that feature description, do this:
       
       ## Notes
       
-      - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`
+      - Items marked incomplete require spec updates before `/spec.clarify` or `/spec.plan`
       ```
 
    b. **Run Validation Check**: Review the spec against each checklist item:
@@ -166,8 +167,8 @@ Given that feature description, do this:
 
       - **If items fail (excluding [NEEDS CLARIFICATION])**:
         1. List the failing items and specific issues
-        2. Update the spec to address each issue
-        3. Re-run validation until all items pass (max 3 iterations)
+        2. Update the spec content in memory to address each issue
+        3. Validate the spec content in memory against checklist criteria. Only write spec.md once all checks pass internally (max 3 mental validation passes). Do not re-read the file after writing.
         4. If still failing after 3 iterations, document remaining issues in checklist notes and warn user
 
       - **If [NEEDS CLARIFICATION] markers remain**:
@@ -205,11 +206,11 @@ Given that feature description, do this:
         8. Update the spec by replacing each [NEEDS CLARIFICATION] marker with the user's selected or provided answer
         9. Re-run validation after all clarifications are resolved
 
-   d. **Update Checklist**: After each validation iteration, update the checklist file with current pass/fail status
+   d. **Update Checklist**: Write the final checklist pass/fail status once, after all validation is complete.
 
-7. Report completion with branch name, spec file path, checklist results, and readiness for the next phase (`/speckit.clarify` or `/speckit.plan`).
+7. Report completion with branch name, spec file path, checklist results, and readiness for the next phase (`/spec.clarify` or `/spec.plan`).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.specify" -Status "completed"` to signal command completion.
+**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "spec.specify" -Status "completed"` to signal command completion.
 
 8. **Check for extension hooks**: After reporting completion, check if `.claude/specify/extensions.yml` exists in the project root.
    - If it exists, read it and look for entries under the `hooks.after_specify` key

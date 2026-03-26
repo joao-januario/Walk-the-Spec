@@ -1,5 +1,6 @@
 ---
 description: Review the current branch against best practices for the underlying technologies. Produces a structured findings report with severity, location, and recommendations.
+model: sonnet
 ---
 
 ## User Input
@@ -10,7 +11,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.review" -Status "started"` to signal command start.
+**Status Signal**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.review" -Phase review -Json` to signal command start.
 
 ## Goal
 
@@ -40,6 +41,8 @@ git merge-base HEAD main
 git diff --name-only $(git merge-base HEAD main)..HEAD
 git diff --stat $(git merge-base HEAD main)..HEAD
 ```
+
+> **Note**: Chain these git operations into a single Bash call where possible.
 
 Extract:
 - **CURRENT_BRANCH**: The active branch name
@@ -194,9 +197,9 @@ One heading block per finding. Each finding MUST include Why and Gain. Code snip
 
 ### Phase 6: Write Review Artifact
 
-Write the full report to `.claude/specs/<BRANCH_NAME>/review.md`. This persists the review as part of the branch's artifact trail alongside spec.md, plan.md, tasks.md, etc.
+Write the full report to `.claude/specs/<BRANCH_NAME>/review.md`. This persists the review as part of the branch's artifact trail alongside spec.md, plan.md, etc.
 
-The file should contain the complete report (summary table, all findings, proposed fixes, cross-vertical observations). It is cleaned up when `/speckit.conclude` deletes the branch artifacts.
+The file should contain the complete report (summary table, all findings, proposed fixes, cross-vertical observations). It is cleaned up when `/spec.conclude` deletes the branch artifacts.
 
 If the file already exists (re-review), overwrite it with the new report and note "Re-reviewed on YYYY-MM-DD" at the top.
 
@@ -220,13 +223,13 @@ Continue numbering from the last existing ID. Do not duplicate existing entries 
 
 ### Phase 9: Suggest Next Step
 
-Output: "Run `/speckit.heal` to apply fixes for all findings (CRITICAL, HIGH, MEDIUM, LOW). Optionally run `/speckit.dive` to generate code deep-dives."
+Output: "Run `/spec.heal` to apply fixes for all findings (CRITICAL, HIGH, MEDIUM, LOW). Optionally run `/spec.dive` to generate code deep-dives."
 
-If no actionable findings exist (only NEEDS_REFACTOR or none): "No fixes needed. Optionally run `/speckit.dive` to generate code deep-dives, or `/speckit.conclude` to finalize the branch."
+If no actionable findings exist (only NEEDS_REFACTOR or none): "No fixes needed. Optionally run `/spec.dive` to generate code deep-dives, or `/spec.conclude` to finalize the branch."
 
-**IMPORTANT**: `/speckit.review` is strictly read-only. It MUST NOT modify any source files. All fixes are applied by `/speckit.heal`.
+**IMPORTANT**: `/spec.review` is strictly read-only. It MUST NOT modify any source files. All fixes are applied by `/spec.heal`.
 
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.review" -Status "completed"` to signal command completion.
+**Status Signal**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.review" -Json` to signal command completion.
 
 ## Operating Principles
 
@@ -236,4 +239,4 @@ If no actionable findings exist (only NEEDS_REFACTOR or none): "No fixes needed.
 - **Only review changed code** — pre-existing issues are out of scope.
 - **Be thorough over fast** — check every rule against every changed line.
 - **Critical thinking** — flag real problems, not theoretical concerns.
-- **NEVER modify files** — review is read-only. Fixes are applied by `/speckit.heal`.
+- **NEVER modify files** — review is read-only. Fixes are applied by `/spec.heal`.

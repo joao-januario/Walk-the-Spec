@@ -1,5 +1,5 @@
 ---
-description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
+description: Execute the implementation plan by deriving tasks from plan.md artifacts and implementing them in priority order.
 ---
 
 ## User Input
@@ -12,43 +12,11 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Pre-Execution Checks
 
-**Check for extension hooks (before implementation)**:
-- Check if `.claude/specify/extensions.yml` exists in the project root.
-- If it exists, read it and look for entries under the `hooks.before_implement` key
-- If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
-- Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
-- For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
-  - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
-- For each executable hook, output the following based on its `optional` flag:
-  - **Optional hook** (`optional: true`):
-    ```
-    ## Extension Hooks
-
-    **Optional Pre-Hook**: {extension}
-    Command: `/{command}`
-    Description: {description}
-
-    Prompt: {prompt}
-    To execute: `/{command}`
-    ```
-  - **Mandatory hook** (`optional: false`):
-    ```
-    ## Extension Hooks
-
-    **Automatic Pre-Hook**: {extension}
-    Executing: `/{command}`
-    EXECUTE_COMMAND: {command}
-    
-    Wait for the result of the hook command before proceeding to the Outline.
-    ```
-- If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
-
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.implement" -Status "started"` to signal command start.
+**Bootstrap**: Run `.claude/specify/scripts/powershell/bootstrap-phase.ps1 -Command "spec.implement" -Phase implement -Json` from repo root and parse JSON for FEATURE_DIR, AVAILABLE_DOCS, HAS_EXTENSIONS. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 ## Outline
 
-1. Run `.claude/specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Load context**: Read plan.md, spec.md, and all available context files (research.md, data-model.md, contracts/, quickstart.md) in parallel.
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Scan all checklist files in the checklists/ directory
@@ -81,13 +49,7 @@ You **MUST** consider the user input before proceeding (if not empty).
      - Display the table showing all checklists passed
      - Automatically proceed to step 3
 
-3. Load and analyze the implementation context:
-   - **REQUIRED**: Read tasks.md for the complete task list and execution plan
-   - **REQUIRED**: Read plan.md for tech stack, architecture, and file structure
-   - **IF EXISTS**: Read data-model.md for entities and relationships
-   - **IF EXISTS**: Read contracts/ for API specifications and test requirements
-   - **IF EXISTS**: Read research.md for technical decisions and constraints
-   - **IF EXISTS**: Read quickstart.md for integration scenarios
+3. **Generate execution plan**: Generate an internal execution plan from plan.md artifacts. Derive task ordering from the plan's file structure and the spec's user story priorities. Execute: infrastructure/setup first, then foundational components, then user stories in priority order, then polish.
 
 4. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
@@ -133,49 +95,40 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **Terraform**: `.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`
    - **Kubernetes/k8s**: `*.secret.yaml`, `secrets/`, `.kube/`, `kubeconfig*`, `*.key`, `*.crt`
 
-5. Parse tasks.md structure and extract:
-   - **Task phases**: Setup, Tests, Core, Integration, Polish
-   - **Task dependencies**: Sequential vs parallel execution rules
-   - **Task details**: ID, description, file paths, parallel markers [P]
-   - **Execution flow**: Order and dependency requirements
-
-6. Execute implementation following the task plan:
+5. Execute implementation following the execution plan:
    - **Phase-by-phase execution**: Complete each phase before moving to the next
-   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together  
    - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
    - **File-based coordination**: Tasks affecting the same files must run sequentially
    - **Validation checkpoints**: Verify each phase completion before proceeding
 
-7. Implementation execution rules:
+6. Implementation execution rules:
    - **Setup first**: Initialize project structure, dependencies, configuration
    - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
    - **Core development**: Implement models, services, CLI commands, endpoints
    - **Integration work**: Database connections, middleware, logging, external services
    - **Polish and validation**: Unit tests, performance optimization, documentation
 
-8. Progress tracking and error handling:
-   - Report progress after each completed task
-   - Halt execution if any non-parallel task fails
-   - For parallel tasks [P], continue with successful tasks, report failed ones
+7. Progress tracking and error handling:
+   - Report progress after each completed phase
+   - Halt execution if a critical task fails
    - Provide clear error messages with context for debugging
    - Suggest next steps if implementation cannot proceed
-   - **CRITICAL**: After EACH PHASE completes, immediately update tasks.md to mark completed tasks as `[x]` and update the progress line at the top. Do NOT batch task updates to the end — the user needs real-time visibility into progress. If the user checks tasks.md mid-implementation, it must reflect the current state accurately.
 
-9. Completion validation:
+8. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
-10. **Generate implementation summary** (if not already present):
+9. **Generate implementation summary** (if not already present):
    - Check if `summary.md` exists in FEATURE_DIR
-   - **If it already exists**: Log "Summary already exists — skipping generation" and proceed to step 11
+   - **If it already exists**: Log "Summary already exists — skipping generation" and proceed to step 10
    - **If it does not exist**:
      1. Read the summary template from `.claude/specify/templates/summary-template.md` — follow its structure EXACTLY
-     2. Read all available artifacts from FEATURE_DIR: spec.md, plan.md, tasks.md, research.md (if exists)
-     3. Review all code changes made during this implementation (use `git diff main` or the task list file paths)
-     4. Read the actual source files you created/modified — you need the real code for snippets
+     2. Reference the spec.md, plan.md, and research.md content already loaded at the start of this phase. Only re-read if context has been truncated.
+     3. Review all code changes made during this implementation (use `git diff main` or the implementation file paths)
+     4. Use the source code from your implementation work (already in context) for code snippets. Only read files if context has been truncated.
      5. Generate `summary.md` in FEATURE_DIR following the template's mandatory section structure:
         - **Overview**: What was built, mental model, prerequisites (NO code)
         - **Architecture Walkthrough**: Numbered steps following the data flow, with actual code snippets at each step and **Why this matters** callouts
@@ -191,42 +144,11 @@ You **MUST** consider the user input before proceeding (if not empty).
         - Write as an engineer explaining to another engineer during code review
      7. Write the generated content to `FEATURE_DIR/summary.md`
 
-11. **Commit implementation work**:
-   - Stage all changed files (`git add -A`)
-   - Commit with message: `feat(<branch>): implement <feature summary>`
-   - This ensures `/speckit.review` can diff the branch against main
+10. **Commit implementation work**:
+    - Stage all changed files (`git add -A`)
+    - Commit with message: `feat(<branch>): implement <feature summary>`
+    - This ensures `/spec.review` can diff the branch against main
 
-12. Suggest next steps: "Run `/speckit.review` or `/speckit.conclude`."
+11. Suggest next steps: "Run `/spec.review` or `/spec.conclude`."
 
-Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
-
-**Status Signal**: Run `.claude/specify/scripts/powershell/write-status.ps1 -Command "speckit.implement" -Status "completed"` to signal command completion.
-
-13. **Check for extension hooks**: After completion validation, check if `.claude/specify/extensions.yml` exists in the project root.
-    - If it exists, read it and look for entries under the `hooks.after_implement` key
-    - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
-    - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
-    - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-      - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
-      - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
-    - For each executable hook, output the following based on its `optional` flag:
-      - **Optional hook** (`optional: true`):
-        ```
-        ## Extension Hooks
-
-        **Optional Hook**: {extension}
-        Command: `/{command}`
-        Description: {description}
-
-        Prompt: {prompt}
-        To execute: `/{command}`
-        ```
-      - **Mandatory hook** (`optional: false`):
-        ```
-        ## Extension Hooks
-
-        **Automatic Hook**: {extension}
-        Executing: `/{command}`
-        EXECUTE_COMMAND: {command}
-        ```
-    - If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
+**Teardown**: Run `.claude/specify/scripts/powershell/teardown-phase.ps1 -Command "spec.implement" -Json` to signal command completion.
