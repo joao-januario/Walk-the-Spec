@@ -85,6 +85,22 @@ describe('config-manager', () => {
 
       expect(() => addProject(config, '/tmp/my-project')).toThrow(/already registered/);
     });
+
+    it('detects duplicates with different separators', () => {
+      const config: WalkTheSpecConfig = {
+        projects: [{ id: 'abc', name: 'existing', path: 'C:\\Users\\dev\\project' }],
+      };
+
+      expect(() => addProject(config, 'C:/Users/dev/project')).toThrow(/already registered/);
+    });
+
+    it('detects duplicates with different casing', () => {
+      const config: WalkTheSpecConfig = {
+        projects: [{ id: 'abc', name: 'existing', path: 'C:\\Users\\Dev\\Project' }],
+      };
+
+      expect(() => addProject(config, 'c:\\users\\dev\\project')).toThrow(/already registered/);
+    });
   });
 
   describe('removeProject', () => {

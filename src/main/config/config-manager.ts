@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
+import { normalizePathForComparison } from '../utils/paths.js';
 
 export interface ProjectEntry {
   id: string;
@@ -56,7 +57,9 @@ export function saveConfig(configPath: string = DEFAULT_CONFIG_PATH, config: Wal
 }
 
 export function addProject(config: WalkTheSpecConfig, projectPath: string, name?: string): ProjectEntry {
-  const duplicate = config.projects.find((p) => p.path === projectPath);
+  const duplicate = config.projects.find(
+    (p) => normalizePathForComparison(p.path) === normalizePathForComparison(projectPath),
+  );
   if (duplicate) {
     throw new Error(`Path "${projectPath}" is already registered as "${duplicate.name}"`);
   }

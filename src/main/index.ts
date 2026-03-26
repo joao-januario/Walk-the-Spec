@@ -8,6 +8,7 @@ import { playNotificationSound } from './notifications/sound-player.js';
 import { startNotifyServer, stopNotifyServer, type NotifyPayload } from './notifications/notify-server.js';
 import { scanProject } from './projects/project-scanner.js';
 import { detectPhase } from './phase/phase-detector.js';
+import { normalizePathForComparison } from './utils/paths.js';
 import fs from 'fs';
 
 app.setAppUserModelId('com.speckit.walk-the-spec');
@@ -25,10 +26,9 @@ async function handleNotify(payload: NotifyPayload): Promise<void> {
     if (payload.status !== 'completed') return;
 
     const config = loadConfig();
-    // Find project by matching path
-    const normalise = (p: string) => p.replace(/\\/g, '/').toLowerCase();
+    // Find project by matching path (normalized for cross-platform comparison)
     const project = config.projects.find(
-      (p) => normalise(p.path) === normalise(payload.projectPath),
+      (p) => normalizePathForComparison(p.path) === normalizePathForComparison(payload.projectPath),
     );
     if (!project) {
       console.log(`[notifications] no project matched path ${payload.projectPath} — skipping`);

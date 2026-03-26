@@ -1,6 +1,7 @@
 import chokidar from 'chokidar';
 import path from 'path';
 import fs from 'fs';
+import { normalizePath } from '../utils/paths.js';
 
 export interface WatcherEvents {
   onSpecsChanged: (projectId: string, files: string[]) => void;
@@ -43,7 +44,7 @@ export function watchProject(projectId: string, projectPath: string, events: Wat
     });
 
     const handleChange = (filePath: string) => {
-      const relative = path.relative(specsDir, filePath);
+      const relative = normalizePath(path.relative(specsDir, filePath));
       pw.pendingFiles.add(relative);
 
       // Debounce 300ms

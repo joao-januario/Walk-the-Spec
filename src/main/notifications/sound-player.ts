@@ -29,9 +29,20 @@ function getSoundPath(command: string): string {
   return path.join(__dirname, '../../resources/sounds', file);
 }
 
-function playWindows(filePath: string): Promise<void> {
+function playWindows(filePath: string, volume: number): Promise<void> {
   return new Promise((resolve, reject) => {
-    const script = `(New-Object System.Media.SoundPlayer '${filePath.replace(/'/g, "''")}').PlaySync()`;
+    const escaped = filePath.replace(/'/g, "''");
+    const script = [
+      "Add-Type -AssemblyName PresentationCore",
+      "$p = New-Object System.Windows.Media.MediaPlayer",
+      `$p.Volume = ${volume}`,
+      `$p.Open([Uri]'${escaped}')`,
+      "Start-Sleep -Milliseconds 100",
+      "$p.Play()",
+      "while ($p.Position -eq [TimeSpan]::Zero) { Start-Sleep -Milliseconds 50 }",
+      "while ($p.Position -lt $p.NaturalDuration.TimeSpan) { Start-Sleep -Milliseconds 50 }",
+      "$p.Close()",
+    ].join('; ');
     execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], (err) => {
       if (err) {
         reject(err);
@@ -67,7 +78,7 @@ export async function playNotificationSound(volume: SoundVolume, command: string
 
   try {
     if (process.platform === 'win32') {
-      await playWindows(filePath);
+      await playWindows(filePath, numericVolume);
     } else if (process.platform === 'darwin') {
       await playMacOS(filePath, numericVolume);
     } else {

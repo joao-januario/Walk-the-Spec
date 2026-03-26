@@ -38,7 +38,7 @@ describe('sound-player', () => {
     expect(mockExecFile).not.toHaveBeenCalled();
   });
 
-  it('calls powershell.exe with SoundPlayer on Windows', async () => {
+  it('calls powershell.exe with MediaPlayer and volume on Windows', async () => {
     setPlatform('win32');
     simulateExecSuccess();
 
@@ -46,9 +46,34 @@ describe('sound-player', () => {
 
     expect(mockExecFile).toHaveBeenCalledWith(
       'powershell.exe',
-      expect.arrayContaining(['-NoProfile', '-NonInteractive', '-Command', expect.stringContaining('System.Media.SoundPlayer')]),
+      expect.arrayContaining(['-NoProfile', '-NonInteractive', '-Command']),
       expect.any(Function),
     );
+
+    const script = mockExecFile.mock.calls[0]![3] as unknown as string;
+    const args = mockExecFile.mock.calls[0]![1] as string[];
+    const cmdArg = args[args.indexOf('-Command') + 1]!;
+    expect(cmdArg).toContain('PresentationCore');
+    expect(cmdArg).toContain('MediaPlayer');
+    expect(cmdArg).toContain('.Volume = 0.5');
+  });
+
+  it('maps volume levels correctly on Windows', async () => {
+    setPlatform('win32');
+    simulateExecSuccess();
+
+    await playNotificationSound('high', 'spec.plan');
+    const argsHigh = mockExecFile.mock.calls[0]![1] as string[];
+    const cmdHigh = argsHigh[argsHigh.indexOf('-Command') + 1]!;
+    expect(cmdHigh).toContain('.Volume = 1');
+
+    mockExecFile.mockReset();
+    simulateExecSuccess();
+
+    await playNotificationSound('low', 'spec.plan');
+    const argsLow = mockExecFile.mock.calls[0]![1] as string[];
+    const cmdLow = argsLow[argsLow.indexOf('-Command') + 1]!;
+    expect(cmdLow).toContain('.Volume = 0.2');
   });
 
   it('calls afplay with volume flag on macOS', async () => {
