@@ -21,6 +21,36 @@
 
   Do NOT use key-value metadata lists. Write as an engineer explaining the
   approach to another engineer.
+
+  DIAGRAMS: When describing multi-component interactions, data flows, or
+  process pipelines, include a mermaid diagram alongside the prose. A diagram
+  communicates architecture in seconds where paragraphs of prose cannot.
+  Diagrams are OPTIONAL for trivial/single-file features — only include them
+  when they add clarity over text alone.
+
+  Use this heuristic to pick the right diagram type:
+
+  | Scenario                              | Diagram type       |
+  |---------------------------------------|--------------------|
+  | Data flowing through stages/processes | flowchart          |
+  | Component-to-component interaction    | sequenceDiagram    |
+  | Object lifecycle / state transitions  | stateDiagram-v2    |
+  | Entity relationships / data model     | classDiagram       |
+  | System boundary / deployment layout   | flowchart (subgraphs) |
+
+  For complex systems with many interacting components, break into focused
+  sub-diagrams (one per concern) rather than one monolithic chart.
+
+  OUTPUT FORMAT SPECIFICATION:
+
+  | Visual element           | Markdown convention                          |
+  |--------------------------|----------------------------------------------|
+  | Prose explanation         | Plain paragraphs                             |
+  | Diagram                  | Fenced block with ```mermaid language         |
+  | Code snippet             | Fenced block with language tag (```typescript)|
+  | File structure            | Fenced block with ```text language            |
+
+  NEVER use ASCII art for diagrams — always use ```mermaid fenced blocks.
 -->
 
 [Describe the technical approach as prose — what technologies interact, how data flows, where code runs]
@@ -45,6 +75,19 @@
 
   If a Constitution Check violation must be justified, include the justification
   in the rationale of the relevant decision.
+
+  DIAGRAMS IN DECISIONS: When a decision involves component relationships,
+  data flow, or state transitions, the rationale SHOULD include a mermaid
+  diagram illustrating the chosen approach. A diagram of how data flows
+  between processes can communicate in seconds what paragraphs of prose
+  cannot. Use ```mermaid fenced blocks, never ASCII art.
+
+  Do NOT force diagrams into text-only decisions (naming conventions, code
+  style choices, dependency selections) — prose is sufficient when the
+  decision doesn't involve visual/spatial relationships.
+
+  For complex decisions, break into focused sub-diagrams rather than one
+  monolithic chart with 20+ nodes.
 -->
 
 ### 1. [Decision title]

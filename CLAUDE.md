@@ -38,7 +38,6 @@ TypeScript 5.x: Follow standard conventions. Dark Radix Mauve theme for UI (acce
 ## Recent Changes
 - 004-walk-the-spec-rebrand: Added Electron
 - 004-radix-mauve-theme: Added react-markdown, @tailwindcss/typography (new). @radix-ui/colors for color tokens. Existing stack unchanged.
-- 003-tailwind-migration: Added TypeScript 5.x (existing) + Tailwind CSS v4, @tailwindcss/vite (new). Electron, React 19, electron-vite (existing)
 
 
 <!-- MANUAL ADDITIONS START -->

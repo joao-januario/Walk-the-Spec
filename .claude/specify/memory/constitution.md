@@ -77,6 +77,8 @@ Strict mode is non-negotiable. The type system is a safety net, not a suggestion
 - **SHOULD** define error types as discriminated unions, not bare strings or generic Error subclasses.
 - **SHOULD** prefer `??` over `||` for default values to avoid falsy-value bugs.
 - **SHOULD** use branded types for domain identifiers to prevent accidental interchange.
+- **SHOULD** replace raw equality checks (`x.type === '...'`, `x.status === '...'`) with named predicate functions (`isHeading(x)`, `isComplete(x)`) that express intent. Predicates improve readability and give TypeScript automatic type narrowing via `is` return types.
+- **SHOULD** follow the Law of Demeter — don't reach through chains of objects (`a.b.c.d`). Wrap deep access behind a method or function that names what you're asking for.
 
 ### V. Testing Discipline
 

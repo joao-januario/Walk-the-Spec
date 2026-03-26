@@ -75,4 +75,103 @@ describe('plan-parser', () => {
       expect(result.decisions).toHaveLength(0);
     });
   });
+
+  describe('code block preservation (plans with diagrams)', () => {
+    const content = fs.readFileSync(path.join(FIXTURES, 'plan-with-diagrams.md'), 'utf-8');
+    const result = parsePlan(content);
+
+    it('preserves mermaid code blocks in summary', () => {
+      expect(result.summary).toContain('```mermaid');
+      expect(result.summary).toContain('flowchart LR');
+      expect(result.summary).toContain('```');
+    });
+
+    it('preserves mermaid code blocks in technical approach', () => {
+      expect(result.technicalApproach).toContain('```mermaid');
+      expect(result.technicalApproach).toContain('sequenceDiagram');
+    });
+
+    it('preserves typescript code blocks in technical approach', () => {
+      expect(result.technicalApproach).toContain('```typescript');
+      expect(result.technicalApproach).toContain('function processData');
+    });
+
+    it('preserves prose alongside code blocks in technical approach', () => {
+      expect(result.technicalApproach).toContain('TypeScript 5.x with React 19');
+      expect(result.technicalApproach).toContain('renderer then displays');
+    });
+
+    it('preserves mermaid code blocks in architecture decision rationale', () => {
+      const decision = result.architectureDecisions[0];
+      expect(decision.rationale).toContain('```mermaid');
+      expect(decision.rationale).toContain('flowchart TD');
+    });
+
+    it('does not add code blocks to decisions that have none', () => {
+      const decision = result.architectureDecisions[1];
+      expect(decision.rationale).not.toContain('```');
+    });
+
+    it('still extracts structured decision fields correctly with code blocks present', () => {
+      expect(result.architectureDecisions).toHaveLength(2);
+      const first = result.architectureDecisions[0];
+      expect(first.heading).toBe('Parser preserves code blocks');
+      expect(first.decision).toContain('code node handling');
+      expect(first.alternativesRejected).toContain('Raw string slicing');
+    });
+  });
+
+  describe('markdown preservation (lists, blockquotes, tables)', () => {
+    const content = fs.readFileSync(path.join(FIXTURES, 'plan-with-lists.md'), 'utf-8');
+    const result = parsePlan(content);
+
+    it('preserves bullet lists in summary', () => {
+      expect(result.summary).toContain('- First benefit item');
+      expect(result.summary).toContain('- Second benefit item');
+    });
+
+    it('preserves blockquotes in summary', () => {
+      expect(result.summary).toContain('> This is an important note');
+    });
+
+    it('preserves bullet lists in technical approach', () => {
+      expect(result.technicalApproach).toContain('- Step one: parse the input');
+    });
+
+    it('preserves blockquotes in technical approach', () => {
+      expect(result.technicalApproach).toContain('> Important architectural constraint');
+    });
+
+    it('preserves tables in technical approach', () => {
+      expect(result.technicalApproach).toContain('| Parser');
+    });
+
+    it('preserves sub-headings in technical approach', () => {
+      expect(result.technicalApproach).toContain('### Sub-heading within Technical Approach');
+    });
+
+    it('preserves lists in architecture decision rationale', () => {
+      const decision = result.architectureDecisions[0];
+      expect(decision.rationale).toContain('- Reason one');
+      expect(decision.rationale).toContain('- Reason two');
+    });
+
+    it('preserves blockquotes in architecture decision rationale', () => {
+      const decision = result.architectureDecisions[0];
+      expect(decision.rationale).toContain('> Additional context');
+    });
+
+    it('still extracts structured fields correctly with rich markdown', () => {
+      expect(result.architectureDecisions).toHaveLength(2);
+      const first = result.architectureDecisions[0];
+      expect(first.heading).toBe('Use lists for structured data');
+      expect(first.decision).toContain('markdown lists');
+      expect(first.alternativesRejected).toContain('Custom JSON');
+    });
+
+    it('extracts file structure from code blocks only', () => {
+      expect(result.fileStructure).toContain('plan-parser.ts');
+      expect(result.fileStructure).not.toContain('```');
+    });
+  });
 });
