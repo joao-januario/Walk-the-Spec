@@ -8,7 +8,7 @@ import {
   deleteComment,
 } from '../../../src/main/writer/comment-writer.js';
 
-const TEST_DIR = path.join(os.tmpdir(), '.spec-board-comment-writer-test-' + Date.now());
+const TEST_DIR = path.join(os.tmpdir(), '.walk-the-spec-comment-writer-test-' + Date.now());
 
 describe('comment-writer', () => {
   beforeEach(() => fs.mkdirSync(TEST_DIR, { recursive: true }));

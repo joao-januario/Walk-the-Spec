@@ -1,5 +1,5 @@
 {
-  "name": "spec-board",
+  "name": "walk-the-spec",
   "version": "0.1.0",
   "private": true,
   "main": "./out/main/index.js",
@@ -14,10 +14,11 @@
     "test:watch": "vitest"
   },
   "build": {
-    "appId": "com.speckit.spec-board",
-    "productName": "Spec Board",
+    "appId": "com.speckit.walk-the-spec",
+    "productName": "Walk the Spec",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "resources"
     },
     "files": [
       "out/**/*"

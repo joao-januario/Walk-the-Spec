@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 import { editTaskCheckbox, editRequirementText } from '../../../src/main/writer/artifact-writer.js';
 
-const TEST_DIR = path.join(os.tmpdir(), '.spec-board-writer-test-' + Date.now());
+const TEST_DIR = path.join(os.tmpdir(), '.walk-the-spec-writer-test-' + Date.now());
 
 describe('artifact-writer', () => {
   beforeEach(() => fs.mkdirSync(TEST_DIR, { recursive: true }));

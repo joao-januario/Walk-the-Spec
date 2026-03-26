@@ -9,7 +9,7 @@ import { parseTasks } from '../../src/main/parser/tasks-parser.js';
 import { parseResearch } from '../../src/main/parser/research-parser.js';
 import { scanProject } from '../../src/main/projects/project-scanner.js';
 
-const TEST_DIR = path.join(os.tmpdir(), '.spec-board-artifact-test-' + Date.now());
+const TEST_DIR = path.join(os.tmpdir(), '.walk-the-spec-artifact-test-' + Date.now());
 const FIXTURES = path.join(__dirname, '../fixtures');
 
 function createProjectWithSpecs(name: string, specFiles: Record<string, string>): string {

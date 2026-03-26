@@ -30,5 +30,5 @@ Thumbs.db
 # Test coverage
 coverage/
 
-# Spec Board config (user-specific)
-# ~/.spec-board/ is in home dir, not repo
+# Walk the Spec config (user-specific)
+# ~/.walk-the-spec/ is in home dir, not repo

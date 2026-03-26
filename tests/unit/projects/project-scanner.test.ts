@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 import { scanProject } from '../../../src/main/projects/project-scanner.js';
 
-const TEMP_DIR = path.join(os.tmpdir(), 'spec-board-scanner-test-' + Date.now());
+const TEMP_DIR = path.join(os.tmpdir(), 'walk-the-spec-scanner-test-' + Date.now());
 
 function createTempProject(opts: { withGit?: boolean; branch?: string; withSpecs?: boolean; specFiles?: string[] } = {}) {
   const projectDir = path.join(TEMP_DIR, 'project-' + Math.random().toString(36).slice(2, 8));

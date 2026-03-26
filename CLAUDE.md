@@ -1,6 +1,6 @@
-﻿# spec-board Development Guidelines
+﻿# walk-the-spec Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-25
+Auto-generated from all feature plans. Last updated: 2026-03-26
 
 ## Active Technologies
 - TypeScript 5.x (existing) + Electron, React 19, unified/remark, chokidar (all existing — no new deps) (003-review-heal-tracking)
@@ -36,6 +36,7 @@ TypeScript 5.x: Follow standard conventions. Dark Radix Mauve theme for UI (acce
 - Native OS integration — folder picker, window management via Electron
 
 ## Recent Changes
+- 004-walk-the-spec-rebrand: Added Electron
 - 004-radix-mauve-theme: Added react-markdown, @tailwindcss/typography (new). @radix-ui/colors for color tokens. Existing stack unchanged.
 - 003-tailwind-migration: Added TypeScript 5.x (existing) + Tailwind CSS v4, @tailwindcss/vite (new). Electron, React 19, electron-vite (existing)
 

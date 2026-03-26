@@ -8,10 +8,10 @@ import {
   addProject,
   removeProject,
   getProjects,
-  type SpecBoardConfig,
+  type WalkTheSpecConfig,
 } from '../../../src/main/config/config-manager.js';
 
-const TEST_CONFIG_DIR = path.join(os.tmpdir(), '.spec-board-test-' + Date.now());
+const TEST_CONFIG_DIR = path.join(os.tmpdir(), '.walk-the-spec-test-' + Date.now());
 const TEST_CONFIG_PATH = path.join(TEST_CONFIG_DIR, 'config.json');
 
 describe('config-manager', () => {
@@ -49,7 +49,7 @@ describe('config-manager', () => {
 
   describe('saveConfig', () => {
     it('writes config to file', () => {
-      const config: SpecBoardConfig = {
+      const config: WalkTheSpecConfig = {
         projects: [{ id: 'xyz', name: 'proj', path: '/tmp/proj' }],
       };
       saveConfig(TEST_CONFIG_PATH, config);
@@ -62,7 +62,7 @@ describe('config-manager', () => {
 
   describe('addProject', () => {
     it('adds a project and returns it with generated id', () => {
-      const config: SpecBoardConfig = { projects: [] };
+      const config: WalkTheSpecConfig = { projects: [] };
       const project = addProject(config, '/tmp/my-project', 'my-project');
 
       expect(project.id).toBeDefined();
@@ -72,14 +72,14 @@ describe('config-manager', () => {
     });
 
     it('derives name from path basename if not provided', () => {
-      const config: SpecBoardConfig = { projects: [] };
+      const config: WalkTheSpecConfig = { projects: [] };
       const project = addProject(config, '/home/user/cool-repo');
 
       expect(project.name).toBe('cool-repo');
     });
 
     it('throws on duplicate path', () => {
-      const config: SpecBoardConfig = {
+      const config: WalkTheSpecConfig = {
         projects: [{ id: 'abc', name: 'existing', path: '/tmp/my-project' }],
       };
 
@@ -89,7 +89,7 @@ describe('config-manager', () => {
 
   describe('removeProject', () => {
     it('removes a project by id', () => {
-      const config: SpecBoardConfig = {
+      const config: WalkTheSpecConfig = {
         projects: [
           { id: 'a', name: 'p1', path: '/tmp/p1' },
           { id: 'b', name: 'p2', path: '/tmp/p2' },
@@ -101,14 +101,14 @@ describe('config-manager', () => {
     });
 
     it('throws if project not found', () => {
-      const config: SpecBoardConfig = { projects: [] };
+      const config: WalkTheSpecConfig = { projects: [] };
       expect(() => removeProject(config, 'nonexistent')).toThrow(/not found/);
     });
   });
 
   describe('getProjects', () => {
     it('returns all registered projects', () => {
-      const config: SpecBoardConfig = {
+      const config: WalkTheSpecConfig = {
         projects: [
           { id: 'a', name: 'p1', path: '/tmp/p1' },
           { id: 'b', name: 'p2', path: '/tmp/p2' },
