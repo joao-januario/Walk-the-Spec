@@ -1,7 +1,7 @@
 # Repo Map
 
-Generated: 2026-03-27T20:24:56.038Z
-Updated: 2026-03-27T20:24:56.038Z
+Generated: 2026-03-27T21:04:56.830Z
+Updated: 2026-03-27T21:04:56.830Z
 Files: 84
 Token estimate: ~6464
 
@@ -126,7 +126,7 @@ src/main/notifications/os-notifier.ts
 ⋮...
 
 src/main/notifications/sound-player.ts
-│ hash: 932a4c4ee99f
+│ hash: 34d7b0572f45
 │
 │ imports: child_process, path
 │ local: ../config/config-manager.js
