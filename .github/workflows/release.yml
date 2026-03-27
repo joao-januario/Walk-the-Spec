@@ -36,13 +36,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build app
-        run: npx electron-vite build
-
-      - name: Clean node_modules for production
-        run: npx rimraf node_modules && npm ci --omit=dev
-
-      - name: Package and publish
-        run: npx electron-builder@26.8.1 ${{ matrix.build_args }} --publish always
+      - name: Build and publish
+        run: npx electron-vite build && npx electron-builder@25.1.8 ${{ matrix.build_args }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
