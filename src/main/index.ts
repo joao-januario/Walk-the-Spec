@@ -150,16 +150,28 @@ export function stopWatchingProject(projectId: string) {
 
 // Theme menu items — matches the order in renderer/src/themes/themes.ts
 const THEME_MENU_ITEMS: readonly { id: string; name: string; category: 'dark' | 'light' }[] = [
+  { id: 'catppuccin-mocha', name: 'Catppuccin Mocha', category: 'dark' },
   { id: 'radix-mauve', name: 'Radix Mauve', category: 'dark' },
   { id: 'dracula', name: 'Dracula', category: 'dark' },
   { id: 'tokyo-night', name: 'Tokyo Night', category: 'dark' },
   { id: 'one-dark', name: 'One Dark', category: 'dark' },
   { id: 'rose-pine', name: 'Rosé Pine', category: 'dark' },
-  { id: 'catppuccin-mocha', name: 'Catppuccin Mocha', category: 'dark' },
   { id: 'gruvbox-dark', name: 'Gruvbox Dark', category: 'dark' },
   { id: 'solarized-dark', name: 'Solarized Dark', category: 'dark' },
   { id: 'solarized-light', name: 'Solarized Light', category: 'light' },
   { id: 'catppuccin-latte', name: 'Catppuccin Latte', category: 'light' },
+];
+
+// Reading font menu items — matches the order in renderer/src/themes/fonts.ts
+const FONT_MENU_ITEMS: readonly { id: string; name: string }[] = [
+  { id: 'inter', name: 'Inter' },
+  { id: 'system', name: 'System Default' },
+  { id: 'atkinson', name: 'Atkinson Hyperlegible' },
+  { id: 'ibm-plex', name: 'IBM Plex Sans' },
+  { id: 'source-sans', name: 'Source Sans' },
+  { id: 'nunito', name: 'Nunito' },
+  { id: 'geist', name: 'Geist' },
+  { id: 'jetbrains-mono', name: 'JetBrains Mono' },
 ];
 
 const MIN_FONT_SIZE = 14;
@@ -218,6 +230,22 @@ function buildMenu() {
         {
           label: `Current: ${currentSize}px`,
           enabled: false,
+        },
+        { type: 'separator' as const },
+        {
+          label: 'Reading Font',
+          submenu: FONT_MENU_ITEMS.map((font) => ({
+            label: font.name,
+            type: 'radio' as const,
+            checked: config.settings.readingFont === font.id,
+            click: () => {
+              const c = loadConfig();
+              c.settings = { ...c.settings, readingFont: font.id };
+              void saveConfig(c);
+              sendToRenderer('settings-changed', { readingFont: font.id });
+              buildMenu();
+            },
+          })),
         },
         { type: 'separator' as const },
         { role: 'reload' as const },

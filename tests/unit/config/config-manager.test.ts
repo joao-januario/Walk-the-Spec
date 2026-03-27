@@ -39,7 +39,7 @@ describe('config-manager', () => {
       const config = loadConfig();
       expect(config).toEqual({
         projects: [],
-        settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' },
+        settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' },
       });
     });
 
@@ -65,7 +65,7 @@ describe('config-manager', () => {
       await initConfigCache(TEST_CONFIG_PATH);
       const config = loadConfig();
       expect(config.settings).toEqual({
-        fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve',
+        fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha',
       });
     });
   });
@@ -112,7 +112,7 @@ describe('config-manager', () => {
 
   describe('addProject', () => {
     it('adds a project and returns it with generated id', () => {
-      const config: WalkTheSpecConfig = { projects: [], settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' } };
+      const config: WalkTheSpecConfig = { projects: [], settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' } };
       const project = addProject(config, '/tmp/my-project', 'my-project');
 
       expect(project.id).toBeDefined();
@@ -122,7 +122,7 @@ describe('config-manager', () => {
     });
 
     it('derives name from path basename if not provided', () => {
-      const config: WalkTheSpecConfig = { projects: [], settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' } };
+      const config: WalkTheSpecConfig = { projects: [], settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' } };
       const project = addProject(config, '/home/user/cool-repo');
 
       expect(project.name).toBe('cool-repo');
@@ -131,7 +131,7 @@ describe('config-manager', () => {
     it('throws on duplicate path', () => {
       const config: WalkTheSpecConfig = {
         projects: [{ id: 'abc', name: 'existing', path: '/tmp/my-project' }],
-        settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' },
+        settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' },
       };
 
       expect(() => addProject(config, '/tmp/my-project')).toThrow(/already registered/);
@@ -140,7 +140,7 @@ describe('config-manager', () => {
     it('detects duplicates with different separators', () => {
       const config: WalkTheSpecConfig = {
         projects: [{ id: 'abc', name: 'existing', path: 'C:\\Users\\dev\\project' }],
-        settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' },
+        settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' },
       };
 
       expect(() => addProject(config, 'C:/Users/dev/project')).toThrow(/already registered/);
@@ -149,7 +149,7 @@ describe('config-manager', () => {
     it('detects duplicates with different casing', () => {
       const config: WalkTheSpecConfig = {
         projects: [{ id: 'abc', name: 'existing', path: 'C:\\Users\\Dev\\Project' }],
-        settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' },
+        settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' },
       };
 
       expect(() => addProject(config, 'c:\\users\\dev\\project')).toThrow(/already registered/);
@@ -163,7 +163,7 @@ describe('config-manager', () => {
           { id: 'a', name: 'p1', path: '/tmp/p1' },
           { id: 'b', name: 'p2', path: '/tmp/p2' },
         ],
-        settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' },
+        settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' },
       };
       removeProject(config, 'a');
       expect(config.projects).toHaveLength(1);
@@ -171,7 +171,7 @@ describe('config-manager', () => {
     });
 
     it('throws if project not found', () => {
-      const config: WalkTheSpecConfig = { projects: [], settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' } };
+      const config: WalkTheSpecConfig = { projects: [], settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' } };
       expect(() => removeProject(config, 'nonexistent')).toThrow(/not found/);
     });
   });
@@ -183,7 +183,7 @@ describe('config-manager', () => {
           { id: 'a', name: 'p1', path: '/tmp/p1' },
           { id: 'b', name: 'p2', path: '/tmp/p2' },
         ],
-        settings: { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' },
+        settings: { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' },
       };
       expect(getProjects(config)).toHaveLength(2);
     });

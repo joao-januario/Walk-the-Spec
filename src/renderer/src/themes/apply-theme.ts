@@ -1,5 +1,5 @@
 // Applies a theme by setting CSS custom properties on <html>.
-// The default theme (radix-mauve) removes all overrides, falling back to @theme values.
+// The default theme (catppuccin-mocha) removes all overrides, falling back to @theme values.
 
 import { getThemeById, DEFAULT_THEME_ID } from './themes.js';
 import type { ThemeDefinition } from './themes.js';

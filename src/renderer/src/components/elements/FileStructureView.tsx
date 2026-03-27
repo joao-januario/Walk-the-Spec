@@ -19,9 +19,9 @@ function EntryRow({ entry }: { entry: FileStructureEntry }): JSX.Element {
         op.bg,
       )}
     >
-      <FileText size={13} className="shrink-0 translate-y-[1px] text-board-text-muted/50" />
+      <FileText size={13} className="shrink-0 translate-y-[1px] text-board-text-faint" />
       <span className="min-w-0 flex-1 font-mono text-[0.8125rem] leading-snug">
-        <span className="text-board-text-muted/70">{entry.directory}</span>
+        <span className="text-board-text-subtle">{entry.directory}</span>
         <span className="text-board-text-bright font-medium">{entry.filename}</span>
       </span>
       {op.label && (
@@ -30,7 +30,7 @@ function EntryRow({ entry }: { entry: FileStructureEntry }): JSX.Element {
         </span>
       )}
       {entry.comment && (
-        <span className="shrink-0 text-[0.75rem] text-board-text-muted/60 max-w-[40%] truncate">
+        <span className="shrink-0 text-[0.75rem] text-board-text-faint max-w-[40%] truncate">
           {entry.comment}
         </span>
       )}

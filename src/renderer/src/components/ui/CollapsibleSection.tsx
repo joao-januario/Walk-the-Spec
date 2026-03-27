@@ -55,7 +55,7 @@ export default function CollapsibleSection({
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-board-cyan/60',
           hasComment
             ? 'text-board-cyan'
-            : 'text-board-text-muted/60 hover:text-board-text-muted',
+            : 'text-board-text-faint hover:text-board-text-muted',
         )}
       >
         <MessageSquare size={14} />
@@ -69,7 +69,7 @@ export default function CollapsibleSection({
           className={cn(
             'w-full rounded-md border px-3 py-2 text-[0.875rem] leading-relaxed mt-2',
             'bg-board-bg border-board-border text-board-text',
-            'placeholder:text-board-text-muted/50',
+            'placeholder:text-board-text-faint',
             'focus-visible:border-board-cyan focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-board-cyan/30',
             'resize-y min-h-[60px]',
           )}
@@ -131,7 +131,7 @@ export default function CollapsibleSection({
           {open ? '▼' : '▶'}
         </span>
         {number != null && (
-          <span className="text-board-accent text-[0.75rem] font-medium tabular-nums opacity-50">
+          <span className="text-board-accent/70 text-[0.75rem] font-medium tabular-nums">
             {String(number).padStart(2, '0')}
           </span>
         )}

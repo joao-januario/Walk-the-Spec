@@ -15,12 +15,13 @@ export type SoundVolume = 'high' | 'medium' | 'low' | 'off';
 
 export interface AppSettings {
   fontSize: number;
+  readingFont: string;
   soundVolume: SoundVolume;
   osNotifications: boolean;
   theme: string;
 }
 
-export const DEFAULT_SETTINGS: AppSettings = { fontSize: 16, soundVolume: 'medium', osNotifications: true, theme: 'radix-mauve' };
+export const DEFAULT_SETTINGS: AppSettings = { fontSize: 16, readingFont: 'inter', soundVolume: 'medium', osNotifications: true, theme: 'catppuccin-mocha' };
 
 export interface WalkTheSpecConfig {
   projects: ProjectEntry[];

@@ -181,7 +181,7 @@ export default function ReviewView({ findings, healSummary, commentEnabled, getC
         </div>
       )}
 
-      <div className="space-y-5">
+      <div className="space-y-7">
         {Array.from(grouped.entries()).map(([severity, items]) => (
           <CollapsibleSection
             key={severity}

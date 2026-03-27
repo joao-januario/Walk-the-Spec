@@ -44,14 +44,14 @@ export default function CodeBlock({ code, language, label }: CodeBlockProps) {
           <LazyMermaidBlock code={code} />
         </Suspense>
       ) : (
-        <pre className="bg-board-bg border-board-border overflow-x-auto rounded-md border p-3">
+        <pre className="bg-board-bg border-board-border overflow-x-auto rounded-md border p-3 font-mono">
           {highlighted ? (
             <code
-              className="hljs text-[0.875rem] leading-relaxed"
+              className="hljs font-mono text-[0.875rem] leading-relaxed"
               dangerouslySetInnerHTML={{ __html: highlighted.value }}
             />
           ) : (
-            <code className="text-board-text text-[0.875rem] leading-relaxed">
+            <code className="text-board-text font-mono text-[0.875rem] leading-relaxed">
               {code}
             </code>
           )}

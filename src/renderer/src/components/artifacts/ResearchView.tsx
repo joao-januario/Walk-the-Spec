@@ -15,7 +15,7 @@ export default function ResearchView({ elements, commentEnabled, getComment, onC
   const decisions = elements.filter((e) => e.type === 'decision');
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-7">
       {decisions.map((e, idx) => {
         const d = e.content as DecisionContent;
         return (

@@ -81,7 +81,7 @@ export default function TasksView({ elements, onToggleTask }: TasksViewProps) {
       </div>
 
       {/* Phases */}
-      <div className="space-y-5">
+      <div className="space-y-7">
         {sortedPhases.map((phaseName, idx) => {
           const phaseElements = phases.get(phaseName)!;
           const done = phaseElements.filter((e) => (e.content as TaskContent).checked).length;

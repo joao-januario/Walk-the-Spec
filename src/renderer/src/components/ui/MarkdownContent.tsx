@@ -114,7 +114,7 @@ export default function MarkdownContent({ content, inline, className }: Markdown
   return (
     <div
       className={cn(
-        'prose max-w-none text-[1rem] leading-relaxed text-board-text',
+        'prose max-w-none text-[1.0625rem] leading-relaxed text-board-text',
         'prose-headings:text-board-text-bright',
         'prose-p:text-board-text',
         'prose-a:text-board-accent',

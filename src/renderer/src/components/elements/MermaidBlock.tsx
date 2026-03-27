@@ -14,7 +14,7 @@ mermaid.initialize({
     lineColor: '#625f69',
     secondaryColor: '#baa7ff',
     tertiaryColor: '#2b292d',
-    fontFamily: 'Inter, system-ui, sans-serif',
+    fontFamily: "'JetBrains Mono', monospace",
     fontSize: '16px',
   },
 });

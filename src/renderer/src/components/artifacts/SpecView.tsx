@@ -31,7 +31,7 @@ export default function SpecView({
   let num = 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-7">
       {stories.length > 0 && (
         <CollapsibleSection
           id="spec-stories"
@@ -90,7 +90,7 @@ export default function SpecView({
                 )}
                 <div className="border-board-border/20 flex items-start gap-[10px] border-b py-[10px]">
                   <CodeTag color="green">{sc.id}</CodeTag>
-                  <MarkdownContent inline content={sc.text} className="text-board-text flex-1 text-[1rem] leading-relaxed" />
+                  <MarkdownContent inline content={sc.text} className="text-board-text flex-1 text-[1.0625rem] leading-relaxed" />
                 </div>
               </div>
             );

@@ -15,7 +15,7 @@ export default function TaskRow({ content, onToggle }: TaskRowProps) {
   };
 
   return (
-    <div className="border-board-border/20 flex items-center gap-2 border-b py-[7px] last:border-b-0">
+    <div className="border-board-border/20 flex items-center gap-2 border-b py-[10px] last:border-b-0">
       <input
         type="checkbox"
         checked={content.checked}
@@ -35,7 +35,7 @@ export default function TaskRow({ content, onToggle }: TaskRowProps) {
       <MarkdownContent
         inline
         content={content.description}
-        className={cn('text-[1rem] leading-relaxed', content.checked ? 'text-board-text-muted line-through' : 'text-board-text')}
+        className={cn('text-[1.0625rem] leading-relaxed', content.checked ? 'text-board-text-muted line-through' : 'text-board-text')}
       />
     </div>
   );

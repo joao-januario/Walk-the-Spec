@@ -93,7 +93,7 @@ export default function SummaryView({ elements, commentEnabled, getComment, onCo
   }
 
   return (
-    <article className="space-y-5">
+    <article className="space-y-7">
       {sections.map((el, idx) => {
         const section = el.content as SectionContent;
         const { preamble, subs } = splitAtHeadingLevel(section.content, H3_LINE, H3_PREFIX);

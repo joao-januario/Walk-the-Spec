@@ -37,7 +37,7 @@ export default function PlanView({ elements, commentEnabled, getComment, onComme
   let num = 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-7">
       {summaryEl && (
         <CollapsibleSection
           id="plan-summary"

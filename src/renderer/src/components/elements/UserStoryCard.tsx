@@ -41,7 +41,7 @@ export default function UserStoryCard({ content }: { content: UserStoryContent }
             {content.priority}
           </span>
         </Tooltip>
-        <span className="text-board-text-bright text-[1rem] font-semibold">
+        <span className="text-board-text-bright text-[1.0625rem] font-semibold">
           US{content.number} — {content.title}
         </span>
       </div>
@@ -69,7 +69,7 @@ export default function UserStoryCard({ content }: { content: UserStoryContent }
                 <div>
                   <SectionLabel sub className="mb-[6px]">Acceptance Scenarios</SectionLabel>
                   {content.acceptanceScenarios.map((s: GWTScenario, i: number) => (
-                    <div key={i} className="text-board-text border-board-border mb-1.5 border-l-2 pl-[10px] text-[1rem] leading-relaxed">
+                    <div key={i} className="text-board-text border-board-border mb-1.5 border-l-2 pl-[10px] text-[1.0625rem] leading-relaxed">
                       <span className="text-board-green font-semibold">Given</span>{' '}
                       <MarkdownContent inline content={s.given} />,{' '}
                       <span className="text-board-orange font-semibold">When</span>{' '}

@@ -19,6 +19,8 @@ const REQUIRED_COLOR_KEYS = [
   '--color-board-border-hover',
   '--color-board-text',
   '--color-board-text-muted',
+  '--color-board-text-faint',
+  '--color-board-text-subtle',
   '--color-board-text-bright',
   '--color-board-accent',
   '--color-board-red',
@@ -93,12 +95,12 @@ describe('theme definitions', () => {
 
   it('dark themes are listed in the correct order per spec', () => {
     const expectedOrder = [
+      'catppuccin-mocha',
       'radix-mauve',
       'dracula',
       'tokyo-night',
       'one-dark',
       'rose-pine',
-      'catppuccin-mocha',
       'gruvbox-dark',
       'solarized-dark',
     ];

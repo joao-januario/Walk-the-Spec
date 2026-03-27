@@ -7,10 +7,18 @@ import { usePhaseNotification } from './hooks/usePhaseNotification.js';
 import { useAutoUpdate } from './hooks/useAutoUpdate.js';
 import { applyTheme } from './themes/apply-theme.js';
 import { DEFAULT_THEME_ID } from './themes/themes.js';
+import { getReadingFontById, DEFAULT_READING_FONT_ID } from './themes/fonts.js';
 import type { Project } from './types/index.js';
 
 function applyFontSize(size: number): void {
   document.documentElement.style.fontSize = `${size}px`;
+}
+
+function applyReadingFont(fontId: string): void {
+  const font = getReadingFontById(fontId);
+  if (font) {
+    document.documentElement.style.setProperty('--font-sans', font.stack);
+  }
 }
 
 export default function App() {
@@ -25,11 +33,13 @@ export default function App() {
   useEffect(() => {
     window.api.getSettings().then((settings) => {
       applyFontSize(settings.fontSize);
+      applyReadingFont(settings.readingFont ?? DEFAULT_READING_FONT_ID);
       applyTheme(settings.theme ?? DEFAULT_THEME_ID);
     }).catch(() => {});
 
-    const unsubSettings = window.api.onSettingsChanged((data: { fontSize?: number; theme?: string }) => {
+    const unsubSettings = window.api.onSettingsChanged((data: { fontSize?: number; readingFont?: string; theme?: string }) => {
       if (data.fontSize !== undefined) applyFontSize(data.fontSize);
+      if (data.readingFont !== undefined) applyReadingFont(data.readingFont);
       if (data.theme !== undefined) applyTheme(data.theme);
     });
 
@@ -62,8 +72,8 @@ export default function App() {
   return (
     <div className="flex h-screen font-sans">
       <BoardView onSelectProject={handleSelectProject} selectedProjectId={selectedProject?.id ?? null} refreshKey={refreshKey} />
-      <div className="flex flex-1 flex-col overflow-auto">
-        <div className="flex-1 overflow-auto px-8 pt-4 pb-6">
+      <div className="flex-1 overflow-auto px-8 pt-4 pb-16">
+        <div className="max-w-[1500px]">
           {selectedProject ? (
             selectedProject.hasSpeckitContent ? (
               <FeatureDetail key={`${selectedProject.id}-${refreshKey}`} project={selectedProject} />

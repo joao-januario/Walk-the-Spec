@@ -1,54 +1,59 @@
 @import "tailwindcss";
+@import "./fonts.css";
 @import "highlight.js/styles/github-dark-dimmed.min.css";
 @plugin "@tailwindcss/typography";
 
 @theme {
   /*
-   * Radix Mauve — accessibility-engineered 12-step dark scale
-   * All surface/text values from @radix-ui/colors mauve-dark.css
-   * All accent values from @radix-ui/colors {color}-dark.css step 11
+   * Catppuccin Mocha — catppuccin.com
+   * Default theme — CSS values used as-is when no overrides are applied.
    */
 
-  /* ── Surfaces (mauve-dark steps 1-8) ── */
-  --color-board-bg: #121113;
-  --color-board-surface: #1a191b;
-  --color-board-surface-hover: #2b292d;
-  --color-board-surface-alt: #121113;
-  --color-board-surface-elevated: #323035;
-  --color-board-surface-overlay: #3c393f;
-  --color-board-border: #49474e;
-  --color-board-border-hover: #625f69;
+  /* ── Surfaces ── */
+  --color-board-bg: #1e1e2e;
+  --color-board-surface: #181825;
+  --color-board-surface-hover: #313244;
+  --color-board-surface-alt: #1e1e2e;
+  --color-board-surface-elevated: #45475a;
+  --color-board-surface-overlay: #585b70;
+  --color-board-border: #45475a;
+  --color-board-border-hover: #585b70;
 
-  /* ── Text (mauve-dark steps 11-12) ── */
-  --color-board-text: #eeeef0;
-  --color-board-text-muted: #c8c6d0;
+  /* ── Text ── */
+  --color-board-text: #cdd6f4;
+  --color-board-text-muted: #a6adc8;
   --color-board-text-bright: #ffffff;
 
-  /* ── Accents (radix dark scales, step 11) ── */
-  --color-board-accent: #70b8ff;
-  --color-board-red: #ff9592;
-  --color-board-orange: #ffa057;
-  --color-board-yellow: #ffca16;
-  --color-board-green: #3dd68c;
-  --color-board-purple: #baa7ff;
-  --color-board-cyan: #4ccce6;
-  --color-board-teal: #0bd8b6;
+  /* ── Accents ── */
+  --color-board-accent: #89b4fa;
+  --color-board-red: #f38ba8;
+  --color-board-orange: #fab387;
+  --color-board-yellow: #f9e2af;
+  --color-board-green: #a6e3a1;
+  --color-board-purple: #cba6f7;
+  --color-board-cyan: #89dceb;
+  --color-board-teal: #94e2d5;
 
-  /* ── Phase colors (5 distinct hue families) ── */
-  --color-phase-specify: #70b8ff;
-  --color-phase-plan: #baa7ff;
-  --color-phase-tasks: #ffa057;
-  --color-phase-implement: #3dd68c;
-  --color-phase-summary: #f65cb6;
-  --color-phase-review: #0bd8b6;
-  --color-phase-unknown: #6f6d78;
+  /* ── Phase colors ── */
+  --color-phase-specify: #89b4fa;
+  --color-phase-plan: #cba6f7;
+  --color-phase-tasks: #fab387;
+  --color-phase-implement: #a6e3a1;
+  --color-phase-summary: #f38ba8;
+  --color-phase-review: #94e2d5;
+  --color-phase-unknown: #6c7086;
 
   /* ── Shadows ── */
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.6);
-  --shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.4);
 
-  /* ── Font ── */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* ── Dimmed text (solid colors, no opacity hacks) ── */
+  --color-board-text-faint: #7f849c;
+  --color-board-text-subtle: #9399b2;
+
+  /* ── Fonts ── */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 /* Override hljs background to use our theme */

@@ -21,8 +21,8 @@ declare global {
         value: unknown,
       ) => Promise<any>;
       getRefactorBacklog: (projectId: string) => Promise<{ entries: import('../types/index.js').RefactorEntry[] }>;
-      getSettings: () => Promise<{ fontSize: number }>;
-      saveSettings: (partial: Record<string, unknown>) => Promise<{ fontSize: number }>;
+      getSettings: () => Promise<{ fontSize: number; readingFont?: string }>;
+      saveSettings: (partial: Record<string, unknown>) => Promise<{ fontSize: number; readingFont?: string }>;
       getGlossary: (projectId: string) => Promise<{ terms: Record<string, string> }>;
       getMemorySnapshot: () => Promise<{ main: { rss: number; heapTotal: number; heapUsed: number; external: number; arrayBuffers: number }; timestamp: string }>;
       onSettingsChanged: (callback: (...args: any[]) => void) => () => void;

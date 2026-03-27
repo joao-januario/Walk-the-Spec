@@ -26,7 +26,7 @@ interface CodeTagProps {
 
 export default function CodeTag({ color = 'accent', size = 'md', className, children }: CodeTagProps) {
   return (
-    <code className={cn('rounded font-bold whitespace-nowrap', colorMap[color], sizeMap[size], className)}>
+    <code className={cn('rounded font-mono font-bold whitespace-nowrap', colorMap[color], sizeMap[size], className)}>
       {children}
     </code>
   );

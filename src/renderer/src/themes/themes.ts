@@ -1,6 +1,6 @@
 // Theme definitions — each maps CSS variable names to canonical hex values.
 // All colors are sourced from the official published palettes of each design system.
-// The default theme (Radix Mauve) uses the @theme block values and has no overrides.
+// The default theme (Catppuccin Mocha) uses the @theme block values and has no overrides.
 
 export interface ThemeDefinition {
   readonly id: string;
@@ -9,14 +9,45 @@ export interface ThemeDefinition {
   readonly colors: Readonly<Record<string, string>>;
 }
 
-const DEFAULT_THEME_ID = 'radix-mauve';
+const DEFAULT_THEME_ID = 'catppuccin-mocha';
 
-// Radix Mauve — default. No color overrides needed; uses @theme CSS values as-is.
+// Radix Mauve — accessibility-engineered 12-step dark scale
 const radixMauve: ThemeDefinition = {
-  id: DEFAULT_THEME_ID,
+  id: 'radix-mauve',
   name: 'Radix Mauve',
   category: 'dark',
-  colors: {},
+  colors: {
+    '--color-board-bg': '#121113',
+    '--color-board-surface': '#1a191b',
+    '--color-board-surface-hover': '#2b292d',
+    '--color-board-surface-alt': '#121113',
+    '--color-board-surface-elevated': '#323035',
+    '--color-board-surface-overlay': '#3c393f',
+    '--color-board-border': '#49474e',
+    '--color-board-border-hover': '#625f69',
+    '--color-board-text': '#eeeef0',
+    '--color-board-text-muted': '#c8c6d0',
+    '--color-board-text-faint': '#706d78',
+    '--color-board-text-subtle': '#908d99',
+    '--color-board-text-bright': '#ffffff',
+    '--color-board-accent': '#70b8ff',
+    '--color-board-red': '#ff9592',
+    '--color-board-orange': '#ffa057',
+    '--color-board-yellow': '#ffca16',
+    '--color-board-green': '#3dd68c',
+    '--color-board-purple': '#baa7ff',
+    '--color-board-cyan': '#4ccce6',
+    '--color-board-teal': '#0bd8b6',
+    '--color-phase-specify': '#70b8ff',
+    '--color-phase-plan': '#baa7ff',
+    '--color-phase-tasks': '#ffa057',
+    '--color-phase-implement': '#3dd68c',
+    '--color-phase-summary': '#f65cb6',
+    '--color-phase-review': '#0bd8b6',
+    '--color-phase-unknown': '#6f6d78',
+    '--shadow-card': '0 2px 8px rgba(0, 0, 0, 0.6)',
+    '--shadow-card-hover': '0 6px 16px rgba(0, 0, 0, 0.5)',
+  },
 };
 
 // Dracula — draculatheme.com
@@ -35,6 +66,8 @@ const dracula: ThemeDefinition = {
     '--color-board-border-hover': '#7284b8',
     '--color-board-text': '#f8f8f2',
     '--color-board-text-muted': '#6272a4',
+    '--color-board-text-faint': '#545a78',
+    '--color-board-text-subtle': '#6272a4',
     '--color-board-text-bright': '#ffffff',
     '--color-board-accent': '#8be9fd',
     '--color-board-red': '#ff5555',
@@ -72,6 +105,8 @@ const tokyoNight: ThemeDefinition = {
     '--color-board-border-hover': '#565f89',
     '--color-board-text': '#c0caf5',
     '--color-board-text-muted': '#565f89',
+    '--color-board-text-faint': '#444b6a',
+    '--color-board-text-subtle': '#565f89',
     '--color-board-text-bright': '#ffffff',
     '--color-board-accent': '#7aa2f7',
     '--color-board-red': '#f7768e',
@@ -109,6 +144,8 @@ const oneDark: ThemeDefinition = {
     '--color-board-border-hover': '#636d83',
     '--color-board-text': '#abb2bf',
     '--color-board-text-muted': '#5c6370',
+    '--color-board-text-faint': '#4b5263',
+    '--color-board-text-subtle': '#5c6370',
     '--color-board-text-bright': '#ffffff',
     '--color-board-accent': '#61afef',
     '--color-board-red': '#e06c75',
@@ -146,6 +183,8 @@ const rosePine: ThemeDefinition = {
     '--color-board-border-hover': '#6e6a86',
     '--color-board-text': '#e0def4',
     '--color-board-text-muted': '#908caa',
+    '--color-board-text-faint': '#6e6a86',
+    '--color-board-text-subtle': '#817c9c',
     '--color-board-text-bright': '#ffffff',
     '--color-board-accent': '#c4a7e7',
     '--color-board-red': '#eb6f92',
@@ -167,41 +206,12 @@ const rosePine: ThemeDefinition = {
   },
 };
 
-// Catppuccin Mocha — catppuccin.com
+// Catppuccin Mocha — default. No color overrides needed; uses @theme CSS values as-is.
 const catppuccinMocha: ThemeDefinition = {
-  id: 'catppuccin-mocha',
+  id: DEFAULT_THEME_ID,
   name: 'Catppuccin Mocha',
   category: 'dark',
-  colors: {
-    '--color-board-bg': '#1e1e2e',
-    '--color-board-surface': '#181825',
-    '--color-board-surface-hover': '#313244',
-    '--color-board-surface-alt': '#1e1e2e',
-    '--color-board-surface-elevated': '#45475a',
-    '--color-board-surface-overlay': '#585b70',
-    '--color-board-border': '#45475a',
-    '--color-board-border-hover': '#585b70',
-    '--color-board-text': '#cdd6f4',
-    '--color-board-text-muted': '#a6adc8',
-    '--color-board-text-bright': '#ffffff',
-    '--color-board-accent': '#89b4fa',
-    '--color-board-red': '#f38ba8',
-    '--color-board-orange': '#fab387',
-    '--color-board-yellow': '#f9e2af',
-    '--color-board-green': '#a6e3a1',
-    '--color-board-purple': '#cba6f7',
-    '--color-board-cyan': '#89dceb',
-    '--color-board-teal': '#94e2d5',
-    '--color-phase-specify': '#89b4fa',
-    '--color-phase-plan': '#cba6f7',
-    '--color-phase-tasks': '#fab387',
-    '--color-phase-implement': '#a6e3a1',
-    '--color-phase-summary': '#f38ba8',
-    '--color-phase-review': '#94e2d5',
-    '--color-phase-unknown': '#6c7086',
-    '--shadow-card': '0 2px 8px rgba(0, 0, 0, 0.5)',
-    '--shadow-card-hover': '0 6px 16px rgba(0, 0, 0, 0.4)',
-  },
+  colors: {},
 };
 
 // Gruvbox Dark — github.com/morhetz/gruvbox
@@ -220,6 +230,8 @@ const gruvboxDark: ThemeDefinition = {
     '--color-board-border-hover': '#7c6f64',
     '--color-board-text': '#ebdbb2',
     '--color-board-text-muted': '#a89984',
+    '--color-board-text-faint': '#7c6f64',
+    '--color-board-text-subtle': '#928374',
     '--color-board-text-bright': '#fbf1c7',
     '--color-board-accent': '#83a598',
     '--color-board-red': '#fb4934',
@@ -257,6 +269,8 @@ const solarizedDark: ThemeDefinition = {
     '--color-board-border-hover': '#657b83',
     '--color-board-text': '#93a1a1',
     '--color-board-text-muted': '#657b83',
+    '--color-board-text-faint': '#506369',
+    '--color-board-text-subtle': '#5b7279',
     '--color-board-text-bright': '#fdf6e3',
     '--color-board-accent': '#268bd2',
     '--color-board-red': '#dc322f',
@@ -294,6 +308,8 @@ const solarizedLight: ThemeDefinition = {
     '--color-board-border-hover': '#839496',
     '--color-board-text': '#002b36',
     '--color-board-text-muted': '#073642',
+    '--color-board-text-faint': '#839496',
+    '--color-board-text-subtle': '#657b83',
     '--color-board-text-bright': '#002b36',
     '--color-board-accent': '#268bd2',
     '--color-board-red': '#dc322f',
@@ -331,6 +347,8 @@ const catppuccinLatte: ThemeDefinition = {
     '--color-board-border-hover': '#9ca0b0',
     '--color-board-text': '#1e1e2e',
     '--color-board-text-muted': '#303446',
+    '--color-board-text-faint': '#9ca0b0',
+    '--color-board-text-subtle': '#7c7f93',
     '--color-board-text-bright': '#11111b',
     '--color-board-accent': '#1e66f5',
     '--color-board-red': '#d20f39',
@@ -353,12 +371,12 @@ const catppuccinLatte: ThemeDefinition = {
 };
 
 export const themes: readonly ThemeDefinition[] = [
+  catppuccinMocha,
   radixMauve,
   dracula,
   tokyoNight,
   oneDark,
   rosePine,
-  catppuccinMocha,
   gruvboxDark,
   solarizedDark,
   solarizedLight,
