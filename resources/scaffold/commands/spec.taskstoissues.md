@@ -1,6 +1,5 @@
 ---
 description: Convert plan artifacts and user stories into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.
-model: haiku
 tools: ['github/github-mcp-server/issue_write']
 ---
 

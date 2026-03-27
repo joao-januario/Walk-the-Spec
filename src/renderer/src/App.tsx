@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import BoardView from './components/board/BoardView.js';
 import FeatureDetail from './components/feature/FeatureDetail.js';
 import EmptyState from './components/common/EmptyState.js';
+import UpdateDialog from './components/common/UpdateDialog.js';
 import { usePhaseNotification } from './hooks/usePhaseNotification.js';
+import { useAutoUpdate } from './hooks/useAutoUpdate.js';
 import { applyTheme } from './themes/apply-theme.js';
 import { DEFAULT_THEME_ID } from './themes/themes.js';
 import type { Project } from './types/index.js';
@@ -17,6 +19,7 @@ export default function App() {
   const [notification, setNotification] = useState<string | null>(null);
 
   usePhaseNotification();
+  const autoUpdate = useAutoUpdate();
 
   // Load saved settings (font size + theme) on mount + listen for menu changes
   useEffect(() => {
@@ -72,6 +75,8 @@ export default function App() {
           )}
         </div>
       </div>
+
+      <UpdateDialog update={autoUpdate} />
 
       {notification && (
         <div className="border-board-yellow/40 bg-board-yellow/10 text-board-yellow fixed right-5 bottom-5 z-50 flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm shadow-lg">

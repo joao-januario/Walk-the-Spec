@@ -117,6 +117,26 @@ Three components work together when an external command completes:
 
 No database. All runtime state is derived from filesystem (git branch, artifact files). Comments are ephemeral (in-memory with sessionStorage fallback).
 
+## Scaffold & Integration
+
+**Modules**: `src/main/integration/`, `resources/scaffold/`, `scripts/sync-scaffold.sh`
+
+The scaffold is a bundled set of speckit files (commands, templates, scripts, best-practices) that gets copied into other projects when they "integrate" with Walk the Spec. It lives in `resources/scaffold/` and is distributed with the packaged Electron app.
+
+**Dual-source with auto-sync**: The live speckit files in `.claude/commands/`, `.claude/specify/templates/`, and `.claude/specify/scripts/` are the source of truth. `scripts/sync-scaffold.sh` copies them to `resources/scaffold/` at build time via the `prebuild` npm script. Scaffold-only files (`best-practices/`, `CLAUDE.md.template`, `.scaffold-version`) are not synced — they're maintained directly in `resources/scaffold/`.
+
+**Integration flow**: When a user adds a project or clicks "Refresh Specs", the app runs `generateIntegrationPlan()` in `integration-planner.ts` to produce a read-only diff (create/overwrite/preserve for each file). The `IntegrationDialog` component shows this plan. On confirm, `executeIntegration()` in `scaffold-writer.ts` copies scaffold files to the target project's `.claude/` directory, skipping `CLAUDE.md` if it already exists and preserving template overrides.
+
+**Scaffold versioning**: Each scaffold has a version in `.scaffold-version`. When a project's scaffold version doesn't match the bundled version, the app shows an "outdated" integration state. Bump `resources/scaffold/.scaffold-version` when scaffold content changes meaningfully.
+
+**Runtime path resolution**: `getScaffoldDir()` in `scaffold-version.ts` resolves the scaffold directory relative to `__dirname` (which is `out/main/` in the built app), going up two levels to the app root then into `resources/scaffold/`.
+
+## Auto-Update
+
+**Module**: `src/main/updater/auto-updater.ts`
+
+On startup (production only — skipped when `ELECTRON_RENDERER_URL` is set), `initAutoUpdater()` configures `electron-updater` with `autoDownload: false` and checks GitHub Releases for a newer version via `latest.yml`. If found, it forwards `update-available` to the renderer via IPC. The renderer shows an `UpdateDialog` modal. User clicks "Update" → `update:install` IPC triggers download → `update-downloaded` event → user clicks "Restart" → `update:restart` IPC calls `quitAndInstall()`. All errors are silently logged (no user-facing error on network failure).
+
 ## Where to Start
 
 | Task | Files to touch |

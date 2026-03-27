@@ -11,6 +11,7 @@ import { detectPhase } from './phase/phase-detector.js';
 import { normalizePathForComparison } from './utils/paths.js';
 import { generateRepoMap } from './repomap/index.js';
 import { getAllExtractors } from './repomap/extractors.js';
+import { initAutoUpdater } from './updater/auto-updater.js';
 import fs from 'fs';
 
 app.setAppUserModelId('com.speckit.walk-the-spec');
@@ -280,6 +281,7 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 500,
+    show: false,
     backgroundColor: '#121113',
     titleBarStyle: 'hiddenInset',
     icon: path.join(__dirname, '../../resources/icon.png'),
@@ -288,6 +290,10 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show();
   });
 
   if (process.env.ELECTRON_RENDERER_URL) {
@@ -307,6 +313,7 @@ app.whenReady().then(() => {
   buildMenu();
   startWatchingAll();
   startNotifyServer(handleNotify);
+  if (mainWindow) initAutoUpdater(mainWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

@@ -38,11 +38,11 @@ Consider user input before proceeding.
 
 5. **Execute implementation** following the plan:
    - Phase-by-phase: complete each before moving to next
-   - TDD: test tasks before corresponding implementation
+   - **TDD is mandatory**: For every user story, write tests FIRST. Run them. Confirm they FAIL. Only then write the implementation to make them pass. Do NOT write implementation code without a failing test. This is non-negotiable — no exceptions, no "this is hard to test" excuses, no skipping for "thin wrappers" or "event wiring." If it's code, it gets a test first.
    - File-based coordination: same-file tasks run sequentially
    - Validation checkpoints at each phase boundary
 
-6. **Execution order**: Setup → tests/contracts → core (models, services, endpoints) → integration (DB, middleware, logging) → polish/validation
+6. **Execution order**: Setup → **failing tests** → implementation to make them pass → integration → polish/validation
 
 7. **Progress tracking**: Report per phase. Halt on critical failure. Provide clear errors with debugging context.
 

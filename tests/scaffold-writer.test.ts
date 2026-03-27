@@ -97,7 +97,7 @@ describe('scaffold-writer', () => {
         path.join(tmpDir, '.claude', 'specify', '.scaffold-version'),
         'utf-8',
       );
-      expect(version.trim()).toBe('1.0.0');
+      expect(version.trim()).toBe('1.1.0');
     });
 
     it('creates empty context and memory directories', async () => {

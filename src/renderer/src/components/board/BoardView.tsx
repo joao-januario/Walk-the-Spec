@@ -15,6 +15,7 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
   const [loading, setLoading] = useState(true);
   const [integrationPlan, setIntegrationPlan] = useState<IntegrationPlan | null>(null);
   const [integrationExecuting, setIntegrationExecuting] = useState(false);
+  const [refreshTarget, setRefreshTarget] = useState<Project | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -61,9 +62,16 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
     setIntegrationExecuting(true);
     try {
       await api.executeIntegration(integrationPlan.targetPath);
-      const project = await api.addProject(integrationPlan.targetPath);
-      setProjects((prev) => [...prev, project]);
-      onSelectProject(project);
+      if (refreshTarget) {
+        // Refresh existing project — just refetch
+        await fetchProjects();
+        setRefreshTarget(null);
+      } else {
+        // New project — add and select
+        const project = await api.addProject(integrationPlan.targetPath);
+        setProjects((prev) => [...prev, project]);
+        onSelectProject(project);
+      }
       setIntegrationPlan(null);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Integration failed');
@@ -74,6 +82,30 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
 
   const handleIntegrationCancel = () => {
     setIntegrationPlan(null);
+    setRefreshTarget(null);
+  };
+
+  const handleContextAction = async (action: 'refresh' | 'delete', project: Project) => {
+    if (action === 'refresh') {
+      try {
+        const plan = await api.planIntegration(project.path);
+        setRefreshTarget(project);
+        setIntegrationPlan(plan);
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Failed to plan refresh');
+      }
+    } else if (action === 'delete') {
+      try {
+        await api.deleteProject(project.id);
+        setProjects((prev) => prev.filter((p) => p.id !== project.id));
+        if (selectedProjectId === project.id) {
+          const remaining = projects.filter((p) => p.id !== project.id);
+          onSelectProject(remaining[0] ?? ({ id: '' } as Project));
+        }
+      } catch (err: unknown) {
+        alert(err instanceof Error ? err.message : 'Delete failed');
+      }
+    }
   };
 
   return (
@@ -105,6 +137,7 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
             project={p}
             selected={p.id === selectedProjectId}
             onClick={() => onSelectProject(p)}
+            onContextAction={handleContextAction}
           />
         ))}
       </div>

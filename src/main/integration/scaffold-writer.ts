@@ -46,10 +46,13 @@ function scaffoldPathToTarget(scaffoldRelative: string): string {
  * 6. Ensure context/ and memory/ directories exist
  */
 export async function executeIntegration(targetPath: string, scaffoldDir: string): Promise<void> {
+  console.log(`[integration] executing integration: scaffold=${scaffoldDir} → target=${targetPath}`);
+
   // Step 1: Wipe .claude/specs/ (FR-016)
   const specsDir = path.join(targetPath, '.claude', 'specs');
   try {
     await fs.rm(specsDir, { recursive: true, force: true });
+    console.log('[integration] wiped .claude/specs/');
   } catch {
     // Directory might not exist — that's fine
   }
@@ -75,6 +78,7 @@ export async function executeIntegration(targetPath: string, scaffoldDir: string
 
     // Copy file
     await fs.copyFile(sourcePath, destPath);
+    console.log(`[integration] copied: ${targetRel}`);
   }
 
   // Step 6: Ensure context/ and memory/ directories exist (even if empty)

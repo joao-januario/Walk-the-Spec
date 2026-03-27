@@ -26,7 +26,7 @@ describe('integration-planner', () => {
       const plan = await generateIntegrationPlan(tmpDir, SCAFFOLD_DIR);
 
       expect(plan.targetPath).toBe(tmpDir);
-      expect(plan.scaffoldVersion).toBe('1.0.0');
+      expect(plan.scaffoldVersion).toBe('1.1.0');
       expect(plan.createCount).toBeGreaterThan(0);
       expect(plan.overwriteCount).toBe(0);
       expect(plan.preserveCount).toBe(0);

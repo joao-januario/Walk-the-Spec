@@ -28,6 +28,7 @@ Read the right doc for your task — don't read all source files.
 | Add/modify UI component / theme | `docs/renderer.md` | `docs/ipc.md` (if new data needed) |
 | Modify artifact editing | `docs/writer.md` | `docs/ipc.md` (edit-field handler) |
 | Modify file watching / phase detection / notifications / settings | `docs/architecture.md` (inline sections) | — |
+| Modify scaffold / integration / auto-update | `docs/architecture.md` | — |
 
 ## Context & Navigation
 
@@ -39,7 +40,7 @@ This table is the **single source of truth** for file-to-doc coverage. Do not du
 
 | File | Covers source paths |
 |------|---------------------|
-| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/main/repomap/`, `src/main/integration/`, `src/preload/` |
+| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/main/repomap/`, `src/main/integration/`, `src/main/updater/`, `src/preload/`, `resources/scaffold/`, `scripts/`, `.github/workflows/` |
 | `docs/parsers.md` | `src/main/parser/` |
 | `docs/ipc.md` | `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/services/api.ts` |
 | `docs/renderer.md` | `src/renderer/src/components/`, `src/renderer/src/hooks/`, `src/renderer/src/themes/` |
@@ -71,5 +72,13 @@ TypeScript strict mode. Dark Radix Mauve theme (accessibility-tested). See `.cla
 - 1-click project switching
 - Native OS integration (folder picker, window management)
 
-<!-- MANUAL ADDITIONS START -->
-<!-- MANUAL ADDITIONS END -->
+## Scaffold Sync
+
+`.claude/commands/`, `.claude/specify/templates/`, and `.claude/specify/scripts/` are the **source of truth** for speckit files. `resources/scaffold/` is a bundled copy that gets distributed to other projects during integration ("Refresh Specs"). The sync is automatic — `npm run build` runs `scripts/sync-scaffold.sh` before compiling.
+
+**Not synced** (scaffold-only, intentionally different from live files):
+- `resources/scaffold/best-practices/` — generic templates replaced by `/spec.constitution` per project
+- `resources/scaffold/CLAUDE.md.template` — template for new projects, not a copy of this file
+- `resources/scaffold/.scaffold-version` — bump manually when scaffold content changes
+
+If you edit any file in `.claude/commands/`, `.claude/specify/templates/`, or `.claude/specify/scripts/`, the next `npm run build` automatically propagates it to `resources/scaffold/`. Project-specific commands (e.g., `release-new-version.md`) are excluded via the `EXCLUDE_FILES` list in `scripts/sync-scaffold.sh`. Run `npm run sync-scaffold:check` to verify sync without modifying files.

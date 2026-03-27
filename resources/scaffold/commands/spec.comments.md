@@ -1,6 +1,5 @@
 ---
 description: Apply clipboard-pasted section comments to artifact files by rewriting the targeted sections.
-model: sonnet
 ---
 
 ## User Input

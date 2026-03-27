@@ -1,6 +1,5 @@
 ---
 description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md and plan.md after plan generation.
-model: sonnet
 ---
 
 ## User Input

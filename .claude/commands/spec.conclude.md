@@ -1,6 +1,5 @@
 ---
 description: Finalize the current feature branch — run tests, clean up branch-specific artifacts, commit, squash merge to main.
-model: haiku
 ---
 
 ## User Input
@@ -34,14 +33,15 @@ Build fails → STOP, report errors. Tests fail → STOP, report failures. Both 
 
 ### Step 3: Update Documentation
 
-If the project's agent context file has a Documentation section with coverage mappings:
-1. `git diff main --name-only` to see changed files
-2. Cross-reference against CLAUDE.md Documentation table (single source of truth for doc coverage)
-3. Update only specific sections affected in matching docs
-4. Verify Documentation and Context Routing tables still accurate
-5. No documentation table or no documented areas touched → "No doc changes needed"
+1. `git diff main --name-only` to get all changed/new files
+2. Read CLAUDE.md Documentation table (single source of truth for which code maps to which docs)
+3. For each changed file:
+   - **File is covered by an existing doc**: Update the relevant sections in that doc to reflect the changes
+   - **File is NOT covered by any doc**: Find the most appropriate existing doc to add coverage, OR create a new doc if no existing doc is a reasonable fit. Then add the new file-to-doc mapping in the CLAUDE.md Documentation table.
+4. For each new source directory or module introduced: Ensure it has doc coverage. New areas of the codebase MUST be documented — not documenting new code is never acceptable.
+5. Update the Context Routing Table in CLAUDE.md if new workflows or areas were introduced.
 
-**Rules**: Only update affected sections. CLAUDE.md owns the index. Doc files contain deep technical content only — reference source files inline in prose.
+**Rules**: CLAUDE.md owns the index. Doc files contain deep technical content only — reference source files inline in prose. New code gets new documentation.
 
 ### Step 4: Proceed
 

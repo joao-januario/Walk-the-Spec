@@ -9,9 +9,11 @@ interface FeatureCardProps {
   project: Project;
   selected: boolean;
   onClick: () => void;
+  onContextAction?: (action: 'refresh' | 'delete', project: Project) => void;
 }
 
-export default function FeatureCard({ project, selected, onClick }: FeatureCardProps) {
+export default function FeatureCard({ project, selected, onClick, onContextAction }: FeatureCardProps) {
+  const [menuPos, setMenuPos] = React.useState<{ x: number; y: number } | null>(null);
   const hasError = !!project.error;
   const p = hasError
     ? { bg: 'bg-board-red/20', text: 'text-board-red', dot: 'bg-board-red', border: 'border-board-red', label: 'Error' }
@@ -21,9 +23,24 @@ export default function FeatureCard({ project, selected, onClick }: FeatureCardP
   const justTransitioned = prevPhase !== undefined && prevPhase !== project.phase;
   const phaseVar = `var(--color-phase-${project.phase})`;
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMenuPos({ x: e.clientX, y: e.clientY });
+  };
+
+  // Close menu on any click outside
+  React.useEffect(() => {
+    if (!menuPos) return;
+    const close = () => setMenuPos(null);
+    window.addEventListener('click', close);
+    return () => window.removeEventListener('click', close);
+  }, [menuPos]);
+
   return (
+    <>
     <div
       onClick={onClick}
+      onContextMenu={handleContextMenu}
       className={cn(
         'mb-[2px] cursor-pointer rounded-lg border-l-[3px] px-[14px] py-[10px] transition-all duration-150',
         selected
@@ -60,5 +77,26 @@ export default function FeatureCard({ project, selected, onClick }: FeatureCardP
         )}
       </div>
     </div>
+
+    {menuPos && (
+      <div
+        className="bg-board-surface border-board-border fixed z-50 min-w-[160px] rounded-lg border py-1 shadow-2xl"
+        style={{ left: menuPos.x, top: menuPos.y }}
+      >
+        <button
+          onClick={() => { setMenuPos(null); onContextAction?.('refresh', project); }}
+          className="text-board-text hover:bg-board-surface-hover w-full cursor-pointer bg-transparent px-3 py-1.5 text-left text-[0.8125rem] transition-colors"
+        >
+          Refresh Specs
+        </button>
+        <button
+          onClick={() => { setMenuPos(null); onContextAction?.('delete', project); }}
+          className="text-board-red hover:bg-board-red/10 w-full cursor-pointer bg-transparent px-3 py-1.5 text-left text-[0.8125rem] transition-colors"
+        >
+          Remove Project
+        </button>
+      </div>
+    )}
+    </>
   );
 }

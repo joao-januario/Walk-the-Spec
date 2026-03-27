@@ -58,6 +58,20 @@ const api = {
     ipcRenderer.on('branch-changed', sub);
     return () => ipcRenderer.removeListener('branch-changed', sub);
   },
+
+  // Auto-update events
+  onUpdateAvailable: (callback: (payload: { version: string }) => void) => {
+    const sub = (_event: any, payload: { version: string }) => callback(payload);
+    ipcRenderer.on('update-available', sub);
+    return () => ipcRenderer.removeListener('update-available', sub);
+  },
+  onUpdateDownloaded: (callback: (payload: { version: string }) => void) => {
+    const sub = (_event: any, payload: { version: string }) => callback(payload);
+    ipcRenderer.on('update-downloaded', sub);
+    return () => ipcRenderer.removeListener('update-downloaded', sub);
+  },
+  installUpdate: () => ipcRenderer.invoke('update:install'),
+  restartForUpdate: () => ipcRenderer.invoke('update:restart'),
 };
 
 contextBridge.exposeInMainWorld('api', api);

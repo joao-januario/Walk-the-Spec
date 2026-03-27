@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin({ include: ['typescript', 'web-tree-sitter', 'tree-sitter-wasms'] })],
+    plugins: [externalizeDepsPlugin({ include: ['typescript', 'web-tree-sitter', 'tree-sitter-wasms', 'electron-updater'] })],
     build: {
       outDir: 'out/main',
       rollupOptions: {

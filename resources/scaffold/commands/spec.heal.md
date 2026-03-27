@@ -1,6 +1,5 @@
 ---
 description: Apply fixes for all actionable findings (CRITICAL, HIGH, MEDIUM, LOW) from the most recent /spec.review. NEEDS_REFACTOR is excluded (tracked in refactor-backlog.md).
-model: sonnet
 ---
 
 ## User Input

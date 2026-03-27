@@ -16,7 +16,7 @@ ipcMain.handle('channel-name', async (_event, arg1: Type1, arg2?: Type2) => {
 
 Key conventions:
 - Channel names are lowercase kebab-case (e.g., `get-projects`, `add-project`, `edit-field`)
-- Exception: `backlog:list` uses colon namespace (legacy pattern)
+- Domain-namespaced channels use colon notation (e.g., `update:install`, `update:restart`, `integration:plan`, `backlog:list`)
 - First parameter is always `_event` (unused in handle pattern)
 - All handlers return serializable data (no class instances, no functions)
 
@@ -40,6 +40,8 @@ onSpecsChanged: (callback) => {
 ```
 
 Every `on`-style listener returns a cleanup function for React `useEffect` teardown.
+
+**Auto-update channels** follow the same patterns. The main process registers `update:install` and `update:restart` handlers in `src/main/updater/auto-updater.ts` (not in `handlers.ts` — they're registered during `initAutoUpdater()`). The preload bridge exposes `onUpdateAvailable` and `onUpdateDownloaded` event listeners plus `installUpdate` and `restartForUpdate` invoke wrappers.
 
 ## Renderer API Wrapper
 

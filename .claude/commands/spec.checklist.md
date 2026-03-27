@@ -1,6 +1,5 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
-model: sonnet
 ---
 
 ## Checklist Purpose: "Unit Tests for English"

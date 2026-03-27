@@ -1,6 +1,5 @@
 ---
 description: Review the current branch against best practices for the underlying technologies. Produces a structured findings report with severity, location, and recommendations.
-model: sonnet
 ---
 
 ## User Input

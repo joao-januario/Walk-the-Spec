@@ -1,14 +1,14 @@
 # Repo Map
 
-Generated: 2026-03-27T15:11:51.031Z
-Updated: 2026-03-27T15:11:51.031Z
-Files: 79
-Token estimate: ~6172
+Generated: 2026-03-27T16:34:33.467Z
+Updated: 2026-03-27T16:34:33.467Z
+Files: 82
+Token estimate: ~6346
 
 ---
 
 electron.vite.config.ts
-│ hash: 728675d71fec
+│ hash: 22415dfe5a7b
 │
 │ imports: electron-vite, @vitejs/plugin-react, @tailwindcss/vite
 │
@@ -37,10 +37,10 @@ src/main/config/config-manager.ts
 ⋮...
 
 src/main/index.ts
-│ hash: ab43f0ff2f9a
+│ hash: ea5b2e268811
 │
 │ imports: electron, path, fs
-│ local: ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./repomap/index.js, ./repomap/extractors.js
+│ local: ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./repomap/index.js, ./repomap/extractors.js, ./updater/auto-updater.js
 │
 │ export function startWatchingProject(projectId: string, projectPath: string)
 │ export function stopWatchingProject(projectId: string)
@@ -48,7 +48,7 @@ src/main/index.ts
 ⋮...
 
 src/main/integration/integration-planner.ts
-│ hash: 1515dbc10e7a
+│ hash: cfa6df1cb9e7
 │
 │ imports: fs/promises, path
 │ local: ./types.js, ../utils/paths.js
@@ -58,7 +58,7 @@ src/main/integration/integration-planner.ts
 ⋮...
 
 src/main/integration/scaffold-version.ts
-│ hash: 5ea20aff88c9
+│ hash: f54cc433bbd8
 │
 │ imports: fs/promises, path
 │
@@ -71,7 +71,7 @@ src/main/integration/scaffold-version.ts
 ⋮...
 
 src/main/integration/scaffold-writer.ts
-│ hash: a5d97b2d88d0
+│ hash: a4742e7adee2
 │
 │ imports: fs/promises, path
 │ local: ../utils/paths.js
@@ -81,7 +81,7 @@ src/main/integration/scaffold-writer.ts
 ⋮...
 
 src/main/integration/types.ts
-│ hash: c3088f7daa5a
+│ hash: 0a5f30b660c3
 │
 │ export type FileAction
 │ export type FileCategory
@@ -387,6 +387,15 @@ src/main/repomap/types.ts
 
 ⋮...
 
+src/main/updater/auto-updater.ts
+│ hash: 8dd3c3c98013
+│
+│ imports: electron, electron-updater
+│
+│ export function initAutoUpdater(mainWindow: BrowserWindow): void
+
+⋮...
+
 src/main/utils/paths.ts
 │ hash: 2744a62f0d03
 │
@@ -414,7 +423,7 @@ src/main/writer/markdown-serializer.ts
 ⋮...
 
 src/preload/index.ts
-│ hash: a9d7dde6c432
+│ hash: a3cd93ee861a
 │
 │ imports: electron
 │
@@ -423,10 +432,10 @@ src/preload/index.ts
 ⋮...
 
 src/renderer/src/App.tsx
-│ hash: 8ba6c0d9ee87
+│ hash: 6501cef90fe5
 │
 │ imports: react
-│ local: ./components/board/BoardView.js, ./components/feature/FeatureDetail.js, ./components/common/EmptyState.js, ./hooks/usePhaseNotification.js, ./themes/apply-theme.js, ./themes/themes.js, ./types/index.js
+│ local: ./components/board/BoardView.js, ./components/feature/FeatureDetail.js, ./components/common/EmptyState.js, ./components/common/UpdateDialog.js, ./hooks/usePhaseNotification.js, ./hooks/useAutoUpdate.js, ./themes/apply-theme.js, ./themes/themes.js, ./types/index.js
 │
 │ export default function App()
 
@@ -498,7 +507,7 @@ src/renderer/src/components/artifacts/TasksView.tsx
 ⋮...
 
 src/renderer/src/components/board/BoardView.tsx
-│ hash: 148215cd69c3
+│ hash: e5113b99c332
 │
 │ imports: react
 │ local: ./FeatureCard.js, ../integration/IntegrationDialog.js, ../../types/index.js, ../../services/api.js
@@ -508,12 +517,12 @@ src/renderer/src/components/board/BoardView.tsx
 ⋮...
 
 src/renderer/src/components/board/FeatureCard.tsx
-│ hash: a2ca702b8d13
+│ hash: 09a5f5ee89f0
 │
 │ imports: react, framer-motion
 │ local: ../../theme.js, ../../lib/utils.js, ../../hooks/usePrevious.js, ../../types/index.js
 │
-│ export default function FeatureCard({ project, selected, onClick }: FeatureCardProps)
+│ export default function FeatureCard({ project, selected, onClick, onContextAction }: FeatureCardProps)
 
 ⋮...
 
@@ -533,6 +542,16 @@ src/renderer/src/components/common/EmptyState.tsx
 │ imports: react
 │
 │ export default function EmptyState({ branchName, message }: EmptyStateProps)
+
+⋮...
+
+src/renderer/src/components/common/UpdateDialog.tsx
+│ hash: 244b5bde7489
+│
+│ imports: react, framer-motion
+│ local: ../../lib/utils.js, ../../hooks/useAutoUpdate.js
+│
+│ export default function UpdateDialog({ update }: UpdateDialogProps)
 
 ⋮...
 
@@ -625,7 +644,7 @@ src/renderer/src/components/feature/FeatureDetail.tsx
 ⋮...
 
 src/renderer/src/components/integration/IntegrationBanner.tsx
-│ hash: 3428fcb49190
+│ hash: 8b270f425977
 │
 │ imports: react
 │ local: ../../lib/utils.js, ../../types/index.js
@@ -635,7 +654,7 @@ src/renderer/src/components/integration/IntegrationBanner.tsx
 ⋮...
 
 src/renderer/src/components/integration/IntegrationDialog.tsx
-│ hash: d73ac5d55521
+│ hash: cf2ba73ba363
 │
 │ imports: react, framer-motion
 │ local: ../../lib/utils.js, ../../types/index.js
@@ -729,6 +748,16 @@ src/renderer/src/context/GlossaryContext.ts
 
 ⋮...
 
+src/renderer/src/hooks/useAutoUpdate.ts
+│ hash: 67b5890b80bb
+│
+│ imports: react
+│
+│ export interface AutoUpdateHandle
+│ export function useAutoUpdate(): AutoUpdateHandle
+
+⋮...
+
 src/renderer/src/hooks/useCommentStore.ts
 │ hash: 257571419e98
 │
@@ -796,7 +825,7 @@ src/renderer/src/main.tsx
 ⋮...
 
 src/renderer/src/services/api.ts
-│ hash: 3d53a7ed8f4c
+│ hash: aa91ebb33516
 │
 │ local: ../types/index.js
 │

@@ -26,6 +26,10 @@ declare global {
       onSettingsChanged: (callback: (...args: any[]) => void) => () => void;
       onSpecsChanged: (callback: (...args: any[]) => void) => () => void;
       onBranchChanged: (callback: (...args: any[]) => void) => () => void;
+      onUpdateAvailable: (callback: (payload: { version: string }) => void) => () => void;
+      onUpdateDownloaded: (callback: (payload: { version: string }) => void) => () => void;
+      installUpdate: () => Promise<void>;
+      restartForUpdate: () => Promise<void>;
     };
   }
 }

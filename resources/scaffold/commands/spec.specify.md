@@ -1,6 +1,5 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
-model: sonnet
 handoffs:
   - label: Build Technical Plan
     agent: spec.plan

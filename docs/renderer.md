@@ -9,8 +9,9 @@ The renderer is a React 19 SPA running in Electron's renderer process. It displa
 ```
 App
 ├── BoardView (sidebar, always visible)
-│   ├── FeatureCard[] (one per project)
+│   ├── FeatureCard[] (one per project, right-click context menu)
 │   └── Add Project button
+├── UpdateDialog (modal, shown when auto-update available)
 │
 └── Main content area
     ├── FeatureDetail (selected project)
@@ -53,6 +54,7 @@ No external state library. State lives in three places:
 - **useArtifactData** (inline in FeatureDetail): Returns `{ artifact, loading, error }`. Fetches via `api.getArtifact()`.
 - **usePhaseNotification**: Returns `{ commentableTabs, lastCommand }`. Persists to `sessionStorage`.
 - **useCommentStore**: Returns `{ getComment, setComment, hasAnyComments }`. In-memory only.
+- **useAutoUpdate**: Returns `{ state, install, dismiss, restart }`. Discriminated union state machine (idle/available/downloading/ready) driven by IPC events from electron-updater.
 
 ## Tab System
 
@@ -91,6 +93,8 @@ Comments are ephemeral (in-memory). Not persisted to disk.
 | `specs-changed` | Increments `refreshKey`, shows toast notification |
 | `branch-changed` | Increments `refreshKey`, shows toast notification |
 | `phase-changed` | (handled by `usePhaseNotification` in FeatureDetail) |
+| `update-available` | (handled by `useAutoUpdate` — shows UpdateDialog) |
+| `update-downloaded` | (handled by `useAutoUpdate` — transitions dialog to "restart" state) |
 
 Cleanup functions from `window.api.on*` are called in the effect's return.
 

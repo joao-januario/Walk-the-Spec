@@ -2,18 +2,26 @@
   "name": "walk-the-spec",
   "version": "0.1.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joao-januario/Walk-the-Spec.git"
+  },
   "main": "./out/main/index.js",
   "type": "module",
   "scripts": {
+    "predev": "bash scripts/sync-scaffold.sh",
     "dev": "electron-vite dev",
+    "prebuild": "bash scripts/sync-scaffold.sh",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "pack": "electron-vite build && electron-builder --dir",
-    "dist": "electron-vite build && electron-builder",
-    "dist:win": "electron-vite build && electron-builder --win",
-    "dist:mac": "electron-vite build && electron-builder --mac --x64",
-    "dist:mac-arm64": "electron-vite build && electron-builder --mac --arm64",
-    "dist:mac-universal": "electron-vite build && electron-builder --mac --x64 --arm64",
+    "sync-scaffold": "bash scripts/sync-scaffold.sh",
+    "sync-scaffold:check": "bash scripts/sync-scaffold.sh --check",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac --x64",
+    "dist:mac-arm64": "npm run build && electron-builder --mac --arm64",
+    "dist:mac-universal": "npm run build && electron-builder --mac --x64 --arm64",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -45,6 +53,11 @@
     },
     "linux": {
       "target": "AppImage"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "joao-januario",
+      "repo": "Walk-the-Spec"
     }
   },
   "dependencies": {
@@ -52,6 +65,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.2",
     "chokidar": "^4.0.0",
+    "electron-updater": "^6.3.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "highlight.js": "^11.11.1",
