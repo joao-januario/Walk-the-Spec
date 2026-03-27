@@ -42,6 +42,12 @@
       "node_modules/web-tree-sitter/**/*",
       "node_modules/tree-sitter-wasms/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "resources/scaffold",
+        "to": "scaffold"
+      }
+    ],
     "win": {
       "target": "nsis"
     },

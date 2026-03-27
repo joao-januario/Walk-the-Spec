@@ -5,12 +5,21 @@ const SCAFFOLD_VERSION_PATH = '.claude/specify/.scaffold-version';
 
 /**
  * Resolve the path to the bundled scaffold directory.
- * In electron-vite builds, __dirname resolves to out/main/.
- * Accept an optional override for testing (Vitest __dirname differs from electron-vite).
+ *
+ * - Dev: __dirname resolves to out/main/, so ../../resources/scaffold works.
+ * - Production: scaffold is shipped via extraResources alongside app.asar,
+ *   so we use process.resourcesPath to locate it.
+ * - Tests: pass an explicit `base` override (Vitest __dirname differs).
  */
 export function getScaffoldDir(base?: string): string {
-  const root = base ?? path.join(__dirname, '../../');
-  return path.join(root, 'resources/scaffold');
+  if (base) return path.join(base, 'resources/scaffold');
+
+  // In packaged builds, __dirname is inside app.asar — scaffold lives alongside it
+  if (__dirname.includes('app.asar')) {
+    return path.join(process.resourcesPath, 'scaffold');
+  }
+  // Dev: navigate from compiled output (out/main/) to project root
+  return path.join(__dirname, '../../resources/scaffold');
 }
 
 /** Read the scaffold version from a target project. Returns null if not found. */
