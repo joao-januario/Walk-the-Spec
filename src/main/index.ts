@@ -1,3 +1,4 @@
+import './utils/logger.js'; // Initialize electron-log before anything else — redirects console.* to file
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { registerIpcHandlers } from './ipc/handlers.js';
