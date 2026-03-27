@@ -22,10 +22,15 @@ const PHASE_SOUNDS: Record<string, string> = {
 const DEFAULT_SOUND = 'plan.wav';
 
 function getSoundPath(command: string): string {
-  // command is like "spec.implement" -extract the phase after the dot
+  // command is like "spec.implement" — extract the phase after the dot
   const phase = command.split('.').pop() ?? '';
   const file = PHASE_SOUNDS[phase] ?? DEFAULT_SOUND;
-  // __dirname resolves to out/main/ after electron-vite bundling
+
+  // In packaged builds, __dirname is inside app.asar — sounds live alongside it
+  if (__dirname.includes('app.asar')) {
+    return path.join(process.resourcesPath, 'sounds', file);
+  }
+  // Dev: navigate from compiled output (out/main/) to project root
   return path.join(__dirname, '../../resources/sounds', file);
 }
 

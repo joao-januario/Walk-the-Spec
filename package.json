@@ -46,6 +46,10 @@
       {
         "from": "resources/scaffold",
         "to": "scaffold"
+      },
+      {
+        "from": "resources/sounds",
+        "to": "sounds"
       }
     ],
     "win": {
