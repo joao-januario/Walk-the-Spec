@@ -1,6 +1,6 @@
 # Walk the Spec
 
-A desktop dashboard that monitors your local projects for [speckit](https://github.com/joao-januario/Walk-the-Spec) artifacts (`.claude/specs/<branch>/*.md`) and renders them as an interactive, real-time board.
+A desktop dashboard that monitors your local projects for spec artifacts (`.claude/specs/<branch>/*.md`) — heavily modified from [spec-kit](https://github.com/github/spec-kit) — and renders them as an interactive, real-time board.
 
 Think of it as a mission control for your spec-driven development workflow: see every feature's phase at a glance, drill into specs, plans, tasks, research, and reviews — all parsed and rendered live as files change on disk.
 
