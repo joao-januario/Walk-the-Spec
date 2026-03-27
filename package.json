@@ -1,6 +1,6 @@
 {
   "name": "walk-the-spec",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Desktop dashboard for spec-driven development artifacts",
   "author": "joao-januario",
   "private": true,
@@ -44,6 +44,10 @@
     ],
     "win": {
       "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "mac": {
       "target": [
