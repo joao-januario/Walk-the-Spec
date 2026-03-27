@@ -1,7 +1,7 @@
 {
   "name": "walk-the-spec",
   "version": "1.0.11",
-  "description": "Desktop dashboard for spec-driven development artifacts",
+  "description": "Walk the Spec",
   "author": "joao-januario",
   "private": true,
   "repository": {

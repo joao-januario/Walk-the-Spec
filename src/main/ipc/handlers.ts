@@ -26,36 +26,50 @@ import type { IntegrationState } from '../integration/types.js';
 /** Cached bundled scaffold version — read once, reused for all projects. */
 let bundledScaffoldVersion: string | null = null;
 
-/** Detect integration state from in-project files. */
-function detectIntegrationState(projectPath: string): IntegrationState {
+/** Detect integration state from in-project files (async). */
+async function detectIntegrationState(projectPath: string): Promise<IntegrationState> {
   const versionPath = path.join(projectPath, '.claude', 'specify', '.scaffold-version');
-  if (!fs.existsSync(versionPath)) return 'not-integrated';
+  try {
+    await fs.promises.access(versionPath);
+  } catch {
+    return 'not-integrated';
+  }
 
-  const projectVersion = fs.readFileSync(versionPath, 'utf-8').trim();
+  const projectVersion = (await fs.promises.readFile(versionPath, 'utf-8')).trim();
   if (bundledScaffoldVersion && projectVersion !== bundledScaffoldVersion) return 'outdated';
 
   const constitutionPath = path.join(projectPath, '.claude', 'specify', 'memory', 'constitution.md');
-  if (!fs.existsSync(constitutionPath)) return 'needs-constitution';
+  try {
+    await fs.promises.access(constitutionPath);
+  } catch {
+    return 'needs-constitution';
+  }
 
   return 'current';
 }
 
-function getProjectState(entry: { id: string; name: string; path: string }) {
+async function getProjectState(entry: { id: string; name: string; path: string }) {
   try {
-    if (!fs.existsSync(entry.path)) {
+    try {
+      await fs.promises.access(entry.path);
+    } catch {
       return { ...entry, currentBranch: '', hasSpeckitContent: false, phase: 'unknown' as const, integrationState: 'not-integrated' as IntegrationState, error: 'Project path no longer exists' };
     }
-    const scan = scanProject(entry.path);
+    const scan = await scanProject(entry.path);
     let tasksContent: string | undefined;
     if (scan.specDir && scan.artifactFiles.includes('tasks.md')) {
-      tasksContent = fs.readFileSync(path.join(scan.specDir, 'tasks.md'), 'utf-8');
+      try {
+        tasksContent = await fs.promises.readFile(path.join(scan.specDir, 'tasks.md'), 'utf-8');
+      } catch {
+        // tasks.md may have been removed between scan and read
+      }
     }
     return {
       ...entry,
       currentBranch: scan.currentBranch,
       hasSpeckitContent: scan.hasSpeckitContent,
       phase: detectPhase(scan.artifactFiles, tasksContent),
-      integrationState: detectIntegrationState(entry.path),
+      integrationState: await detectIntegrationState(entry.path),
       error: null,
     };
   } catch (err: unknown) {
@@ -69,16 +83,31 @@ export function registerIpcHandlers() {
 
   ipcMain.handle('get-projects', () => {
     const config = loadConfig();
-    return { projects: getProjects(config).map(getProjectState) };
+    return { projects: getProjects(config).map((p) => ({ id: p.id, name: p.name, path: p.path })) };
+  });
+
+  ipcMain.handle('get-project-state', async (_event, projectId: string) => {
+    const config = loadConfig();
+    const project = getProjects(config).find((p) => p.id === projectId);
+    if (!project) throw new Error('Project not found');
+    return getProjectState(project);
   });
 
   ipcMain.handle('add-project', async (_event, projectPath: string, name?: string) => {
-    if (!fs.existsSync(projectPath)) throw new Error('Path does not exist');
-    if (!fs.existsSync(path.join(projectPath, '.git'))) throw new Error('Path is not a git repository');
+    try {
+      await fs.promises.access(projectPath);
+    } catch {
+      throw new Error('Path does not exist');
+    }
+    try {
+      await fs.promises.access(path.join(projectPath, '.git'));
+    } catch {
+      throw new Error('Path is not a git repository');
+    }
 
     const config = loadConfig();
     const entry = addProject(config, projectPath, name);
-    saveConfig(undefined, config);
+    await saveConfig(config);
 
     // Generate initial repo map in background (non-blocking)
     void getAllExtractors().then((extractors) =>
@@ -90,10 +119,10 @@ export function registerIpcHandlers() {
     return getProjectState(entry);
   });
 
-  ipcMain.handle('delete-project', (_event, id: string) => {
+  ipcMain.handle('delete-project', async (_event, id: string) => {
     const config = loadConfig();
     removeProject(config, id);
-    saveConfig(undefined, config);
+    await saveConfig(config);
   });
 
   // --- Integration ---
@@ -106,16 +135,32 @@ export function registerIpcHandlers() {
   });
 
   ipcMain.handle('integration:plan', async (_event, projectPath: string) => {
-    if (!fs.existsSync(projectPath)) throw new Error('Path does not exist');
-    if (!fs.existsSync(path.join(projectPath, '.git'))) throw new Error('Path is not a git repository');
+    try {
+      await fs.promises.access(projectPath);
+    } catch {
+      throw new Error('Path does not exist');
+    }
+    try {
+      await fs.promises.access(path.join(projectPath, '.git'));
+    } catch {
+      throw new Error('Path is not a git repository');
+    }
 
     const scaffoldDir = getScaffoldDir();
     return generateIntegrationPlan(projectPath, scaffoldDir);
   });
 
   ipcMain.handle('integration:execute', async (_event, projectPath: string) => {
-    if (!fs.existsSync(projectPath)) throw new Error('Path does not exist');
-    if (!fs.existsSync(path.join(projectPath, '.git'))) throw new Error('Path is not a git repository');
+    try {
+      await fs.promises.access(projectPath);
+    } catch {
+      throw new Error('Path does not exist');
+    }
+    try {
+      await fs.promises.access(path.join(projectPath, '.git'));
+    } catch {
+      throw new Error('Path is not a git repository');
+    }
 
     const scaffoldDir = getScaffoldDir();
     await executeIntegration(projectPath, scaffoldDir);
@@ -136,37 +181,43 @@ export function registerIpcHandlers() {
     if (result.canceled || result.filePaths.length === 0) return null;
 
     const selectedPath = result.filePaths[0];
-    const isGitRepo = fs.existsSync(path.join(selectedPath, '.git'));
+    let isGitRepo = false;
+    try {
+      await fs.promises.access(path.join(selectedPath, '.git'));
+      isGitRepo = true;
+    } catch {
+      // not a git repo
+    }
     return { path: selectedPath, isGitRepo };
   });
 
   // --- Feature ---
 
-  ipcMain.handle('get-feature', (_event, projectId: string) => {
+  ipcMain.handle('get-feature', async (_event, projectId: string) => {
     const config = loadConfig();
     const project = getProjects(config).find((p) => p.id === projectId);
     if (!project) throw new Error('Project not found');
 
-    const scan = scanProject(project.path);
+    const scan = await scanProject(project.path);
     if (!scan.hasSpeckitContent || !scan.specDir) return null;
 
     let tasksContent: string | undefined;
     if (scan.artifactFiles.includes('tasks.md')) {
-      tasksContent = fs.readFileSync(path.join(scan.specDir, 'tasks.md'), 'utf-8');
+      tasksContent = await fs.promises.readFile(path.join(scan.specDir, 'tasks.md'), 'utf-8');
     }
 
     let summary = '';
     if (scan.artifactFiles.includes('spec.md')) {
-      const specContent = fs.readFileSync(path.join(scan.specDir, 'spec.md'), 'utf-8');
+      const specContent = await fs.promises.readFile(path.join(scan.specDir, 'spec.md'), 'utf-8');
       const match = specContent.match(/^# (?:Feature Specification: )?(.+)/m);
       if (match) summary = match[1].trim();
     }
 
-    const artifacts = scan.artifactFiles.map((f) => {
+    const artifacts = await Promise.all(scan.artifactFiles.map(async (f) => {
       const filePath = path.join(scan.specDir!, f);
-      const stat = fs.statSync(filePath);
+      const stat = await fs.promises.stat(filePath);
       return { type: f.replace('.md', ''), filePath: f, lastModified: stat.mtime.toISOString(), elementCount: 0 };
-    });
+    }));
 
     return {
       branchName: scan.currentBranch,
@@ -179,20 +230,24 @@ export function registerIpcHandlers() {
 
   // --- Artifacts ---
 
-  ipcMain.handle('get-artifact', (_event, projectId: string, artifactType: string) => {
+  ipcMain.handle('get-artifact', async (_event, projectId: string, artifactType: string) => {
     const config = loadConfig();
     const project = getProjects(config).find((p) => p.id === projectId);
     if (!project) throw new Error('Project not found');
 
-    const scan = scanProject(project.path);
+    const scan = await scanProject(project.path);
     if (!scan.specDir) throw new Error('No speckit content');
 
     const fileName = `${artifactType}.md`;
     const filePath = path.join(scan.specDir, fileName);
-    if (!fs.existsSync(filePath)) throw new Error(`Artifact ${artifactType} not found`);
+    try {
+      await fs.promises.access(filePath);
+    } catch {
+      throw new Error(`Artifact ${artifactType} not found`);
+    }
 
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const stat = fs.statSync(filePath);
+    const content = await fs.promises.readFile(filePath, 'utf-8');
+    const stat = await fs.promises.stat(filePath);
 
     let elements: any[] = [];
     let parseWarning: string | null = null;
@@ -326,23 +381,27 @@ export function registerIpcHandlers() {
 
   // --- Edits ---
 
-  ipcMain.handle('edit-field', (_event, projectId: string, artifactType: string, elementId: string, field: string, value: unknown) => {
+  ipcMain.handle('edit-field', async (_event, projectId: string, artifactType: string, elementId: string, field: string, value: unknown) => {
     const config = loadConfig();
     const project = getProjects(config).find((p) => p.id === projectId);
     if (!project) throw new Error('Project not found');
 
-    const scan = scanProject(project.path);
+    const scan = await scanProject(project.path);
     if (!scan.specDir) throw new Error('No speckit content');
 
     const filePath = path.join(scan.specDir, `${artifactType}.md`);
-    if (!fs.existsSync(filePath)) throw new Error(`Artifact ${artifactType} not found`);
+    try {
+      await fs.promises.access(filePath);
+    } catch {
+      throw new Error(`Artifact ${artifactType} not found`);
+    }
 
     switch (`${artifactType}:${field}`) {
       case 'tasks:checked':
-        editTaskCheckbox(filePath, elementId, value as boolean);
+        await editTaskCheckbox(filePath, elementId, value as boolean);
         break;
       case 'spec:text':
-        editRequirementText(filePath, elementId, value as string);
+        await editRequirementText(filePath, elementId, value as string);
         break;
       default:
         throw new Error(`Unsupported edit: ${artifactType}:${field} on ${elementId}`);
@@ -358,15 +417,19 @@ export function registerIpcHandlers() {
 
   // --- Refactor Backlog (project-level) ---
 
-  ipcMain.handle('backlog:list', (_event, projectId: string) => {
+  ipcMain.handle('backlog:list', async (_event, projectId: string) => {
     const config = loadConfig();
     const project = getProjects(config).find((p) => p.id === projectId);
     if (!project) throw new Error('Project not found');
 
     const backlogPath = path.join(project.path, '.claude', 'specs', 'refactor-backlog.md');
-    if (!fs.existsSync(backlogPath)) return { entries: [] };
+    try {
+      await fs.promises.access(backlogPath);
+    } catch {
+      return { entries: [] };
+    }
 
-    const content = fs.readFileSync(backlogPath, 'utf-8');
+    const content = await fs.promises.readFile(backlogPath, 'utf-8');
     return parseRefactorBacklog(content);
   });
 
@@ -377,10 +440,10 @@ export function registerIpcHandlers() {
     return config.settings;
   });
 
-  ipcMain.handle('save-settings', (_event, partial: Partial<AppSettings>) => {
+  ipcMain.handle('save-settings', async (_event, partial: Partial<AppSettings>) => {
     const config = loadConfig();
     config.settings = { ...config.settings, ...partial };
-    saveConfig(undefined, config);
+    await saveConfig(config);
     return config.settings;
   });
 
@@ -388,18 +451,22 @@ export function registerIpcHandlers() {
 
   const GLOSSARY_ENTRY = /^- `([^`]+)` — (.+)$/gm;
 
-  ipcMain.handle('get-glossary', (_event, projectId: string) => {
+  ipcMain.handle('get-glossary', async (_event, projectId: string) => {
     const config = loadConfig();
     const project = getProjects(config).find((p) => p.id === projectId);
     if (!project) throw new Error('Project not found');
 
-    const scan = scanProject(project.path);
+    const scan = await scanProject(project.path);
     if (!scan.specDir) return { terms: {} };
 
     const glossaryPath = path.join(scan.specDir, 'glossary.md');
-    if (!fs.existsSync(glossaryPath)) return { terms: {} };
+    try {
+      await fs.promises.access(glossaryPath);
+    } catch {
+      return { terms: {} };
+    }
 
-    const content = fs.readFileSync(glossaryPath, 'utf-8');
+    const content = await fs.promises.readFile(glossaryPath, 'utf-8');
     const terms: Record<string, string> = {};
     let match: RegExpExecArray | null;
     while ((match = GLOSSARY_ENTRY.exec(content)) !== null) {

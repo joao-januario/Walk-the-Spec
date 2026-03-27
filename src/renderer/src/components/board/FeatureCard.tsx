@@ -10,9 +10,10 @@ interface FeatureCardProps {
   selected: boolean;
   onClick: () => void;
   onContextAction?: (action: 'refresh' | 'delete', project: Project) => void;
+  loading?: boolean;
 }
 
-export default function FeatureCard({ project, selected, onClick, onContextAction }: FeatureCardProps) {
+export default function FeatureCard({ project, selected, onClick, onContextAction, loading }: FeatureCardProps) {
   const [menuPos, setMenuPos] = React.useState<{ x: number; y: number } | null>(null);
   const hasError = !!project.error;
   const p = hasError
@@ -65,7 +66,9 @@ export default function FeatureCard({ project, selected, onClick, onContextActio
         </span>
       </div>
       <div className="mt-[2px] ml-4">
-        {hasError ? (
+        {loading ? (
+          <span className="text-board-text-muted text-[0.75rem] animate-pulse">Loading...</span>
+        ) : hasError ? (
           <span className="text-board-red text-[0.75rem]">{project.error}</span>
         ) : (
           <>

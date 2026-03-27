@@ -2,7 +2,7 @@ import './utils/logger.js'; // Initialize electron-log before anything else — 
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { registerIpcHandlers } from './ipc/handlers.js';
-import { loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS, type SoundVolume, type AppSettings } from './config/config-manager.js';
+import { initConfigCache, loadConfig, saveConfig, getProjects, DEFAULT_SETTINGS, type SoundVolume, type AppSettings } from './config/config-manager.js';
 import { watchProject, unwatchAll, type WatcherEvents } from './projects/file-watcher.js';
 import { showCompletionNotification } from './notifications/os-notifier.js';
 import { playNotificationSound } from './notifications/sound-player.js';
@@ -12,7 +12,7 @@ import { detectPhase } from './phase/phase-detector.js';
 import { normalizePathForComparison } from './utils/paths.js';
 import { generateRepoMap } from './repomap/index.js';
 import { getAllExtractors } from './repomap/extractors.js';
-import { initAutoUpdater } from './updater/auto-updater.js';
+import { initAutoUpdater, checkForUpdatesManual } from './updater/auto-updater.js';
 import fs from 'fs';
 
 app.setAppUserModelId('com.speckit.walk-the-spec');
@@ -39,7 +39,7 @@ async function handleNotify(payload: NotifyPayload): Promise<void> {
       return;
     }
 
-    const scan = scanProject(project.path);
+    const scan = await scanProject(project.path);
     let tasksContent: string | undefined;
     if (scan.specDir && scan.artifactFiles.includes('tasks.md')) {
       try {
@@ -165,7 +165,7 @@ function changeFontSize(delta: number) {
   const next = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, current + delta));
   if (next === current) return;
   config.settings = { ...config.settings, fontSize: next };
-  saveConfig(undefined, config);
+  void saveConfig(config);
   sendToRenderer('settings-changed', { fontSize: next });
   buildMenu();
 }
@@ -173,7 +173,7 @@ function changeFontSize(delta: number) {
 function resetFontSize() {
   const config = loadConfig();
   config.settings = { ...config.settings, fontSize: DEFAULT_SETTINGS.fontSize };
-  saveConfig(undefined, config);
+  void saveConfig(config);
   sendToRenderer('settings-changed', { fontSize: DEFAULT_SETTINGS.fontSize });
   buildMenu();
 }
@@ -232,7 +232,7 @@ function buildMenu() {
           click: () => {
             const c = loadConfig();
             c.settings = { ...c.settings, soundVolume: level as SoundVolume };
-            saveConfig(undefined, c);
+            void saveConfig(c);
             sendToRenderer('settings-changed', { soundVolume: level });
             buildMenu();
           },
@@ -246,7 +246,7 @@ function buildMenu() {
             const c = loadConfig();
             const next = !c.settings.osNotifications;
             c.settings = { ...c.settings, osNotifications: next };
-            saveConfig(undefined, c);
+            void saveConfig(c);
             sendToRenderer('settings-changed', { osNotifications: next });
             buildMenu();
           },
@@ -263,7 +263,7 @@ function buildMenu() {
           click: () => {
             const c = loadConfig();
             c.settings = { ...c.settings, theme: theme.id };
-            saveConfig(undefined, c);
+            void saveConfig(c);
             sendToRenderer('settings-changed', { theme: theme.id });
             buildMenu();
           },
@@ -271,6 +271,15 @@ function buildMenu() {
       ],
     },
     { role: 'windowMenu' as const },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'Check for Updates',
+          click: () => checkForUpdatesManual(),
+        },
+      ],
+    },
   ];
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -293,8 +302,15 @@ function createWindow() {
     },
   });
 
+  // Defer non-critical startup work until window is visible
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
+
+    // These run after the window is showing — they don't block first render
+    buildMenu();
+    startWatchingAll();
+    startNotifyServer(handleNotify);
+    if (mainWindow) initAutoUpdater(mainWindow);
   });
 
   if (process.env.ELECTRON_RENDERER_URL) {
@@ -308,13 +324,11 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Critical path: init config cache + register IPC handlers + create window
+  await initConfigCache();
   registerIpcHandlers();
   createWindow();
-  buildMenu();
-  startWatchingAll();
-  startNotifyServer(handleNotify);
-  if (mainWindow) initAutoUpdater(mainWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

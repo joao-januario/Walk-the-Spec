@@ -13,6 +13,9 @@ const api = {
   // Native folder picker
   showFolderPicker: () => ipcRenderer.invoke('show-folder-picker'),
 
+  // Project state (per-project async scan)
+  getProjectState: (projectId: string) => ipcRenderer.invoke('get-project-state', projectId),
+
   // Feature
   getFeature: (projectId: string) => ipcRenderer.invoke('get-feature', projectId),
 

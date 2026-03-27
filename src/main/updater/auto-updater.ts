@@ -47,3 +47,8 @@ export function initAutoUpdater(mainWindow: BrowserWindow): void {
     // Silent — network may be unavailable
   });
 }
+
+/** Manually trigger an update check (e.g. from Help menu). */
+export function checkForUpdatesManual(): void {
+  void autoUpdater.checkForUpdates().catch(() => {});
+}

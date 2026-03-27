@@ -62,11 +62,11 @@ describe('artifact parsing integration', () => {
     expect(result.decisions[0].decision).toContain('JSON files');
   });
 
-  it('returns 404-equivalent for missing artifact type', () => {
+  it('returns 404-equivalent for missing artifact type', async () => {
     const dir = createProjectWithSpecs('no-plan', {
       'spec.md': '# Test\n',
     });
-    const scan = scanProject(dir);
+    const scan = await scanProject(dir);
     expect(scan.artifactFiles).not.toContain('plan.md');
   });
 });

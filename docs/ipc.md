@@ -48,12 +48,14 @@ Every `on`-style listener returns a cleanup function for React `useEffect` teard
 `api.ts` provides typed async functions that match the preload bridge 1:1:
 
 ```typescript
-export async function getProjects(): Promise<{ projects: Project[] }> {
+export async function getProjects() {
   return window.api.getProjects();
 }
 ```
 
 The renderer NEVER calls `window.api` directly from components — always through `api.ts`.
+
+**Two-phase project loading**: `getProjects()` returns a lightweight list (id, name, path) instantly from the config cache — no scanning. `getProjectState(id)` returns full scanned state (branch, phase, integration) for a single project. The renderer calls these in parallel for progressive loading.
 
 ## Data Flow
 

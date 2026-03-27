@@ -42,19 +42,19 @@ describe('project-scanner', () => {
     }
   });
 
-  it('detects the checked-out branch from .git/HEAD', () => {
+  it('detects the checked-out branch from .git/HEAD', async () => {
     const dir = createTempProject({ branch: '002-my-feature', withSpecs: true });
-    const result = scanProject(dir);
+    const result = await scanProject(dir);
     expect(result.currentBranch).toBe('002-my-feature');
   });
 
-  it('locates speckit directory and lists artifact files', () => {
+  it('locates speckit directory and lists artifact files', async () => {
     const dir = createTempProject({
       branch: '001-test',
       withSpecs: true,
       specFiles: ['spec.md', 'plan.md', 'tasks.md'],
     });
-    const result = scanProject(dir);
+    const result = await scanProject(dir);
     expect(result.hasSpeckitContent).toBe(true);
     expect(result.specDir).toContain('001-test');
     expect(result.artifactFiles).toContain('spec.md');
@@ -62,22 +62,22 @@ describe('project-scanner', () => {
     expect(result.artifactFiles).toContain('tasks.md');
   });
 
-  it('returns hasSpeckitContent=false when no specs directory', () => {
+  it('returns hasSpeckitContent=false when no specs directory', async () => {
     const dir = createTempProject({ branch: 'main', withSpecs: false });
-    const result = scanProject(dir);
+    const result = await scanProject(dir);
     expect(result.hasSpeckitContent).toBe(false);
     expect(result.artifactFiles).toEqual([]);
   });
 
-  it('throws when path has no .git directory', () => {
+  it('rejects when path has no .git directory', async () => {
     const dir = createTempProject({ withGit: false });
-    expect(() => scanProject(dir)).toThrow(/not a git repository/i);
+    await expect(scanProject(dir)).rejects.toThrow(/not a git repository/i);
   });
 
-  it('handles detached HEAD (direct commit hash)', () => {
+  it('handles detached HEAD (direct commit hash)', async () => {
     const dir = createTempProject();
     fs.writeFileSync(path.join(dir, '.git', 'HEAD'), 'abc123def456\n');
-    const result = scanProject(dir);
+    const result = await scanProject(dir);
     expect(result.currentBranch).toBe('abc123def456');
   });
 });

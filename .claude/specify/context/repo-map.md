@@ -1,14 +1,14 @@
 # Repo Map
 
-Generated: 2026-03-27T16:34:33.467Z
-Updated: 2026-03-27T16:34:33.467Z
-Files: 82
-Token estimate: ~6346
+Generated: 2026-03-27T17:45:51.776Z
+Updated: 2026-03-27T17:45:51.776Z
+Files: 83
+Token estimate: ~6377
 
 ---
 
 electron.vite.config.ts
-│ hash: 22415dfe5a7b
+│ hash: 4ebfc823730e
 │
 │ imports: electron-vite, @vitejs/plugin-react, @tailwindcss/vite
 │
@@ -37,10 +37,10 @@ src/main/config/config-manager.ts
 ⋮...
 
 src/main/index.ts
-│ hash: ea5b2e268811
+│ hash: a6d90e7b0363
 │
 │ imports: electron, path, fs
-│ local: ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./repomap/index.js, ./repomap/extractors.js, ./updater/auto-updater.js
+│ local: ./utils/logger.js, ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./repomap/index.js, ./repomap/extractors.js, ./updater/auto-updater.js
 │
 │ export function startWatchingProject(projectId: string, projectPath: string)
 │ export function stopWatchingProject(projectId: string)
@@ -388,11 +388,20 @@ src/main/repomap/types.ts
 ⋮...
 
 src/main/updater/auto-updater.ts
-│ hash: 8dd3c3c98013
+│ hash: c88b610a6dfa
 │
 │ imports: electron, electron-updater
 │
 │ export function initAutoUpdater(mainWindow: BrowserWindow): void
+
+⋮...
+
+src/main/utils/logger.ts
+│ hash: 448064d59d05
+│
+│ imports: electron-log
+│
+│ export default log
 
 ⋮...
 
@@ -546,7 +555,7 @@ src/renderer/src/components/common/EmptyState.tsx
 ⋮...
 
 src/renderer/src/components/common/UpdateDialog.tsx
-│ hash: 244b5bde7489
+│ hash: 777103e952bf
 │
 │ imports: react, framer-motion
 │ local: ../../lib/utils.js, ../../hooks/useAutoUpdate.js
@@ -749,7 +758,7 @@ src/renderer/src/context/GlossaryContext.ts
 ⋮...
 
 src/renderer/src/hooks/useAutoUpdate.ts
-│ hash: 67b5890b80bb
+│ hash: 59a71724c57f
 │
 │ imports: react
 │

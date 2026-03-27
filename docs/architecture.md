@@ -21,7 +21,8 @@ Filesystem change (artifact file saved)
 
 | Channel | Handler | Renderer Caller | Purpose |
 |---------|---------|-----------------|---------|
-| `get-projects` | `handlers.ts` | `api.getProjects()` | List all projects with branch, phase, errors |
+| `get-projects` | `handlers.ts` | `api.getProjects()` | Lightweight project list (id, name, path) from config cache — no scanning |
+| `get-project-state` | `handlers.ts` | `api.getProjectState(id)` | Full scanned state for one project (branch, phase, integration) |
 | `add-project` | `handlers.ts` | `api.addProject(path, name?)` | Register new project (validates git repo) |
 | `delete-project` | `handlers.ts` | `api.deleteProject(id)` | Unregister project |
 | `show-folder-picker` | `handlers.ts` | `api.showFolderPicker()` | Native OS folder dialog |
@@ -46,9 +47,10 @@ Filesystem change (artifact file saved)
 
 **Module**: `src/main/projects/file-watcher.ts`
 
-Two independent chokidar watchers per project:
+Three chokidar watchers per project:
 1. **Specs watcher**: Monitors `.claude/specs/` for artifact file changes (add/change/unlink)
 2. **HEAD watcher**: Monitors `.git/HEAD` for branch switches
+3. **Source watcher**: Monitors the entire project directory (with ignored dirs) for source file changes that trigger repo map regeneration. Debounced at 3000ms.
 
 Key behaviors:
 - `awaitWriteFinish`: 500ms stability threshold, 100ms poll interval (ensures writes complete before firing)
@@ -114,6 +116,10 @@ Three components work together when an external command completes:
   "settings": { "fontSize": 16, "soundVolume": "medium", "osNotifications": true }
 }
 ```
+
+**In-memory cache**: `config-manager.ts` loads config from disk once at startup via `initConfigCache()` and serves all subsequent `loadConfig()` calls from memory (zero I/O). `saveConfig()` is async — it updates the cache in-place and writes to disk with `fs.promises.writeFile`. The main process is the only writer, so the cache never goes stale.
+
+**Startup sequence**: `initConfigCache()` must be called before `registerIpcHandlers()`. The startup critical path is: `initConfigCache()` → `registerIpcHandlers()` → `createWindow()`. Non-critical work (menu, file watchers, notification server, auto-updater) is deferred to the window's `ready-to-show` event.
 
 No database. All runtime state is derived from filesystem (git branch, artifact files). Comments are ephemeral (in-memory with sessionStorage fallback).
 

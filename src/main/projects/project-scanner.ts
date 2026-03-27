@@ -8,16 +8,20 @@ export interface ScanResult {
   artifactFiles: string[];
 }
 
-export function scanProject(projectPath: string): ScanResult {
+export async function scanProject(projectPath: string): Promise<ScanResult> {
   const gitDir = path.join(projectPath, '.git');
-  if (!fs.existsSync(gitDir)) {
+  try {
+    await fs.promises.access(gitDir);
+  } catch {
     throw new Error(`"${projectPath}" is not a git repository (no .git directory)`);
   }
 
-  const currentBranch = detectBranch(gitDir);
+  const currentBranch = await detectBranch(gitDir);
   const specDir = path.join(projectPath, '.claude', 'specs', currentBranch);
 
-  if (!fs.existsSync(specDir)) {
+  try {
+    await fs.promises.access(specDir);
+  } catch {
     return {
       currentBranch,
       hasSpeckitContent: false,
@@ -26,9 +30,8 @@ export function scanProject(projectPath: string): ScanResult {
     };
   }
 
-  const artifactFiles = fs
-    .readdirSync(specDir)
-    .filter((f) => f.endsWith('.md'));
+  const entries = await fs.promises.readdir(specDir);
+  const artifactFiles = entries.filter((f) => f.endsWith('.md'));
 
   return {
     currentBranch,
@@ -38,9 +41,9 @@ export function scanProject(projectPath: string): ScanResult {
   };
 }
 
-function detectBranch(gitDir: string): string {
+async function detectBranch(gitDir: string): Promise<string> {
   const headPath = path.join(gitDir, 'HEAD');
-  const headContent = fs.readFileSync(headPath, 'utf-8').trim();
+  const headContent = (await fs.promises.readFile(headPath, 'utf-8')).trim();
 
   // HEAD can be "ref: refs/heads/branch-name" or a direct commit hash
   if (headContent.startsWith('ref: ')) {

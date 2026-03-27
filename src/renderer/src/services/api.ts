@@ -4,7 +4,8 @@ import type { Project, Feature, Artifact, ArtifactType, IntegrationPlan } from '
 declare global {
   interface Window {
     api: {
-      getProjects: () => Promise<{ projects: Project[] }>;
+      getProjects: () => Promise<{ projects: Pick<Project, 'id' | 'name' | 'path'>[] }>;
+      getProjectState: (projectId: string) => Promise<Project>;
       addProject: (path: string, name?: string) => Promise<Project>;
       deleteProject: (id: string) => Promise<void>;
       planIntegration: (projectPath: string) => Promise<IntegrationPlan>;
@@ -38,6 +39,10 @@ declare global {
 
 export async function getProjects() {
   return window.api.getProjects();
+}
+
+export async function getProjectState(projectId: string) {
+  return window.api.getProjectState(projectId);
 }
 
 export async function addProject(path: string, name?: string) {

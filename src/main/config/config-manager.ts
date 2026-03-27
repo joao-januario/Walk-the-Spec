@@ -30,32 +30,69 @@ export interface WalkTheSpecConfig {
 const DEFAULT_CONFIG_DIR = path.join(os.homedir(), '.walk-the-spec');
 const DEFAULT_CONFIG_PATH = path.join(DEFAULT_CONFIG_DIR, 'config.json');
 
-export function getDefaultConfigPath(): string {
-  return DEFAULT_CONFIG_PATH;
-}
+// --- In-memory cache ---
 
-export function loadConfig(configPath: string = DEFAULT_CONFIG_PATH): WalkTheSpecConfig {
-  if (!fs.existsSync(configPath)) {
+let cachedConfig: WalkTheSpecConfig | null = null;
+let cachedConfigPath: string = DEFAULT_CONFIG_PATH;
+
+/**
+ * Initialize the config cache by reading from disk (async).
+ * Must be called once at startup before any loadConfig() calls.
+ */
+export async function initConfigCache(configPath: string = DEFAULT_CONFIG_PATH): Promise<void> {
+  cachedConfigPath = configPath;
+
+  try {
+    await fs.promises.access(configPath);
+  } catch {
+    // File doesn't exist — create with defaults
     const dir = path.dirname(configPath);
-    fs.mkdirSync(dir, { recursive: true });
+    await fs.promises.mkdir(dir, { recursive: true });
     const empty: WalkTheSpecConfig = { projects: [], settings: { ...DEFAULT_SETTINGS } };
-    fs.writeFileSync(configPath, JSON.stringify(empty, null, 2));
-    return empty;
+    await fs.promises.writeFile(configPath, JSON.stringify(empty, null, 2));
+    cachedConfig = empty;
+    return;
   }
 
-  const raw = fs.readFileSync(configPath, 'utf-8');
+  const raw = await fs.promises.readFile(configPath, 'utf-8');
   const parsed = JSON.parse(raw) as Partial<WalkTheSpecConfig>;
-  // Backward compat: ensure settings exists with defaults
-  return {
+  cachedConfig = {
     projects: parsed.projects ?? [],
     settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
   };
 }
 
-export function saveConfig(configPath: string = DEFAULT_CONFIG_PATH, config: WalkTheSpecConfig): void {
-  const dir = path.dirname(configPath);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+/**
+ * Reset the cache (for testing only).
+ */
+export function resetConfigCache(): void {
+  cachedConfig = null;
+  cachedConfigPath = DEFAULT_CONFIG_PATH;
+}
+
+export function getDefaultConfigPath(): string {
+  return DEFAULT_CONFIG_PATH;
+}
+
+/**
+ * Return the cached config. No disk I/O.
+ * Throws if initConfigCache() has not been called.
+ */
+export function loadConfig(): WalkTheSpecConfig {
+  if (!cachedConfig) {
+    throw new Error('Config cache not initialized. Call initConfigCache() first.');
+  }
+  return cachedConfig;
+}
+
+/**
+ * Write config to disk and update the in-memory cache.
+ */
+export async function saveConfig(config: WalkTheSpecConfig): Promise<void> {
+  cachedConfig = config;
+  const dir = path.dirname(cachedConfigPath);
+  await fs.promises.mkdir(dir, { recursive: true });
+  await fs.promises.writeFile(cachedConfigPath, JSON.stringify(config, null, 2));
 }
 
 export function addProject(config: WalkTheSpecConfig, projectPath: string, name?: string): ProjectEntry {

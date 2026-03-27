@@ -16,11 +16,11 @@ This is the only write primitive. All edits reduce to: "replace bytes [start, en
 
 ## Edit Functions
 
-### `editTaskCheckbox(filePath, taskId, checked)`
+### `editTaskCheckbox(filePath, taskId, checked): Promise<void>`
 
-Toggles a task's checkbox in `tasks.md`:
+Async function that toggles a task's checkbox in `tasks.md`:
 
-1. Reads the file content
+1. Reads the file content (async via `fs.promises.readFile`)
 2. Finds the line matching pattern: `- [ ] T001` or `- [x] T001`
 3. Regex: `^(- \[)[ x](\] ${taskId})`
 4. Calculates the checkbox character position: `match.index + 3` (the space/x after `[`)

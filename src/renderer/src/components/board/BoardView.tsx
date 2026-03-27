@@ -10,27 +10,67 @@ interface BoardViewProps {
   refreshKey?: number;
 }
 
+/** Create a placeholder Project from the lightweight list entry while state loads. */
+function placeholderProject(entry: { id: string; name: string; path: string }): Project {
+  return {
+    ...entry,
+    currentBranch: '',
+    hasSpeckitContent: false,
+    phase: 'unknown',
+    integrationState: 'not-integrated',
+    error: null,
+  };
+}
+
 export default function BoardView({ onSelectProject, selectedProjectId, refreshKey }: BoardViewProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingStates, setLoadingStates] = useState<Set<string>>(new Set());
   const [integrationPlan, setIntegrationPlan] = useState<IntegrationPlan | null>(null);
   const [integrationExecuting, setIntegrationExecuting] = useState(false);
   const [refreshTarget, setRefreshTarget] = useState<Project | null>(null);
 
   const fetchProjects = async () => {
     try {
+      // Phase 1: Get lightweight project list instantly from config cache
       const data = await api.getProjects();
-      setProjects(data.projects);
-      // Update selected project with fresh data (phase, branch, hasSpeckitContent)
-      if (selectedProjectId) {
-        const fresh = data.projects.find((p) => p.id === selectedProjectId);
-        if (fresh) onSelectProject(fresh);
-      } else if (data.projects.length > 0) {
-        onSelectProject(data.projects[0]);
+      const placeholders = data.projects.map(placeholderProject);
+      setProjects(placeholders);
+      setLoading(false);
+
+      // Auto-select first project if none selected
+      if (!selectedProjectId && placeholders.length > 0) {
+        onSelectProject(placeholders[0]!);
       }
+
+      // Phase 2: Fetch full state for each project in parallel
+      const projectIds = data.projects.map((p) => p.id);
+      setLoadingStates(new Set(projectIds));
+
+      await Promise.all(
+        data.projects.map(async (entry) => {
+          try {
+            const state = await api.getProjectState(entry.id);
+            setProjects((prev) =>
+              prev.map((p) => (p.id === state.id ? state : p)),
+            );
+            // Update selected project with fresh data if it's the one being loaded
+            if (entry.id === selectedProjectId) {
+              onSelectProject(state);
+            }
+          } catch (err) {
+            console.error(`Failed to load state for project ${entry.id}:`, err);
+          } finally {
+            setLoadingStates((prev) => {
+              const next = new Set(prev);
+              next.delete(entry.id);
+              return next;
+            });
+          }
+        }),
+      );
     } catch (err) {
       console.error('Failed to fetch projects:', err);
-    } finally {
       setLoading(false);
     }
   };
@@ -138,6 +178,7 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
             selected={p.id === selectedProjectId}
             onClick={() => onSelectProject(p)}
             onContextAction={handleContextAction}
+            loading={loadingStates.has(p.id)}
           />
         ))}
       </div>
