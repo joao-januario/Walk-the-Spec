@@ -1,9 +1,9 @@
 # Repo Map
 
-Generated: 2026-03-27T11:47:53.948Z
-Updated: 2026-03-27T11:47:53.948Z
+Generated: 2026-03-27T11:49:08.174Z
+Updated: 2026-03-27T11:49:08.174Z
 Files: 102
-Token estimate: ~7087
+Token estimate: ~7088
 
 ---
 
@@ -223,7 +223,7 @@ src/main/projects/project-scanner.ts
 ⋮...
 
 src/main/repomap/extractors.ts
-│ hash: 60dbeb10d378
+│ hash: bf388982b9cc
 │
 │ local: ./ts-extractor.js, ./tree-sitter/index.js, ./types.js
 │
@@ -232,7 +232,7 @@ src/main/repomap/extractors.ts
 ⋮...
 
 src/main/repomap/format.ts
-│ hash: 4381f7b4262e
+│ hash: c3f4e76665b0
 │
 │ local: ./types.js
 │
@@ -242,7 +242,7 @@ src/main/repomap/format.ts
 ⋮...
 
 src/main/repomap/generator.ts
-│ hash: f16657a2849e
+│ hash: 163795f9da3d
 │
 │ imports: fs, path, crypto
 │ local: ../utils/paths.js, ./format.js, ./types.js
@@ -255,7 +255,7 @@ src/main/repomap/generator.ts
 ⋮...
 
 src/main/repomap/index.ts
-│ hash: 6d868865abb1
+│ hash: 00f3c92845fc
 │
 │ export { typescriptExtractor }
 │ export { getAllExtractors }
@@ -275,7 +275,7 @@ src/main/repomap/index.ts
 ⋮...
 
 src/main/repomap/tree-sitter/extractor.ts
-│ hash: 1c28fec3ef08
+│ hash: 11619ae5beb0
 │
 │ imports: web-tree-sitter, crypto, path
 │ local: ../../utils/paths.js, ../types.js, ./languages.js, ./queries.js
@@ -287,7 +287,7 @@ src/main/repomap/tree-sitter/extractor.ts
 ⋮...
 
 src/main/repomap/tree-sitter/index.ts
-│ hash: 08c9bc4959c8
+│ hash: 2c088d0a92c8
 │
 │ local: ./extractor.js, ./languages.js, ./queries.js, ../types.js
 │
@@ -301,7 +301,7 @@ src/main/repomap/tree-sitter/index.ts
 ⋮...
 
 src/main/repomap/tree-sitter/languages.ts
-│ hash: cd8d0db669c5
+│ hash: 6597403a3c46
 │
 │ export type VisibilityStrategy
 │ export interface LanguageConfig
@@ -313,7 +313,7 @@ src/main/repomap/tree-sitter/languages.ts
 ⋮...
 
 src/main/repomap/tree-sitter/queries.ts
-│ hash: 42ab9c10b0be
+│ hash: 3f28faccb0bc
 │
 │ export interface LanguageQueries
 │ export const QUERY_REGISTRY
@@ -321,7 +321,7 @@ src/main/repomap/tree-sitter/queries.ts
 ⋮...
 
 src/main/repomap/ts-extractor.ts
-│ hash: 5f664a0dc471
+│ hash: c4dd8e40b1bb
 │
 │ imports: typescript, crypto, path
 │ local: ../utils/paths.js, ./types.js
@@ -331,7 +331,7 @@ src/main/repomap/ts-extractor.ts
 ⋮...
 
 src/main/repomap/types.ts
-│ hash: 20d50dcb8cb7
+│ hash: 71c0803b5e4d
 │
 │ export interface ExtractedIdentifier
 │ export interface FileExtraction
@@ -836,7 +836,7 @@ src/renderer/src/utils/format-comments.ts
 ⋮...
 
 tests/fixtures/repomap/Sample.java
-│ hash: 1a3a289eeb44
+│ hash: b5496c399915
 │
 │ imports: java.util.List, java.util.Optional, com.example.db.DatabaseService
 │
@@ -852,7 +852,7 @@ tests/fixtures/repomap/Sample.java
 ⋮...
 
 tests/fixtures/repomap/sample-react.tsx
-│ hash: a9bc15d1d427
+│ hash: 9f31f3eb8b09
 │
 │ imports: react
 │ local: ../hooks/useTheme.js
@@ -864,7 +864,7 @@ tests/fixtures/repomap/sample-react.tsx
 ⋮...
 
 tests/fixtures/repomap/sample.go
-│ hash: 7a800ef070b0
+│ hash: e1cd826478d9
 │
 │ imports: fmt, net/http
 │
@@ -877,7 +877,7 @@ tests/fixtures/repomap/sample.go
 ⋮...
 
 tests/fixtures/repomap/sample.py
-│ hash: 866479ddcfb7
+│ hash: a94ef3c1a678
 │
 │ imports: os, pathlib, typing
 │
@@ -892,7 +892,7 @@ tests/fixtures/repomap/sample.py
 ⋮...
 
 tests/fixtures/repomap/sample.rs
-│ hash: 6f10a961c028
+│ hash: 286dabdc36b2
 │
 │ imports: std::collections::HashMap, crate::db::Database
 │
@@ -909,7 +909,7 @@ tests/fixtures/repomap/sample.rs
 ⋮...
 
 tests/fixtures/repomap/sample.ts
-│ hash: 24cc959ae39b
+│ hash: a0cb4f18e110
 │
 │ imports: path
 │ local: ../utils/paths.js, ./types.js
@@ -1049,7 +1049,7 @@ tests/unit/projects/project-scanner.test.ts
 ⋮...
 
 tests/unit/repomap/format.test.ts
-│ hash: eef9bff8fa17
+│ hash: 6828e91fafb9
 │
 │ imports: vitest
 │ local: ../../../src/main/repomap/format.js, ../../../src/main/repomap/types.js
@@ -1057,7 +1057,7 @@ tests/unit/repomap/format.test.ts
 ⋮...
 
 tests/unit/repomap/generator.test.ts
-│ hash: d9f6a666208b
+│ hash: 677c308d3386
 │
 │ imports: vitest, fs, path, os
 │ local: ../../../src/main/repomap/generator.js, ../../../src/main/repomap/ts-extractor.js
@@ -1065,7 +1065,7 @@ tests/unit/repomap/generator.test.ts
 ⋮...
 
 tests/unit/repomap/tree-sitter-extractor.test.ts
-│ hash: b75c571db6dd
+│ hash: caa13f214655
 │
 │ imports: vitest, fs, path
 │ local: ../../../src/main/repomap/tree-sitter/extractor.js, ../../../src/main/repomap/tree-sitter/languages.js, ../../../src/main/repomap/tree-sitter/queries.js, ../../../src/main/repomap/types.js
@@ -1073,7 +1073,7 @@ tests/unit/repomap/tree-sitter-extractor.test.ts
 ⋮...
 
 tests/unit/repomap/ts-extractor.test.ts
-│ hash: ae3233958083
+│ hash: 299cde6a7315
 │
 │ imports: vitest, fs, path
 │ local: ../../../src/main/repomap/ts-extractor.js
