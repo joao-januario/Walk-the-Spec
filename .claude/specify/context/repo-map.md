@@ -1,14 +1,14 @@
 # Repo Map
 
-Generated: 2026-03-27T17:45:51.776Z
-Updated: 2026-03-27T17:45:51.776Z
-Files: 83
-Token estimate: ~6377
+Generated: 2026-03-27T20:24:56.038Z
+Updated: 2026-03-27T20:24:56.038Z
+Files: 84
+Token estimate: ~6464
 
 ---
 
 electron.vite.config.ts
-│ hash: 4ebfc823730e
+│ hash: a6f7ae027cfc
 │
 │ imports: electron-vite, @vitejs/plugin-react, @tailwindcss/vite
 │
@@ -17,7 +17,7 @@ electron.vite.config.ts
 ⋮...
 
 src/main/config/config-manager.ts
-│ hash: 106d336f3c04
+│ hash: f4fff242d52d
 │
 │ imports: fs, path, os, uuid
 │ local: ../utils/paths.js
@@ -27,9 +27,11 @@ src/main/config/config-manager.ts
 │ export interface AppSettings
 │ export const DEFAULT_SETTINGS: AppSettings
 │ export interface WalkTheSpecConfig
+│ export async function initConfigCache(configPath: string = DEFAULT_CONFIG_PATH): Promise<void>
+│ export function resetConfigCache(): void
 │ export function getDefaultConfigPath(): string
-│ export function loadConfig(configPath: string = DEFAULT_CONFIG_PATH): WalkTheSpecConfig
-│ export function saveConfig(configPath: string = DEFAULT_CONFIG_PATH, config: WalkTheSpecConfig): void
+│ export function loadConfig(): WalkTheSpecConfig
+│ export async function saveConfig(config: WalkTheSpecConfig): Promise<void>
 │ export function addProject(config: WalkTheSpecConfig, projectPath: string, name?: string): ProjectEntry
 │ export function removeProject(config: WalkTheSpecConfig, id: string): void
 │ export function getProjects(config: WalkTheSpecConfig): ProjectEntry[]
@@ -37,10 +39,10 @@ src/main/config/config-manager.ts
 ⋮...
 
 src/main/index.ts
-│ hash: a6d90e7b0363
+│ hash: eb8a46524bd6
 │
 │ imports: electron, path, fs
-│ local: ./utils/logger.js, ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./repomap/index.js, ./repomap/extractors.js, ./updater/auto-updater.js
+│ local: ./utils/logger.js, ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./updater/auto-updater.js
 │
 │ export function startWatchingProject(projectId: string, projectPath: string)
 │ export function stopWatchingProject(projectId: string)
@@ -58,7 +60,7 @@ src/main/integration/integration-planner.ts
 ⋮...
 
 src/main/integration/scaffold-version.ts
-│ hash: f54cc433bbd8
+│ hash: 5f30db1cf137
 │
 │ imports: fs/promises, path
 │
@@ -92,10 +94,10 @@ src/main/integration/types.ts
 ⋮...
 
 src/main/ipc/handlers.ts
-│ hash: c08207702c7c
+│ hash: 8d9260376284
 │
 │ imports: electron, fs, path
-│ local: ../config/config-manager.js, ../config/config-manager.js, ../projects/project-scanner.js, ../phase/phase-detector.js, ../parser/spec-parser.js, ../parser/plan-parser.js, ../parser/tasks-parser.js, ../parser/research-parser.js, ../parser/review-parser.js, ../parser/summary-parser.js, ../parser/refactor-backlog-parser.js, ../writer/artifact-writer.js, ../repomap/index.js, ../repomap/extractors.js, ../integration/integration-planner.js, ../integration/scaffold-writer.js, ../integration/scaffold-version.js, ../integration/types.js
+│ local: ../config/config-manager.js, ../config/config-manager.js, ../projects/project-scanner.js, ../phase/phase-detector.js, ../parser/spec-parser.js, ../parser/plan-parser.js, ../parser/tasks-parser.js, ../parser/research-parser.js, ../parser/review-parser.js, ../parser/summary-parser.js, ../parser/refactor-backlog-parser.js, ../writer/artifact-writer.js, ../integration/integration-planner.js, ../integration/scaffold-writer.js, ../integration/scaffold-version.js, ../integration/types.js
 │
 │ export function registerIpcHandlers()
 
@@ -244,10 +246,10 @@ src/main/phase/phase-detector.ts
 ⋮...
 
 src/main/projects/file-watcher.ts
-│ hash: 33f7ff7f5e7e
+│ hash: f3a45bb2f057
 │
 │ imports: chokidar, path, fs
-│ local: ../utils/paths.js, ../repomap/tree-sitter/languages.js
+│ local: ../utils/paths.js
 │
 │ export interface WatcherEvents
 │ export function watchProject(projectId: string, projectPath: string, events: WatcherEvents): void
@@ -257,21 +259,21 @@ src/main/projects/file-watcher.ts
 ⋮...
 
 src/main/projects/project-scanner.ts
-│ hash: 51a0f2c4a447
+│ hash: afb38a8b2aa8
 │
 │ imports: fs, path
 │
 │ export interface ScanResult
-│ export function scanProject(projectPath: string): ScanResult
+│ export async function scanProject(projectPath: string): Promise<ScanResult>
 
 ⋮...
 
 src/main/repomap/extractors.ts
-│ hash: bf388982b9cc
+│ hash: 710a86e43fcb
 │
-│ local: ./ts-extractor.js, ./tree-sitter/index.js, ./types.js
+│ local: ./types.js
 │
-│ export async function getAllExtractors(): Promise<Extractor[]>
+│ export async function getAllExtractors(extensionFilter?: Set<string>): Promise<Extractor[]>
 
 ⋮...
 
@@ -286,12 +288,13 @@ src/main/repomap/format.ts
 ⋮...
 
 src/main/repomap/generator.ts
-│ hash: 0b6a3a5fb727
+│ hash: 525a4cd061b7
 │
 │ imports: fs, path, crypto
 │ local: ../utils/paths.js, ./format.js, ./types.js
 │
 │ export function getMapPath(repoRoot: string): string
+│ export async function discoverProjectExtensions(repoRoot: string): Promise<Set<string>>
 │ export async function generateRepoMap(repoRoot: string, extractors: Extractor[], options?: { incremental?: boolean; signal?: AbortSignal }): Promise<RepoMap>
 │ export async function updateRepoMapFiles(repoRoot: string, changedFiles: string[], extractors: Extractor[]): Promise<RepoMap>
 │ export function isMapValid(repoRoot: string): boolean
@@ -299,9 +302,9 @@ src/main/repomap/generator.ts
 ⋮...
 
 src/main/repomap/index.ts
-│ hash: 00f3c92845fc
+│ hash: 022887fcd1e6
 │
-│ export { typescriptExtractor }
+│ export { getTypescriptExtractor }
 │ export { getAllExtractors }
 │ export { formatRepoMap }
 │ export { buildRepoMap }
@@ -331,11 +334,11 @@ src/main/repomap/tree-sitter/extractor.ts
 ⋮...
 
 src/main/repomap/tree-sitter/index.ts
-│ hash: 2c088d0a92c8
+│ hash: e008fe7e1ed9
 │
-│ local: ./extractor.js, ./languages.js, ./queries.js, ../types.js
+│ local: ../types.js
 │
-│ export async function getTreeSitterExtractors(): Promise<Extractor[]>
+│ export async function getTreeSitterExtractors(extensionFilter?: Set<string>): Promise<Extractor[]>
 │ export { ALL_EXTENSIONS }
 │ export { EXTENSION_TO_LANGUAGE }
 │ export { EXTRACTABLE_LANGUAGES }
@@ -365,12 +368,12 @@ src/main/repomap/tree-sitter/queries.ts
 ⋮...
 
 src/main/repomap/ts-extractor.ts
-│ hash: c4dd8e40b1bb
+│ hash: b9b53fc848e8
 │
-│ imports: typescript, crypto, path
+│ imports: crypto, path
 │ local: ../utils/paths.js, ./types.js
 │
-│ export const typescriptExtractor: Extractor
+│ export async function getTypescriptExtractor(): Promise<Extractor>
 
 ⋮...
 
@@ -388,11 +391,12 @@ src/main/repomap/types.ts
 ⋮...
 
 src/main/updater/auto-updater.ts
-│ hash: c88b610a6dfa
+│ hash: aa8e5becb679
 │
 │ imports: electron, electron-updater
 │
 │ export function initAutoUpdater(mainWindow: BrowserWindow): void
+│ export function checkForUpdatesManual(): void
 
 ⋮...
 
@@ -414,13 +418,13 @@ src/main/utils/paths.ts
 ⋮...
 
 src/main/writer/artifact-writer.ts
-│ hash: 720327f16827
+│ hash: 0a214286ca84
 │
 │ imports: fs
 │ local: ./markdown-serializer.js
 │
-│ export function editTaskCheckbox(filePath: string, taskId: string, checked: boolean): void
-│ export function editRequirementText(filePath: string, requirementId: string, newText: string): void
+│ export async function editTaskCheckbox(filePath: string, taskId: string, checked: boolean): Promise<void>
+│ export async function editRequirementText(filePath: string, requirementId: string, newText: string): Promise<void>
 
 ⋮...
 
@@ -432,7 +436,7 @@ src/main/writer/markdown-serializer.ts
 ⋮...
 
 src/preload/index.ts
-│ hash: a3cd93ee861a
+│ hash: 9fb4a08d6c99
 │
 │ imports: electron
 │
@@ -516,7 +520,7 @@ src/renderer/src/components/artifacts/TasksView.tsx
 ⋮...
 
 src/renderer/src/components/board/BoardView.tsx
-│ hash: e5113b99c332
+│ hash: 03eab01936b4
 │
 │ imports: react
 │ local: ./FeatureCard.js, ../integration/IntegrationDialog.js, ../../types/index.js, ../../services/api.js
@@ -526,12 +530,12 @@ src/renderer/src/components/board/BoardView.tsx
 ⋮...
 
 src/renderer/src/components/board/FeatureCard.tsx
-│ hash: 09a5f5ee89f0
+│ hash: abf1f3d149a9
 │
 │ imports: react, framer-motion
 │ local: ../../theme.js, ../../lib/utils.js, ../../hooks/usePrevious.js, ../../types/index.js
 │
-│ export default function FeatureCard({ project, selected, onClick, onContextAction }: FeatureCardProps)
+│ export default function FeatureCard({ project, selected, onClick, onContextAction, loading }: FeatureCardProps)
 
 ⋮...
 
@@ -574,9 +578,9 @@ src/renderer/src/components/editing/TextEditor.tsx
 ⋮...
 
 src/renderer/src/components/elements/CodeBlock.tsx
-│ hash: ac8e9da3f263
+│ hash: 86c15118622b
 │
-│ imports: react, react-dom, highlight.js, mermaid
+│ imports: react, highlight.js
 │
 │ export default function CodeBlock({ code, language, label }: CodeBlockProps)
 
@@ -599,6 +603,15 @@ src/renderer/src/components/elements/FileStructureView.tsx
 │ local: ../../lib/utils.js, ../../theme.js, ../../types/index.js
 │
 │ export default function FileStructureView({ sections }: FileStructureViewProps): JSX.Element
+
+⋮...
+
+src/renderer/src/components/elements/MermaidBlock.tsx
+│ hash: 2f23c125cd61
+│
+│ imports: react, react-dom, mermaid
+│
+│ export default function MermaidBlock({ code }: { code: string })
 
 ⋮...
 
@@ -834,11 +847,12 @@ src/renderer/src/main.tsx
 ⋮...
 
 src/renderer/src/services/api.ts
-│ hash: aa91ebb33516
+│ hash: f48b4c92f567
 │
 │ local: ../types/index.js
 │
 │ export async function getProjects()
+│ export async function getProjectState(projectId: string)
 │ export async function addProject(path: string, name?: string)
 │ export async function deleteProject(id: string)
 │ export async function planIntegration(projectPath: string)
