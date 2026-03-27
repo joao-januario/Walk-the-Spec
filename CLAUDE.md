@@ -35,7 +35,7 @@ This table is the **single source of truth** for file-to-doc coverage. Do not du
 
 | File | Covers source paths |
 |------|---------------------|
-| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/preload/` |
+| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/main/repomap/`, `src/preload/` |
 | `docs/parsers.md` | `src/main/parser/` |
 | `docs/ipc.md` | `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/services/api.ts` |
 | `docs/renderer.md` | `src/renderer/src/components/`, `src/renderer/src/hooks/`, `src/renderer/src/themes/` |

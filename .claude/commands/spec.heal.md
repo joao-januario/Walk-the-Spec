@@ -35,15 +35,29 @@ Parse the findings table and proposed fixes sections. Extract all findings excep
 
 If no actionable findings exist (only NEEDS_REFACTOR or none): "Nothing to heal. Run `/spec.conclude` to finalize."
 
-### Step 2: Apply Fixes via Sonnet Agents
+### Step 1.5: Small Branch Optimization
 
-Group findings by file. For each file (or small group of related files), spawn a **Sonnet sub-agent** using the Agent tool with `model: "sonnet"`. Launch independent file groups **in parallel**.
+If there are **<= 3 files** to fix AND **<= 5 total findings**:
+- **Skip sub-agent spawning entirely** — apply all fixes yourself inline
+- Read each file, apply the proposed fixes using Edit, and continue to Step 3
+- This avoids agent overhead for typical small reviews
+
+### Step 2: Apply Fixes via Sub-Agents
+
+> **Skip this step if the Small Branch Optimization (Step 1.5) applied.**
+
+Group findings by file. Classify each fix by complexity:
+
+- **Mechanical fixes** (adding `: unknown` to catch, adding `void` prefix, changing `toBeTruthy` to `toMatch`, adding logging to catch blocks, renaming, type narrowing): spawn a **Haiku sub-agent** with `model: "haiku"`
+- **Structural fixes** (refactoring logic, adding new code paths, changing architecture): spawn a **Sonnet sub-agent** with `model: "sonnet"`
+
+Launch independent file groups **in parallel**.
 
 Each sub-agent prompt MUST include:
 
 1. The full current content of the file(s) to fix
 2. The specific findings (rule ID, category, line, current code, proposed fix) from review.md
-3. The applicable best practices document content for context
+3. Only the specific best practices rules referenced by the findings (not the full documents)
 4. Clear instructions:
 
 ```

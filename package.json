@@ -25,7 +25,9 @@
       "buildResources": "resources"
     },
     "files": [
-      "out/**/*"
+      "out/**/*",
+      "node_modules/web-tree-sitter/**/*",
+      "node_modules/tree-sitter-wasms/**/*"
     ],
     "win": {
       "target": "nsis"
@@ -62,9 +64,11 @@
     "remark-stringify": "^11.0.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.2",
+    "tree-sitter-wasms": "^0.1.13",
     "unified": "^11.0.0",
     "unist-util-visit": "^5.0.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "web-tree-sitter": "^0.25.10"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.0",

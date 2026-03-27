@@ -16,7 +16,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. **Load context**: Read plan.md, spec.md, and all available context files (research.md, data-model.md, contracts/, quickstart.md) in parallel.
+1. **Load context**: Read plan.md and spec.md (always needed). For other design artifacts (research.md, data-model.md, contracts/, quickstart.md), follow the Context Protocol in CLAUDE.md: consult the structural map at `.claude/specify/context/repo-map.md` (if it exists) to identify which modules and files are relevant, then load only the design artifacts that relate to those modules. If no structural map exists, fall back to loading all available context files.
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Scan all checklist files in the checklists/ directory

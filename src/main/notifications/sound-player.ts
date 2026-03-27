@@ -22,7 +22,7 @@ const PHASE_SOUNDS: Record<string, string> = {
 const DEFAULT_SOUND = 'plan.wav';
 
 function getSoundPath(command: string): string {
-  // command is like "spec.implement" — extract the phase after the dot
+  // command is like "spec.implement" -extract the phase after the dot
   const phase = command.split('.').pop() ?? '';
   const file = PHASE_SOUNDS[phase] ?? DEFAULT_SOUND;
   // __dirname resolves to out/main/ after electron-vite bundling
@@ -67,7 +67,7 @@ function playMacOS(filePath: string, volume: number): Promise<void> {
 
 export async function playNotificationSound(volume: SoundVolume, command: string): Promise<void> {
   if (volume === 'off') {
-    console.log('[sound-player] volume is off — skipping playback');
+    console.log('[sound-player] volume is off -skipping playback');
     return;
   }
 
@@ -82,7 +82,7 @@ export async function playNotificationSound(volume: SoundVolume, command: string
     } else if (process.platform === 'darwin') {
       await playMacOS(filePath, numericVolume);
     } else {
-      console.warn(`[sound-player] unsupported platform: ${process.platform} — skipping audio`);
+      console.warn(`[sound-player] unsupported platform: ${process.platform} -skipping audio`);
       return;
     }
     console.log('[sound-player] playback completed');

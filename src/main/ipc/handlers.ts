@@ -15,6 +15,8 @@ import { parseSummary } from '../parser/summary-parser.js';
 import { parseRefactorBacklog } from '../parser/refactor-backlog-parser.js';
 
 import { editTaskCheckbox, editRequirementText } from '../writer/artifact-writer.js';
+import { generateRepoMap } from '../repomap/index.js';
+import { getAllExtractors } from '../repomap/extractors.js';
 
 
 function getProjectState(entry: { id: string; name: string; path: string }) {
@@ -47,13 +49,21 @@ export function registerIpcHandlers() {
     return { projects: getProjects(config).map(getProjectState) };
   });
 
-  ipcMain.handle('add-project', (_event, projectPath: string, name?: string) => {
+  ipcMain.handle('add-project', async (_event, projectPath: string, name?: string) => {
     if (!fs.existsSync(projectPath)) throw new Error('Path does not exist');
     if (!fs.existsSync(path.join(projectPath, '.git'))) throw new Error('Path is not a git repository');
 
     const config = loadConfig();
     const entry = addProject(config, projectPath, name);
     saveConfig(undefined, config);
+
+    // Generate initial repo map in background (non-blocking)
+    void getAllExtractors().then((extractors) =>
+      generateRepoMap(projectPath, extractors),
+    ).catch((err) => {
+      console.error(`[repomap] initial generation failed for ${entry.name}:`, err);
+    });
+
     return getProjectState(entry);
   });
 

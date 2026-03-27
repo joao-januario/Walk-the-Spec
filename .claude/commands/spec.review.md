@@ -52,15 +52,13 @@ Extract:
 
 If no changed files exist, report "No changes to review" and exit.
 
-### Phase 2: Load Best Practices & Classify Into Verticals (Orchestrator)
+### Phase 1.5: Cross-File Impact Analysis (Orchestrator)
 
-Read ALL documents from `.claude/best-practices/`:
-- `electron-security.md` — ES01-ES10
-- `electron-architecture.md` — EA01-EA10
-- `react-typescript.md` — RT01-RT14
-- `typescript-strict.md` — TS01-TS13
-- `testing.md` — TT01-TT11
-- `tailwind.md` — TW01-TW23
+If `.claude/specify/context/repo-map.md` exists, read it and use import relationships to identify files that depend on changed files. Flag any changed exports that have downstream consumers not included in the diff as potential cross-file impact risks. Include these observations in the Cross-Vertical Observations section of the final report.
+
+### Phase 2: Classify Into Verticals & Load Relevant Best Practices (Orchestrator)
+
+Group changed files into technology verticals. **Only read the best practices documents relevant to the verticals that have changed files** — do NOT load all 6 docs unconditionally.
 
 Also load `.claude/specify/memory/constitution.md` for the Design Philosophy principles.
 
@@ -81,7 +79,21 @@ Rules:
 - Merge small verticals (1-2 files) into a related one
 - Collect unmatched files into "Not Reviewed" list
 
+### Phase 2.5: Small Branch Optimization (Orchestrator)
+
+Count the changed **source files** (excluding `.claude/specs/` artifacts, `.md` documentation, and config files like `package-lock.json`).
+
+If changed source files count is **<= 5** AND the files map to **<= 2 verticals**:
+- **Skip Phase 3** entirely (no sub-agents)
+- Read the git diffs and the relevant best practices docs (only for the matched verticals) yourself
+- Perform the review inline — analyze the diffs against the rules directly
+- Continue to Phase 4 with your own findings
+
+This avoids the overhead of spawning parallel agents for small, focused branches.
+
 ### Phase 3: Spawn Haiku Sub-Agents (Orchestrator)
+
+> **Skip this phase if the Small Branch Optimization (Phase 2.5) applied.**
 
 For each vertical, spawn a **Haiku sub-agent** using the Agent tool with `model: "haiku"`. Launch ALL sub-agents **in parallel** (single message, multiple Agent tool calls).
 
@@ -89,7 +101,7 @@ Each sub-agent prompt MUST include:
 
 1. **The vertical name and file list**
 2. **The full git diffs** for the vertical's files — run `git diff $(git merge-base HEAD main)..HEAD -- <file>` BEFORE spawning and include the output directly
-3. **The full content of each applicable best practices document** — read them and include directly
+3. **Only the best practices documents relevant to this vertical** (from the Phase 2 table) — do NOT include all 6 docs in every sub-agent
 4. **Clear instructions**:
 
 ```

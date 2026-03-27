@@ -55,11 +55,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 2. **Generate and dispatch research agents**:
 
+   Each research agent MUST follow the Context Protocol: if `.claude/specify/context/repo-map.md` exists, read the structural map first to understand the existing codebase, then read only the source files relevant to the research question. Do NOT explore blindly with grep/glob when the map can answer the question.
+
    ```text
    For each unknown or technology choice:
      Task: "Research {topic} for {feature context}"
    For each architecture trade-off:
-     Task: "Compare approaches for {decision} — evaluate {option A} vs {option B}"
+     Task: "Compare approaches for {decision} - evaluate {option A} vs {option B}"
    ```
 
 3. **Consolidate findings** in `research.md` using this format per finding:

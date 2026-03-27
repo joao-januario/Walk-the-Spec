@@ -9,6 +9,8 @@ import { startNotifyServer, stopNotifyServer, type NotifyPayload } from './notif
 import { scanProject } from './projects/project-scanner.js';
 import { detectPhase } from './phase/phase-detector.js';
 import { normalizePathForComparison } from './utils/paths.js';
+import { generateRepoMap } from './repomap/index.js';
+import { getAllExtractors } from './repomap/extractors.js';
 import fs from 'fs';
 
 app.setAppUserModelId('com.speckit.walk-the-spec');
@@ -31,7 +33,7 @@ async function handleNotify(payload: NotifyPayload): Promise<void> {
       (p) => normalizePathForComparison(p.path) === normalizePathForComparison(payload.projectPath),
     );
     if (!project) {
-      console.log(`[notifications] no project matched path ${payload.projectPath} — skipping`);
+      console.log(`[notifications] no project matched path ${payload.projectPath} - skipping`);
       return;
     }
 
@@ -41,7 +43,7 @@ async function handleNotify(payload: NotifyPayload): Promise<void> {
       try {
         tasksContent = await fs.promises.readFile(path.join(scan.specDir, 'tasks.md'), 'utf-8');
       } catch (err: unknown) {
-        console.warn('[notifications] could not read tasks.md — phase detection may be imprecise:', err);
+        console.warn('[notifications] could not read tasks.md - phase detection may be imprecise:', err);
       }
     }
     const phase = detectPhase(scan.artifactFiles, tasksContent);
@@ -81,6 +83,18 @@ const watcherEvents: WatcherEvents = {
   },
   onBranchChanged: (projectId) => {
     sendToRenderer('branch-changed', { projectId, timestamp: new Date().toISOString() });
+  },
+  onSourceChanged: (projectId, files) => {
+    // Regenerate repo map when source files change
+    const config = loadConfig();
+    const project = getProjects(config).find((p) => p.id === projectId);
+    if (!project) return;
+    console.log(`[repomap] source changed in ${project.name}: ${files.length} file(s) - regenerating map`);
+    void getAllExtractors().then((extractors) =>
+      generateRepoMap(project.path, extractors, { incremental: true }),
+    ).catch((err) => {
+      console.error(`[repomap] failed to update map for ${project.name}:`, err);
+    });
   },
   onError: (projectId, error) => {
     sendToRenderer('project-error', { projectId, error, timestamp: new Date().toISOString() });

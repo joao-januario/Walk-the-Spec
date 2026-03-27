@@ -73,6 +73,25 @@ Pure function. Determines phase from which artifact files exist in the spec dire
 
 Precedence: evaluated top-to-bottom, first match wins.
 
+## Repository Map Generation
+
+**Module**: `src/main/repomap/`
+
+The repomap system analyzes source code structure across multiple languages and generates repository maps for context injection. It powers the structural codebase understanding in spec commands.
+
+**System Components**:
+- `index.ts`: Main generator orchestrates extractor calls and aggregates results
+- `extractors.ts`: Registry of language-specific code structure extractors (TypeScript, Python, Go, Rust, Java)
+- `ts-extractor.ts`: TypeScript AST walker extracts classes, functions, interfaces, types
+- `tree-sitter-extractor.ts`: Tree-sitter fallback parser for non-TypeScript languages (Python, Go, Rust, Java)
+- `format.ts`: Formats extracted structures into human-readable tree and summary formats
+- `types.ts`: Typed interfaces for extractors and generated maps
+
+**Lifecycle**:
+- Generated on project add (background, non-blocking)
+- Regenerated on source file changes via `onSourceChanged` event in file watcher
+- Results stored in project cache for command context injection
+
 ## Notifications
 
 Three components work together when an external command completes:

@@ -9,21 +9,21 @@ export interface CompletionNotificationOpts {
 
 export function showCompletionNotification({ projectName, command, mainWindow }: CompletionNotificationOpts): void {
   if (!Notification.isSupported()) {
-    console.warn('[notifications] OS notifications not supported on this platform — skipping toast');
+    console.warn('[notifications] OS notifications not supported on this platform -skipping toast');
     return;
   }
 
-  console.log(`[notifications] showing toast: "${command} completed — ${projectName}"`);
+  console.log(`[notifications] showing toast: "${command} completed -${projectName}"`);
 
   const notification = new Notification({
     title: 'Walk the Spec',
-    body: `${command} completed — ${projectName}`,
+    body: `${command} completed -${projectName}`,
     silent: true,
     icon: path.join(__dirname, '../../resources/icon.png'),
   });
 
   notification.on('click', () => {
-    console.log('[notifications] toast clicked — focusing window');
+    console.log('[notifications] toast clicked -focusing window');
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();

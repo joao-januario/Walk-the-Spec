@@ -67,8 +67,17 @@ Follow this execution flow:
 
 7. Write the completed constitution back to `.claude/specify/memory/constitution.md` (overwrite).
 
-8. Output a final summary to the user with:
+8. **Install Context Protocol in CLAUDE.md**:
+   - Read `.claude/specify/templates/context-protocol.md`
+   - Read the project's `CLAUDE.md`
+   - Check if a `## Context Protocol` section already exists in CLAUDE.md
+   - **If it does NOT exist**: Insert the context protocol section before the `<!-- MANUAL ADDITIONS START -->` marker (or at the end if no marker exists)
+   - **If it already exists**: Replace the existing `## Context Protocol` section with the current template content (in case the template has been updated)
+   - This ensures every Claude interaction in the project automatically consults the structural map before exploring the codebase
+
+9. Output a final summary to the user with:
    - New version and bump rationale.
+   - Whether the Context Protocol was installed/updated in CLAUDE.md.
    - Any files flagged for manual follow-up.
    - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
 
