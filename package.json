@@ -1,6 +1,6 @@
 {
   "name": "walk-the-spec",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Desktop dashboard for spec-driven development artifacts",
   "author": "joao-januario",
   "private": true,
@@ -62,13 +62,15 @@
     "publish": {
       "provider": "github",
       "owner": "joao-januario",
-      "repo": "Walk-the-Spec"
+      "repo": "Walk-the-Spec",
+      "releaseType": "release"
     }
   },
   "dependencies": {
     "electron-log": "^5.4.3",
     "electron-updater": "^6.3.0",
     "tree-sitter-wasms": "^0.1.13",
+    "typescript": "^5.6.0",
     "web-tree-sitter": "^0.25.10"
   },
   "devDependencies": {
@@ -101,7 +103,6 @@
     "remark-stringify": "^11.0.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "^5.6.0",
     "unified": "^11.0.0",
     "unist-util-visit": "^5.0.0",
     "uuid": "^10.0.0",
