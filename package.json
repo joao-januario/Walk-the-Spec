@@ -1,6 +1,6 @@
 {
   "name": "walk-the-spec",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Desktop dashboard for spec-driven development artifacts",
   "author": "joao-januario",
   "private": true,
@@ -28,6 +28,7 @@
     "test:watch": "vitest"
   },
   "build": {
+    "electronVersion": "33.4.11",
     "appId": "com.speckit.walk-the-spec",
     "productName": "Walk the Spec",
     "directories": {
