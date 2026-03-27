@@ -1,12 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { generateRepoMap, getMapPath, isMapValid } from '../../../src/main/repomap/generator.js';
-import { typescriptExtractor } from '../../../src/main/repomap/ts-extractor.js';
+import { getTypescriptExtractor } from '../../../src/main/repomap/ts-extractor.js';
+import type { Extractor } from '../../../src/main/repomap/types.js';
 
 describe('generator', () => {
   let tmpDir: string;
+  let typescriptExtractor: Extractor;
+
+  beforeAll(async () => {
+    typescriptExtractor = await getTypescriptExtractor();
+  });
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'repomap-test-'));

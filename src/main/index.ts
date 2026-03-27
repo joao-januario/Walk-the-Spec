@@ -10,8 +10,6 @@ import { startNotifyServer, stopNotifyServer, type NotifyPayload } from './notif
 import { scanProject } from './projects/project-scanner.js';
 import { detectPhase } from './phase/phase-detector.js';
 import { normalizePathForComparison } from './utils/paths.js';
-import { generateRepoMap } from './repomap/index.js';
-import { getAllExtractors } from './repomap/extractors.js';
 import { initAutoUpdater, checkForUpdatesManual } from './updater/auto-updater.js';
 import fs from 'fs';
 
@@ -82,6 +80,39 @@ async function handleNotify(payload: NotifyPayload): Promise<void> {
 /** Track in-flight repo map generation per project for cancel-and-restart. */
 const generationControllers = new Map<string, AbortController>();
 
+/** Trigger repo map regeneration for a project (lazy-loads extractors on first call). */
+async function regenerateRepoMap(projectId: string): Promise<void> {
+  // Cancel any in-flight generation for this project
+  const existing = generationControllers.get(projectId);
+  if (existing) {
+    existing.abort();
+    console.log(`[repomap] cancelled in-flight generation for project ${projectId}`);
+  }
+
+  const controller = new AbortController();
+  generationControllers.set(projectId, controller);
+
+  const config = loadConfig();
+  const project = getProjects(config).find((p) => p.id === projectId);
+  if (!project) return;
+
+  console.log(`[repomap] git index changed in ${project.name} - regenerating map`);
+  try {
+    const { generateRepoMap, discoverProjectExtensions } = await import('./repomap/generator.js');
+    const { getAllExtractors } = await import('./repomap/extractors.js');
+    const projectExtensions = await discoverProjectExtensions(project.path);
+    const extractors = await getAllExtractors(projectExtensions);
+    await generateRepoMap(project.path, extractors, { incremental: true, signal: controller.signal });
+    generationControllers.delete(projectId);
+  } catch (err: unknown) {
+    generationControllers.delete(projectId);
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      return;
+    }
+    console.error(`[repomap] failed to update map for ${project.name}:`, err);
+  }
+}
+
 const watcherEvents: WatcherEvents = {
   onSpecsChanged: (projectId, files) => {
     sendToRenderer('specs-changed', { projectId, files, timestamp: new Date().toISOString() });
@@ -89,33 +120,8 @@ const watcherEvents: WatcherEvents = {
   onBranchChanged: (projectId) => {
     sendToRenderer('branch-changed', { projectId, timestamp: new Date().toISOString() });
   },
-  onSourceChanged: (projectId, files) => {
-    // Cancel any in-flight generation for this project
-    const existing = generationControllers.get(projectId);
-    if (existing) {
-      existing.abort();
-      console.log(`[repomap] cancelled in-flight generation for project ${projectId}`);
-    }
-
-    const controller = new AbortController();
-    generationControllers.set(projectId, controller);
-
-    const config = loadConfig();
-    const project = getProjects(config).find((p) => p.id === projectId);
-    if (!project) return;
-    console.log(`[repomap] source changed in ${project.name}: ${files.length} file(s) - regenerating map`);
-    void getAllExtractors().then((extractors) =>
-      generateRepoMap(project.path, extractors, { incremental: true, signal: controller.signal }),
-    ).then(() => {
-      generationControllers.delete(projectId);
-    }).catch((err: unknown) => {
-      generationControllers.delete(projectId);
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        // Expected — new changes arrived, generation was cancelled
-        return;
-      }
-      console.error(`[repomap] failed to update map for ${project.name}:`, err);
-    });
+  onGitIndexChanged: (projectId) => {
+    void regenerateRepoMap(projectId);
   },
   onError: (projectId, error) => {
     sendToRenderer('project-error', { projectId, error, timestamp: new Date().toISOString() });

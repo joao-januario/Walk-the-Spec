@@ -35,6 +35,8 @@ App
 
 **FileStructureView** (`src/renderer/src/components/elements/FileStructureView.tsx`): Renders structured file lists with color-coded operation types (added/modified/removed). Receives `FileStructureSection[]` from the plan parser via PlanView. Uses collapsible section groups with file count badges, and each file entry displays a colored left border, file icon, directory-dimmed filename, operation label, and optional comment. Operation colors are mapped via `operationClasses` in `theme.ts`.
 
+**CodeBlock** (`src/renderer/src/components/elements/CodeBlock.tsx`): Renders fenced code blocks with syntax highlighting via highlight.js. For `language: 'mermaid'`, delegates to `MermaidBlock` which is lazy-loaded via `React.lazy` + `Suspense` — mermaid.js (~888KB chunk) only loads when a mermaid diagram actually appears. This keeps the main renderer bundle light for the common case of viewing artifacts without diagrams.
+
 ## State Management
 
 No external state library. State lives in three places:

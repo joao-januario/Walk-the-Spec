@@ -1,30 +1,38 @@
 /**
  * Tree-sitter multi-language extraction — public API.
  *
- * Initializes web-tree-sitter once, loads all available grammars from
- * tree-sitter-wasms, and returns Extractor instances for each language
- * that has both a grammar and query definitions.
+ * Initializes web-tree-sitter once, then loads only the grammars for
+ * languages whose file extensions are present in the current project.
+ * This avoids loading all 16+ WASM grammars when only 1-2 are needed.
  */
 
-import { initTreeSitter, loadLanguage, createTreeSitterExtractor } from './extractor.js';
-import { EXTRACTABLE_LANGUAGES } from './languages.js';
-import { QUERY_REGISTRY } from './queries.js';
 import type { Extractor } from '../types.js';
 
-let cachedExtractors: Extractor[] | null = null;
-
 /**
- * Get tree-sitter extractors for all supported languages.
- * Initializes on first call, caches thereafter. Non-fatal per language.
+ * Get tree-sitter extractors filtered by the extensions actually present
+ * in the project being scanned. If no filter is provided, loads all
+ * extractable languages (backward compat for tests).
+ *
+ * Grammars are loaded per-invocation — not cached globally — so that new
+ * languages added mid-development are picked up on the next generation.
+ * The web-tree-sitter WASM runtime itself is initialized once.
  */
-export async function getTreeSitterExtractors(): Promise<Extractor[]> {
-  if (cachedExtractors) return cachedExtractors;
+export async function getTreeSitterExtractors(extensionFilter?: Set<string>): Promise<Extractor[]> {
+  const { initTreeSitter, loadLanguage, createTreeSitterExtractor } = await import('./extractor.js');
+  const { EXTRACTABLE_LANGUAGES } = await import('./languages.js');
+  const { QUERY_REGISTRY } = await import('./queries.js');
 
   await initTreeSitter();
 
   const extractors: Extractor[] = [];
 
   for (const config of EXTRACTABLE_LANGUAGES) {
+    // Skip languages whose extensions aren't present in the project
+    if (extensionFilter) {
+      const hasMatchingExtension = config.extensions.some((ext) => extensionFilter.has(ext));
+      if (!hasMatchingExtension) continue;
+    }
+
     const queries = QUERY_REGISTRY.get(config.id);
     if (!queries) continue;
 
@@ -37,8 +45,7 @@ export async function getTreeSitterExtractors(): Promise<Extractor[]> {
     }
   }
 
-  cachedExtractors = extractors;
-  console.log(`[repomap] tree-sitter initialized: ${extractors.length} language extractors ready`);
+  console.log(`[repomap] tree-sitter: ${extractors.length} language extractor(s) loaded${extensionFilter ? ` (filtered from ${extensionFilter.size} extensions)` : ' (all)'}`);
   return extractors;
 }
 

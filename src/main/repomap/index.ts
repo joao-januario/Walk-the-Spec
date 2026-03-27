@@ -6,7 +6,7 @@
  * - Future: tree-sitter (via web-tree-sitter or native bindings) for multi-language support
  */
 
-export { typescriptExtractor } from './ts-extractor.js';
+export { getTypescriptExtractor } from './ts-extractor.js';
 export { getAllExtractors } from './extractors.js';
 export { formatRepoMap, buildRepoMap } from './format.js';
 export { generateRepoMap, updateRepoMapFiles, getMapPath, isMapValid } from './generator.js';

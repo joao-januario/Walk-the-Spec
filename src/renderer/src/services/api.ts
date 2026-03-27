@@ -24,6 +24,7 @@ declare global {
       getSettings: () => Promise<{ fontSize: number }>;
       saveSettings: (partial: Record<string, unknown>) => Promise<{ fontSize: number }>;
       getGlossary: (projectId: string) => Promise<{ terms: Record<string, string> }>;
+      getMemorySnapshot: () => Promise<{ main: { rss: number; heapTotal: number; heapUsed: number; external: number; arrayBuffers: number }; timestamp: string }>;
       onSettingsChanged: (callback: (...args: any[]) => void) => () => void;
       onSpecsChanged: (callback: (...args: any[]) => void) => () => void;
       onBranchChanged: (callback: (...args: any[]) => void) => () => void;

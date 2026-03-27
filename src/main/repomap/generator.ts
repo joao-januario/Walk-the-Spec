@@ -33,6 +33,40 @@ export function getMapPath(repoRoot: string): string {
   return path.join(repoRoot, MAP_RELATIVE_PATH);
 }
 
+/**
+ * Quickly discover which file extensions exist in a project directory.
+ * Used to filter tree-sitter grammars before loading — only load grammars
+ * for languages that are actually present in the project.
+ */
+export async function discoverProjectExtensions(repoRoot: string): Promise<Set<string>> {
+  const extensions = new Set<string>();
+  let dirCount = 0;
+
+  async function walk(dir: string) {
+    let entries: fs.Dirent[];
+    try {
+      entries = await fs.promises.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    if (++dirCount % 20 === 0) await yieldToEventLoop();
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        if (!IGNORED_DIRS.has(entry.name) && !entry.name.startsWith('.')) {
+          await walk(path.join(dir, entry.name));
+        }
+      } else if (entry.isFile()) {
+        const ext = path.extname(entry.name).toLowerCase();
+        if (ext) extensions.add(ext);
+      }
+    }
+  }
+
+  await walk(repoRoot);
+  return extensions;
+}
+
 /** Discover all source files in a repo that match any extractor's extensions (async). */
 async function discoverFiles(repoRoot: string, extensions: Set<string>): Promise<string[]> {
   const files: string[] = [];

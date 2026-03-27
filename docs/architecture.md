@@ -33,6 +33,7 @@ Filesystem change (artifact file saved)
 | `get-settings` | `handlers.ts` | `api.getSettings()` | App settings (fontSize, soundVolume, osNotifications) |
 | `save-settings` | `handlers.ts` | `api.saveSettings(partial)` | Update partial settings |
 | `get-glossary` | `handlers.ts` | `api.getGlossary(projectId)` | Parse glossary.md term definitions |
+| `memory:snapshot` | `handlers.ts` | `api.getMemorySnapshot()` | Main process memory diagnostics (rss, heap, external) |
 
 ### Event Channels (`mainWindow.webContents.send` / `ipcRenderer.on`)
 
@@ -50,12 +51,12 @@ Filesystem change (artifact file saved)
 Three chokidar watchers per project:
 1. **Specs watcher**: Monitors `.claude/specs/` for artifact file changes (add/change/unlink)
 2. **HEAD watcher**: Monitors `.git/HEAD` for branch switches
-3. **Source watcher**: Monitors the entire project directory (with ignored dirs) for source file changes that trigger repo map regeneration. Debounced at 3000ms.
+3. **Git-index watcher**: Monitors `.git/index` for git operations (add, commit, checkout, merge, rebase) that change codebase structure, triggering repo map regeneration. Single-file watcher — negligible memory cost compared to the previous broad source watcher that monitored the entire project tree.
 
 Key behaviors:
 - `awaitWriteFinish`: 500ms stability threshold, 100ms poll interval (ensures writes complete before firing)
 - `ignoreInitial: true`: No events for existing files at startup
-- **Debouncing**: Specs changes accumulate in a `pendingFiles` Set, flushed after 300ms of quiet. Multiple rapid saves batch into one `specs-changed` event. Branch changes fire immediately (no debounce).
+- **Debouncing**: Specs changes accumulate in a `pendingFiles` Set, flushed after 300ms of quiet. Multiple rapid saves batch into one `specs-changed` event. Branch and git-index changes fire immediately (no debounce).
 
 ## Phase Detection
 
@@ -82,17 +83,20 @@ Precedence: evaluated top-to-bottom, first match wins.
 The repomap system analyzes source code structure across multiple languages and generates repository maps for context injection. It powers the structural codebase understanding in spec commands.
 
 **System Components**:
-- `index.ts`: Main generator orchestrates extractor calls and aggregates results
-- `extractors.ts`: Registry of language-specific code structure extractors (TypeScript, Python, Go, Rust, Java)
-- `ts-extractor.ts`: TypeScript AST walker extracts classes, functions, interfaces, types
-- `tree-sitter-extractor.ts`: Tree-sitter fallback parser for non-TypeScript languages (Python, Go, Rust, Java)
+- `index.ts`: Re-exports from sub-modules (public API)
+- `generator.ts`: Walks project directory, runs extractors, writes formatted map. Also exports `discoverProjectExtensions()` for grammar filtering.
+- `extractors.ts`: Lazy extractor builder — dynamically imports `ts-extractor.ts` and `tree-sitter/index.ts` on first call. Accepts an optional extension filter to load only needed grammars.
+- `ts-extractor.ts`: TypeScript AST walker. Exports async `getTypescriptExtractor()` factory that dynamically imports the `typescript` package on first call (~40-60MB heap, deferred from startup).
+- `tree-sitter/extractor.ts`: Tree-sitter WASM parser for non-TypeScript languages (Python, Go, Rust, Java, etc.)
+- `tree-sitter/index.ts`: Lazy grammar loader. Accepts extension filter to load only grammars for languages present in the current project scan (not all 16).
 - `format.ts`: Formats extracted structures into human-readable tree and summary formats
 - `types.ts`: Typed interfaces for extractors and generated maps
 
 **Lifecycle**:
-- Generated on project add (background, non-blocking)
-- Regenerated on source file changes via `onSourceChanged` event in file watcher
-- Results stored in project cache for command context injection
+- Generated on project add (background, non-blocking, lazy-loads extractors)
+- Regenerated on `.git/index` changes via `onGitIndexChanged` event in file watcher
+- TypeScript compiler and tree-sitter grammars are loaded lazily on first generation — not at startup
+- Per-generation grammar filtering: only loads tree-sitter grammars for languages whose file extensions exist in the project being scanned
 
 ## Notifications
 

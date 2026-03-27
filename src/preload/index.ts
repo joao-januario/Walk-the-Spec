@@ -36,6 +36,9 @@ const api = {
   // Glossary
   getGlossary: (projectId: string) => ipcRenderer.invoke('get-glossary', projectId),
 
+  // Memory diagnostics
+  getMemorySnapshot: () => ipcRenderer.invoke('memory:snapshot'),
+
   // Settings events — from native menu
   onSettingsChanged: (callback: (...args: any[]) => void) => {
     const sub = (_event: any, ...args: any[]) => callback(...args);

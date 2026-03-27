@@ -15,8 +15,6 @@ import { parseSummary } from '../parser/summary-parser.js';
 import { parseRefactorBacklog } from '../parser/refactor-backlog-parser.js';
 
 import { editTaskCheckbox, editRequirementText } from '../writer/artifact-writer.js';
-import { generateRepoMap } from '../repomap/index.js';
-import { getAllExtractors } from '../repomap/extractors.js';
 import { generateIntegrationPlan } from '../integration/integration-planner.js';
 import { executeIntegration } from '../integration/scaffold-writer.js';
 import { readScaffoldVersion, getBundledScaffoldVersion, getScaffoldDir } from '../integration/scaffold-version.js';
@@ -109,12 +107,18 @@ export function registerIpcHandlers() {
     const entry = addProject(config, projectPath, name);
     await saveConfig(config);
 
-    // Generate initial repo map in background (non-blocking)
-    void getAllExtractors().then((extractors) =>
-      generateRepoMap(projectPath, extractors),
-    ).catch((err) => {
-      console.error(`[repomap] initial generation failed for ${entry.name}:`, err);
-    });
+    // Generate initial repo map in background (non-blocking, lazy-loads extractors)
+    void (async () => {
+      try {
+        const { discoverProjectExtensions, generateRepoMap } = await import('../repomap/generator.js');
+        const { getAllExtractors } = await import('../repomap/extractors.js');
+        const extensions = await discoverProjectExtensions(projectPath);
+        const extractors = await getAllExtractors(extensions);
+        await generateRepoMap(projectPath, extractors);
+      } catch (err) {
+        console.error(`[repomap] initial generation failed for ${entry.name}:`, err);
+      }
+    })();
 
     return getProjectState(entry);
   });
@@ -474,5 +478,21 @@ export function registerIpcHandlers() {
     }
     GLOSSARY_ENTRY.lastIndex = 0;
     return { terms };
+  });
+
+  // --- Memory diagnostics ---
+
+  ipcMain.handle('memory:snapshot', () => {
+    const mem = process.memoryUsage();
+    return {
+      main: {
+        rss: mem.rss,
+        heapTotal: mem.heapTotal,
+        heapUsed: mem.heapUsed,
+        external: mem.external,
+        arrayBuffers: mem.arrayBuffers,
+      },
+      timestamp: new Date().toISOString(),
+    };
   });
 }

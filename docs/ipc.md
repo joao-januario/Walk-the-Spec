@@ -16,7 +16,7 @@ ipcMain.handle('channel-name', async (_event, arg1: Type1, arg2?: Type2) => {
 
 Key conventions:
 - Channel names are lowercase kebab-case (e.g., `get-projects`, `add-project`, `edit-field`)
-- Domain-namespaced channels use colon notation (e.g., `update:install`, `update:restart`, `integration:plan`, `backlog:list`)
+- Domain-namespaced channels use colon notation (e.g., `update:install`, `update:restart`, `integration:plan`, `backlog:list`, `memory:snapshot`)
 - First parameter is always `_event` (unused in handle pattern)
 - All handlers return serializable data (no class instances, no functions)
 
@@ -126,6 +126,8 @@ After editing, the file watcher detects the change → triggers `specs-changed` 
 2. **Config reload on every call**: Most handlers call `loadConfig()` at the start — config is re-read from disk each time, not cached. This ensures config changes from the menu or other sources are always reflected.
 
 3. **Glossary is inline**: The `get-glossary` handler parses `glossary.md` using raw regex directly in `handlers.ts`, unlike other artifacts which use dedicated parser modules.
+
+4. **Repomap imports are lazy**: The `add-project` handler dynamically imports `generator.ts` and `extractors.ts` when generating initial repo maps. This avoids loading the TypeScript compiler and tree-sitter WASM grammars at startup — they only enter memory when repo map generation actually runs.
 
 4. **Error wrapping**: All handlers wrap errors as `{ error: message }` objects rather than throwing. The renderer checks for `.error` on the response.
 
