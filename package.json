@@ -1,6 +1,8 @@
 {
   "name": "walk-the-spec",
-  "version": "1.0.3",
+  "version": "1.0.4",
+  "description": "Desktop dashboard for spec-driven development artifacts",
+  "author": "joao-januario",
   "private": true,
   "repository": {
     "type": "git",
@@ -33,7 +35,9 @@
       "buildResources": "resources"
     },
     "files": [
-      "out/**/*",
+      "out/**/*"
+    ],
+    "asarUnpack": [
       "node_modules/web-tree-sitter/**/*",
       "node_modules/tree-sitter-wasms/**/*"
     ],
