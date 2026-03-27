@@ -40,3 +40,4 @@ jobs:
         run: npx electron-vite build && npx electron-builder ${{ matrix.build_args }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=4096
