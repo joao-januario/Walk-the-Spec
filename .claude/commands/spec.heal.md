@@ -9,138 +9,74 @@ model: sonnet
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Consider user input before proceeding.
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.heal" --phase heal --json` to signal command start.
 
 ## Goal
 
-Read the review findings from `.claude/specs/<BRANCH_NAME>/review.md` and apply the proposed fixes for CRITICAL and HIGH severity findings. This is the counterpart to `/spec.review` — review finds problems, heal applies corrections.
+Read review findings from `.claude/specs/<BRANCH_NAME>/review.md` and apply proposed fixes for all actionable findings. Counterpart to `/spec.review` — review finds problems, heal applies corrections.
 
 ## Execution Steps
 
 ### Step 1: Load Review Findings
 
-Determine the current branch:
-
-```bash
-git rev-parse --abbrev-ref HEAD
-```
-
-Read `.claude/specs/<BRANCH_NAME>/review.md`.
-
-If the file doesn't exist: ERROR — "No review found. Run `/spec.review` first."
-
-Parse the findings table and proposed fixes sections. Extract all findings except NEEDS_REFACTOR.
-
-If no actionable findings exist (only NEEDS_REFACTOR or none): "Nothing to heal. Run `/spec.conclude` to finalize."
+Determine branch via `git rev-parse --abbrev-ref HEAD`. Read `.claude/specs/<BRANCH_NAME>/review.md`. If missing: ERROR — run `/spec.review` first. Parse findings table and proposed fixes; extract all except NEEDS_REFACTOR. If no actionable findings: "Nothing to heal. Run `/spec.conclude`."
 
 ### Step 1.5: Small Branch Optimization
 
-If there are **<= 3 files** to fix AND **<= 5 total findings**:
-- **Skip sub-agent spawning entirely** — apply all fixes yourself inline
-- Read each file, apply the proposed fixes using Edit, and continue to Step 3
-- This avoids agent overhead for typical small reviews
+If **<= 3 files** to fix AND **<= 5 total findings**: skip sub-agents, apply all fixes inline using Edit, continue to Step 3.
 
 ### Step 2: Apply Fixes via Sub-Agents
 
-> **Skip this step if the Small Branch Optimization (Step 1.5) applied.**
+> Skip if Small Branch Optimization applied.
 
-Group findings by file. Classify each fix by complexity:
+Group findings by file. Classify by complexity:
+- **Mechanical** (type annotations, assertion changes, logging, renaming, narrowing) → **Haiku** sub-agent (`model: "haiku"`)
+- **Structural** (refactoring logic, new code paths, architecture changes) → **Sonnet** sub-agent (`model: "sonnet"`)
 
-- **Mechanical fixes** (adding `: unknown` to catch, adding `void` prefix, changing `toBeTruthy` to `toMatch`, adding logging to catch blocks, renaming, type narrowing): spawn a **Haiku sub-agent** with `model: "haiku"`
-- **Structural fixes** (refactoring logic, adding new code paths, changing architecture): spawn a **Sonnet sub-agent** with `model: "sonnet"`
-
-Launch independent file groups **in parallel**.
-
-Each sub-agent prompt MUST include:
-
-1. The full current content of the file(s) to fix
-2. The specific findings (rule ID, category, line, current code, proposed fix) from review.md
-3. Only the specific best practices rules referenced by the findings (not the full documents)
-4. Clear instructions:
-
-```
-You are applying code fixes. For each finding:
-1. Read the current file content
-2. Locate the code matching the "Current" snippet
-3. Apply the "Proposed" fix from the review
-4. If the code has changed since the review and the snippet can't be found,
-   skip that fix and report it as "Could not apply — code changed since review"
-5. Use the Edit tool to apply changes. Be precise — change only what the fix requires.
-6. Report what was changed for each finding.
-```
-
-After all sub-agents return, collect results — which fixes were applied, which were skipped.
+Launch independent file groups **in parallel**. Each sub-agent receives: full file content, specific findings (rule ID, category, line, current/proposed code), referenced best practices rules, and instructions to locate code, apply proposed fix via Edit, skip if code changed since review, and report results.
 
 ### Step 3: Run Tests
-
-After ALL fixes are applied:
 
 ```bash
 npm test
 ```
 
-- If tests **pass**: Continue to Step 4.
-- If tests **fail**:
-  1. Report which tests failed
-  2. Identify which fix likely caused the failure (by file/module)
-  3. Revert that specific fix
-  4. Re-run tests to confirm revert fixes it
-  5. Mark that finding as "Fix requires manual intervention — broke tests"
-  6. Continue with remaining passing fixes
+Pass → Step 4. Fail → identify causal fix, revert it, re-run tests to confirm, mark as "Fix requires manual intervention — broke tests", continue with remaining.
 
 ### Step 4: Update Review Artifact
 
-Update `.claude/specs/<BRANCH_NAME>/review.md`:
-
-- Mark each applied fix as `FIXED` in the findings table
-- Mark skipped/reverted fixes as `SKIPPED` or `MANUAL` with reason
-- Add a "Heal Summary" section at the bottom:
+Update `.claude/specs/<BRANCH_NAME>/review.md`: mark fixes as `FIXED`, `SKIPPED`, or `MANUAL` with reason. Add Heal Summary section:
 
 ```markdown
 ## Heal Summary
 
 **Date**: YYYY-MM-DD
-**Applied**: N fixes
-**Skipped**: N fixes
-**Reverted**: N fixes (broke tests)
+**Applied**: N fixes | **Skipped**: N | **Reverted**: N (broke tests)
 
 | # | Rule | Status | Notes |
 |---|------|--------|-------|
-| 1 | ES04 | FIXED | Applied successfully |
-| 2 | RT03 | MANUAL | Fix broke TaskRow.test.ts |
 ```
 
 ### Step 5: Report Completion
 
-```markdown
-## Heal Complete
-
-**Applied**: N of N fixes
-**Tests**: ✓ Passing (or list failures)
-
-Remaining findings (MEDIUM/LOW — optional to fix):
-- ...
-
-Run `/spec.conclude` or `/spec.review`.
-```
-
-If any CRITICAL findings remain unfixed (MANUAL status): WARN — "CRITICAL findings remain. Run `/spec.review` to re-assess."
+Report applied/total fixes and test status. List remaining MEDIUM/LOW findings. If CRITICAL findings remain unfixed: WARN. Suggest `/spec.dive` for code deep-dives or `/spec.conclude` to finalize.
 
 ## Scope Rules
 
-- **All actionable findings**: CRITICAL, HIGH, MEDIUM, and LOW are all fixed
-- **NEEDS_REFACTOR excluded** — these are architectural debt tracked in refactor-backlog.md, addressed in dedicated future branches
-- Each fix is applied independently — one broken fix doesn't block others
-- Tests are the safety net — if a fix breaks tests, revert it
+- All actionable findings (CRITICAL, HIGH, MEDIUM, LOW) are fixed; NEEDS_REFACTOR excluded (tracked in refactor-backlog.md)
+- Each fix independent — one broken fix doesn't block others
+- Tests are the safety net — revert any fix that breaks them
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.heal" --json` to signal command completion.
 
 ## Error Handling
 
-- **No review.md**: Stop. Tell user to run `/spec.review` first.
-- **No CRITICAL/HIGH findings**: Nothing to do. Suggest `/spec.conclude`.
-- **File changed since review**: Skip that fix, note it.
-- **Fix breaks tests**: Revert, mark as manual, continue.
-- **All fixes fail**: Report all as manual. User must fix by hand.
+| Condition | Action |
+|-----------|--------|
+| No review.md | Stop, run `/spec.review` first |
+| No actionable findings | Nothing to do, suggest `/spec.conclude` |
+| File changed since review | Skip that fix, note it |
+| Fix breaks tests | Revert, mark manual, continue |
+| All fixes fail | Report all as manual |

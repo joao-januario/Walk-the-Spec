@@ -101,13 +101,13 @@ export function watchProject(projectId: string, projectPath: string, events: Wat
     const relative = normalizePath(path.relative(projectPath, filePath));
     pw.pendingSourceFiles.add(relative);
 
-    // Debounce 1000ms — longer than specs watcher since map regen is heavier
+    // Debounce 3000ms — long enough for bulk refactors/formatter runs to settle
     if (pw.sourceDebounceTimer) clearTimeout(pw.sourceDebounceTimer);
     pw.sourceDebounceTimer = setTimeout(() => {
       const files = Array.from(pw.pendingSourceFiles);
       pw.pendingSourceFiles.clear();
       events.onSourceChanged(projectId, files);
-    }, 1000);
+    }, 3000);
   };
 
   pw.sourceWatcher.on('change', handleSourceChange);

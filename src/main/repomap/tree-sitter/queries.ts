@@ -158,6 +158,7 @@ const scala: LanguageQueries = {
     (val_definition pattern: (identifier) @name) @definition
   `,
   imports: `
+    (import_declaration path: (stable_identifier) @source)
     (import_declaration path: (identifier) @source)
   `,
 };
@@ -187,6 +188,7 @@ const elixir: LanguageQueries = {
   definitions: `
     (call target: (identifier) @_kind (arguments (alias) @name) (#match? @_kind "^(defmodule|defprotocol|defimpl)$")) @definition
     (call target: (identifier) @_kind (arguments (identifier) @name) (#match? @_kind "^(def|defp|defmacro|defmacrop)$")) @definition
+    (call target: (identifier) @_kind (arguments (call target: (identifier) @name)) (#match? @_kind "^(def|defp|defmacro|defmacrop)$")) @definition
   `,
   imports: `
     (call target: (identifier) @_kind (arguments (alias) @source) (#match? @_kind "^(import|alias|use)$"))

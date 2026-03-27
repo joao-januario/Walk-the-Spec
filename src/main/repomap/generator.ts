@@ -96,7 +96,7 @@ async function parseExistingHashes(mapPath: string): Promise<Map<string, string>
 export async function generateRepoMap(
   repoRoot: string,
   extractors: Extractor[],
-  options?: { incremental?: boolean },
+  options?: { incremental?: boolean; signal?: AbortSignal },
 ): Promise<RepoMap> {
   const allExtensions = new Set<string>();
   for (const ext of extractors) {
@@ -104,6 +104,12 @@ export async function generateRepoMap(
   }
 
   const files = await discoverFiles(repoRoot, allExtensions);
+
+  // Check for cancellation after file discovery
+  if (options?.signal?.aborted) {
+    throw new DOMException('Generation aborted', 'AbortError');
+  }
+
   const mapPath = getMapPath(repoRoot);
   const existingHashes = options?.incremental ? await parseExistingHashes(mapPath) : new Map<string, string>();
 
@@ -116,8 +122,13 @@ export async function generateRepoMap(
   const extractions: FileExtraction[] = [];
 
   for (let i = 0; i < files.length; i++) {
-    // Yield every 25 files to keep the renderer responsive
-    if (i > 0 && i % 25 === 0) await yieldToEventLoop();
+    // Yield every 25 files and check for cancellation
+    if (i > 0 && i % 25 === 0) {
+      await yieldToEventLoop();
+      if (options?.signal?.aborted) {
+        throw new DOMException('Generation aborted', 'AbortError');
+      }
+    }
 
     const filePath = files[i];
     const ext = path.extname(filePath).toLowerCase();
@@ -140,6 +151,11 @@ export async function generateRepoMap(
     } catch (err: unknown) {
       console.warn(`[repomap] failed to extract ${relativePath}:`, err);
     }
+  }
+
+  // Final cancellation check before writing
+  if (options?.signal?.aborted) {
+    throw new DOMException('Generation aborted', 'AbortError');
   }
 
   const now = new Date().toISOString();

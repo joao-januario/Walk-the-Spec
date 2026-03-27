@@ -1,6 +1,6 @@
 ---
 description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
-handoffs: 
+handoffs:
   - label: Build Specification
     agent: spec.specify
     prompt: Implement the feature specification based on the updated constitution. I want to build...
@@ -12,86 +12,61 @@ handoffs:
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Consider user input before proceeding.
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/bootstrap-phase.sh --command "spec.constitution" --phase constitution --json --skip-prereqs` to signal command start.
 
 ## Outline
 
-You are updating the project constitution at `.claude/specify/memory/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
+Update the project constitution at `.claude/specify/memory/constitution.md`. This file is a TEMPLATE with placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job: collect/derive concrete values, fill the template, and propagate amendments across dependent artifacts.
 
-**Note**: If `.claude/specify/memory/constitution.md` does not exist yet, it should have been initialized from `.claude/specify/templates/constitution-template.md` during project setup. If it's missing, copy the template first.
+If `.claude/specify/memory/constitution.md` doesn't exist, copy from `.claude/specify/templates/constitution-template.md` first.
 
-Follow this execution flow:
+### Execution Flow
 
-1. Load the existing constitution at `.claude/specify/memory/constitution.md`.
-   - Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]`.
-   **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
+1. **Load** the existing constitution. Identify every `[ALL_CAPS_IDENTIFIER]` placeholder token.
+   The user might require fewer or more principles than the template — respect any specified count and adjust accordingly.
 
-2. Collect/derive values for placeholders:
-   - If user input (conversation) supplies a value, use it.
-   - Otherwise infer from existing repo context (README, docs, prior constitution versions if embedded).
-   - For governance dates: `RATIFICATION_DATE` is the original adoption date (if unknown ask or mark TODO), `LAST_AMENDED_DATE` is today if changes are made, otherwise keep previous.
-   - `CONSTITUTION_VERSION` must increment according to semantic versioning rules:
-     - MAJOR: Backward incompatible governance/principle removals or redefinitions.
-     - MINOR: New principle/section added or materially expanded guidance.
-     - PATCH: Clarifications, wording, typo fixes, non-semantic refinements.
-   - If version bump type ambiguous, propose reasoning before finalizing.
+2. **Collect/derive values** for placeholders:
+   - Use values from user input first, then infer from repo context (README, docs, prior versions).
+   - `RATIFICATION_DATE`: original adoption date (ask or mark TODO if unknown). `LAST_AMENDED_DATE`: today if changes made, otherwise keep previous.
+   - `CONSTITUTION_VERSION`: increment per semver — MAJOR: incompatible governance/principle removals or redefinitions; MINOR: new principle/section or material expansion; PATCH: clarifications, wording, typos. If ambiguous, propose reasoning before finalizing.
 
-3. Draft the updated constitution content:
-   - Replace every placeholder with concrete text (no bracketed tokens left except intentionally retained template slots that the project has chosen not to define yet—explicitly justify any left).
-   - Preserve heading hierarchy and comments can be removed once replaced unless they still add clarifying guidance.
-   - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non‑negotiable rules, explicit rationale if not obvious.
-   - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.
+3. **Draft updated constitution**:
+   - Replace every placeholder with concrete text (no bracketed tokens left unless intentionally deferred — justify any retained).
+   - Preserve heading hierarchy. Each Principle section: succinct name, paragraph/bullets for non-negotiable rules, explicit rationale if not obvious.
+   - Governance section must list amendment procedure, versioning policy, and compliance review expectations.
 
-4. Consistency propagation checklist (convert prior checklist into active validations):
-   - Read `.claude/specify/templates/plan-template.md` and ensure any "Constitution Check" or rules align with updated principles.
-   - Read `.claude/specify/templates/spec-template.md` for scope/requirements alignment—update if constitution adds/removes mandatory sections or constraints.
-   - Read `.claude/specify/templates/tasks-template.md` and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
-   - Read each command file in `.claude/specify/templates/commands/*.md` (including this one) to verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
-   - Read any runtime guidance docs (e.g., `README.md`, `docs/quickstart.md`, or agent-specific guidance files if present). Update references to principles changed.
+4. **Consistency propagation** — read and validate alignment with:
+   - `.claude/specify/templates/plan-template.md` (Constitution Check / rules)
+   - `.claude/specify/templates/spec-template.md` (scope/requirements)
+   - `.claude/specify/templates/tasks-template.md` (task categorization)
+   - `.claude/specify/templates/commands/*.md` (no outdated agent-specific references)
+   - Runtime docs (`README.md`, `docs/quickstart.md`, agent guidance files) — update principle references as needed.
 
-5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
-   - Version change: old → new
-   - List of modified principles (old title → new title if renamed)
-   - Added sections
-   - Removed sections
-   - Templates requiring updates (✅ updated / ⚠ pending) with file paths
-   - Follow-up TODOs if any placeholders intentionally deferred.
+5. **Sync Impact Report** (prepend as HTML comment atop constitution after update):
+   - Version change: old -> new
+   - Modified principles (old title -> new if renamed), added sections, removed sections
+   - Templates requiring updates (with status and file paths)
+   - Follow-up TODOs for deferred placeholders
 
-6. Validation before final output:
-   - No remaining unexplained bracket tokens.
-   - Version line matches report.
-   - Dates ISO format YYYY-MM-DD.
-   - Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).
+6. **Validation**: No unexplained bracket tokens. Version matches report. Dates in ISO YYYY-MM-DD. Principles are declarative, testable — replace vague "should" with MUST/SHOULD + rationale.
 
-7. Write the completed constitution back to `.claude/specify/memory/constitution.md` (overwrite).
+7. **Write** the completed constitution to `.claude/specify/memory/constitution.md` (overwrite).
 
 8. **Install Context Protocol in CLAUDE.md**:
-   - Read `.claude/specify/templates/context-protocol.md`
-   - Read the project's `CLAUDE.md`
-   - Check if a `## Context Protocol` section already exists in CLAUDE.md
-   - **If it does NOT exist**: Insert the context protocol section before the `<!-- MANUAL ADDITIONS START -->` marker (or at the end if no marker exists)
-   - **If it already exists**: Replace the existing `## Context Protocol` section with the current template content (in case the template has been updated)
-   - This ensures every Claude interaction in the project automatically consults the structural map before exploring the codebase
+   - Read `.claude/specify/templates/context-protocol.md` and project `CLAUDE.md`
+   - If `## Context Protocol` section doesn't exist: insert before `<!-- MANUAL ADDITIONS START -->` marker (or at end)
+   - If it exists: replace with current template content
 
-9. Output a final summary to the user with:
-   - New version and bump rationale.
-   - Whether the Context Protocol was installed/updated in CLAUDE.md.
-   - Any files flagged for manual follow-up.
-   - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
+9. **Output summary**: new version + bump rationale, Context Protocol install/update status, files needing manual follow-up, suggested commit message.
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.constitution" --json` to signal command completion.
 
-Formatting & Style Requirements:
+### Formatting & Style
 
-- Use Markdown headings exactly as in the template (do not demote/promote levels).
-- Wrap long rationale lines to keep readability (<100 chars ideally) but do not hard enforce with awkward breaks.
-- Keep a single blank line between sections.
-- Avoid trailing whitespace.
-
-If the user supplies partial updates (e.g., only one principle revision), still perform validation and version decision steps.
-
-If critical info missing (e.g., ratification date truly unknown), insert `TODO(<FIELD_NAME>): explanation` and include in the Sync Impact Report under deferred items.
-
-Do not create a new template; always operate on the existing `.claude/specify/memory/constitution.md` file.
+- Use Markdown headings exactly as in the template (do not demote/promote levels)
+- Keep readability (<100 chars) without awkward breaks. Single blank line between sections. No trailing whitespace.
+- Partial updates still require validation and version decision steps.
+- Missing critical info: insert `TODO(<FIELD_NAME>): explanation` and include in Sync Impact Report.
+- Always operate on existing `.claude/specify/memory/constitution.md` — never create a new template.

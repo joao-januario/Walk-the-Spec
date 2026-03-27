@@ -1,9 +1,9 @@
 # Repo Map
 
-Generated: 2026-03-27T11:49:08.174Z
-Updated: 2026-03-27T11:49:08.174Z
-Files: 102
-Token estimate: ~7088
+Generated: 2026-03-27T13:13:45.244Z
+Updated: 2026-03-27T13:13:45.244Z
+Files: 121
+Token estimate: ~8537
 
 ---
 
@@ -37,7 +37,7 @@ src/main/config/config-manager.ts
 ⋮...
 
 src/main/index.ts
-│ hash: 6b6931ba8b32
+│ hash: ab43f0ff2f9a
 │
 │ imports: electron, path, fs
 │ local: ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./repomap/index.js, ./repomap/extractors.js
@@ -200,7 +200,7 @@ src/main/phase/phase-detector.ts
 ⋮...
 
 src/main/projects/file-watcher.ts
-│ hash: ca0a26a40a80
+│ hash: 33f7ff7f5e7e
 │
 │ imports: chokidar, path, fs
 │ local: ../utils/paths.js, ../repomap/tree-sitter/languages.js
@@ -242,13 +242,13 @@ src/main/repomap/format.ts
 ⋮...
 
 src/main/repomap/generator.ts
-│ hash: 163795f9da3d
+│ hash: a27f350bcad6
 │
 │ imports: fs, path, crypto
 │ local: ../utils/paths.js, ./format.js, ./types.js
 │
 │ export function getMapPath(repoRoot: string): string
-│ export async function generateRepoMap(repoRoot: string, extractors: Extractor[], options?: { incremental?: boolean }): Promise<RepoMap>
+│ export async function generateRepoMap(repoRoot: string, extractors: Extractor[], options?: { incremental?: boolean; signal?: AbortSignal }): Promise<RepoMap>
 │ export async function updateRepoMapFiles(repoRoot: string, changedFiles: string[], extractors: Extractor[]): Promise<RepoMap>
 │ export function isMapValid(repoRoot: string): boolean
 
@@ -313,7 +313,7 @@ src/main/repomap/tree-sitter/languages.ts
 ⋮...
 
 src/main/repomap/tree-sitter/queries.ts
-│ hash: 3f28faccb0bc
+│ hash: 3de36c4ad523
 │
 │ export interface LanguageQueries
 │ export const QUERY_REGISTRY
@@ -863,6 +863,76 @@ tests/fixtures/repomap/sample-react.tsx
 
 ⋮...
 
+tests/fixtures/repomap/sample.c
+│ hash: 112d46800c0f
+│
+│ imports: <stdio.h>, <stdlib.h>
+│
+│ typedef struct {
+│ struct Config
+│ enum Status {
+│ void start_server(int port)
+│ int get_user_count(void)
+│ static void internal_init(void)
+
+⋮...
+
+tests/fixtures/repomap/sample.cpp
+│ hash: 1b4808411721
+│
+│ imports: <string>, <vector>
+│
+│ namespace app
+│ class UserService
+│ struct Config
+│ enum class Role {
+│ void initialize(const Config& config)
+
+⋮...
+
+tests/fixtures/repomap/sample.cs
+│ hash: c461e43950cb
+│
+│ imports: System.Collections.Generic
+│
+│ public class UserService
+│   public void GetUser(int id)
+│   private void Validate(int id)
+│   protected void LogAccess()
+│   ⋮...
+│ public interface IRepository
+│ public struct UserData
+│ public enum UserRole
+
+⋮...
+
+tests/fixtures/repomap/sample.dart
+│ hash: 23ee40174689
+│
+│ imports: dart:async, package:http/http.dart
+│
+│ class UserService
+│   Future<User?> getUser(int id)
+│   Future<List<User>> listUsers()
+│   ⋮...
+│ enum UserRole
+│ void createApp(Map<String, dynamic> config)
+│ String _internalHelper()
+
+⋮...
+
+tests/fixtures/repomap/sample.ex
+│ hash: 496b222060cb
+│
+│ imports: Ecto.Query, App.Repo, GenServer
+│
+│ defmodule App.UserService
+│ def list_users
+│ defmodule App.Config
+│ def default_port, do: 8080
+
+⋮...
+
 tests/fixtures/repomap/sample.go
 │ hash: e1cd826478d9
 │
@@ -873,6 +943,83 @@ tests/fixtures/repomap/sample.go
 │ func createHandler() http.Handler
 │ func StartServer(port int) error
 │ type internalConfig struct {
+
+⋮...
+
+tests/fixtures/repomap/sample.kt
+│ hash: f45c603dafa9
+│
+│ imports: kotlin.collections.List, kotlin.io.println
+│
+│ class UserService(private val db: Database)
+│ fun getUser(id: Int): User?
+│ fun listUsers(): List<User>
+│ private fun validate(id: Int): Boolean
+│ object AppConfig
+│ fun createApp(config: AppConfig): UserService
+│ data class User(val id: Int, val name: String)
+
+⋮...
+
+tests/fixtures/repomap/sample.lua
+│ hash: 49e7a9073be6
+│
+│ imports: utils
+│
+│ function start_server(port)
+│ function get_user(id)
+│ local function internal_helper()
+    -- private helper
+│ function UserService(db)
+
+⋮...
+
+tests/fixtures/repomap/sample.m
+│ hash: b503a5492a71
+│
+│ imports: <Foundation/Foundation.h>, AppDelegate.h
+│
+│ @interface UserService : NSObject
+│ @interface UserService : NSObject
+│ - (void)getUser:(int)userId;
+│ - (void)listUsers;
+│ @implementation UserService
+│ @protocol Repository
+│ - (void)save:(id)entity;
+│ - (id)findById:(int)entityId;
+
+⋮...
+
+tests/fixtures/repomap/sample.ml
+│ hash: 0f92a2822a02
+│
+│ imports: Printf, Stdlib
+│
+│ let get_user id =
+│ let create_app config =
+│ type user = {
+│ type config = {
+│ module UserService = struct
+│ let find id = Printf.printf "Finding %d\n" id
+│ let list_all () = Printf.printf "Listing all\n"
+
+⋮...
+
+tests/fixtures/repomap/sample.php
+│ hash: a2fdbf857936
+│
+│ imports: App\Models\User, App\Contracts\Repository
+│
+│ class UserService
+│   public function getUser(int $id): User
+│   private function validate(int $id): bool
+│   protected function logAccess(): void
+│   ⋮...
+│ interface UserRepository
+│ trait Cacheable
+│ public function getCacheKey(): string
+│ enum UserRole: string
+│ function createApp(array $config): void
 
 ⋮...
 
@@ -888,6 +1035,36 @@ tests/fixtures/repomap/sample.py
 │   ⋮...
 │ def create_app(config: dict) -> object:
 │ def _internal_helper():
+
+⋮...
+
+tests/fixtures/repomap/sample.rb
+│ hash: 4e305cff7550
+│
+│ imports: json, helpers
+│
+│ class UserService
+│ def initialize(db)
+│ def get_user(id)
+│ def list_users
+│ module Validators
+│ def self.validate_email(email)
+│ def create_app(config)
+
+⋮...
+
+tests/fixtures/repomap/sample.res
+│ hash: d17306b58296
+│
+│ imports: Belt
+│
+│ let getUser = (id) => {
+│ let createApp = (config) => {
+│ type user = {
+│ type config = {
+│ module UserService = {
+│ let find = (id) => Js.log("Finding")
+│ let listAll = () => Js.log("Listing")
 
 ⋮...
 
@@ -908,6 +1085,66 @@ tests/fixtures/repomap/sample.rs
 
 ⋮...
 
+tests/fixtures/repomap/sample.scala
+│ hash: 926a9ce5ba0a
+│
+│ class UserService(db: Database) {
+│   def getUser(id: Int): Option[User] =
+│   def listUsers(): List[User] =
+│   ⋮...
+│ object AppConfig {
+│   val port: Int = 8080
+│   val host: String = "localhost"
+│   ⋮...
+│ trait Repository {
+│ def createApp(config: AppConfig): UserService =
+│ val defaultTimeout: Int = 30
+
+⋮...
+
+tests/fixtures/repomap/sample.sh
+│ hash: 52461863a874
+│
+│ local: ./config.sh, ./utils.sh
+│
+│ start_server()
+│ get_user()
+│ initialize_db()
+│ cleanup()
+
+⋮...
+
+tests/fixtures/repomap/sample.sol
+│ hash: 101745ef3673
+│
+│ imports: @openzeppelin/contracts/token/ERC20/ERC20.sol
+│
+│ contract UserRegistry {
+│   function registerUser(uint id, address addr) public
+│   function getUser(uint id) public view returns (address)
+│   ⋮...
+│ interface IRepository {
+│ struct UserData {
+│ enum UserRole {
+
+⋮...
+
+tests/fixtures/repomap/sample.swift
+│ hash: 330316068243
+│
+│ imports: Foundation, UIKit
+│
+│ public class UserService
+│   public func getUser(id: Int) -> User?
+│   private func validate(id: Int) -> Bool
+│   ⋮...
+│ public protocol Repository {
+│ public struct UserData
+│ func internalHelper() -> Void
+│ public func createApp(config: [String: Any]) -> UserService
+
+⋮...
+
 tests/fixtures/repomap/sample.ts
 │ hash: a0cb4f18e110
 │
@@ -925,6 +1162,23 @@ tests/fixtures/repomap/sample.ts
 │   ⋮...
 │ export function watchProject(projectId: string, projectPath: string): void
 │ export async function scanFiles(dir: string): Promise<string[]>
+
+⋮...
+
+tests/fixtures/repomap/sample.zig
+│ hash: fb13df33ef02
+│
+│ imports: std
+│
+│ const std = @import("std");
+│ const mem = @import("std").mem;
+│ pub fn startServer(port: u16) !void
+│ pub const UserService = struct {
+│ pub fn getUser(self: *UserService, id: u32) ?User
+│ fn internalValidate(self: *UserService, id: u32) bool
+│ const Config = struct {
+│ pub fn createApp(config: Config) UserService
+│ pub fn createApp(config: Config) UserService
 
 ⋮...
 
@@ -1065,7 +1319,23 @@ tests/unit/repomap/generator.test.ts
 ⋮...
 
 tests/unit/repomap/tree-sitter-extractor.test.ts
-│ hash: caa13f214655
+│ hash: b75c571db6dd
+│
+│ imports: vitest, fs, path
+│ local: ../../../src/main/repomap/tree-sitter/extractor.js, ../../../src/main/repomap/tree-sitter/languages.js, ../../../src/main/repomap/tree-sitter/queries.js, ../../../src/main/repomap/types.js
+
+⋮...
+
+tests/unit/repomap/tree-sitter-polyglot-a.test.ts
+│ hash: ed1c13559ed8
+│
+│ imports: vitest, fs, path
+│ local: ../../../src/main/repomap/tree-sitter/extractor.js, ../../../src/main/repomap/tree-sitter/languages.js, ../../../src/main/repomap/tree-sitter/queries.js, ../../../src/main/repomap/types.js
+
+⋮...
+
+tests/unit/repomap/tree-sitter-polyglot-b.test.ts
+│ hash: a29c1855ac89
 │
 │ imports: vitest, fs, path
 │ local: ../../../src/main/repomap/tree-sitter/extractor.js, ../../../src/main/repomap/tree-sitter/languages.js, ../../../src/main/repomap/tree-sitter/queries.js, ../../../src/main/repomap/types.js

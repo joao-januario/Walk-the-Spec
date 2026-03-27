@@ -1,7 +1,7 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
 model: sonnet
-handoffs: 
+handoffs:
   - label: Build Technical Plan
     agent: spec.plan
     prompt: Create a plan for the spec. I am building with...
@@ -17,7 +17,7 @@ handoffs:
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+Consider user input before proceeding.
 
 ## Pre-Execution Checks
 
@@ -29,279 +29,143 @@ You **MUST** consider the user input before proceeding (if not empty).
 - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
   - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
   - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
-- For each executable hook, output the following based on its `optional` flag:
-  - **Optional hook** (`optional: true`):
-    ```
-    ## Extension Hooks
-
-    **Optional Pre-Hook**: {extension}
-    Command: `/{command}`
-    Description: {description}
-
-    Prompt: {prompt}
-    To execute: `/{command}`
-    ```
-  - **Mandatory hook** (`optional: false`):
-    ```
-    ## Extension Hooks
-
-    **Automatic Pre-Hook**: {extension}
-    Executing: `/{command}`
-    EXECUTE_COMMAND: {command}
-
-    Wait for the result of the hook command before proceeding to the Outline.
-    ```
-- If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
+- For each executable hook, output based on its `optional` flag:
+  - **Optional hook** (`optional: true`): Display extension name, command, description, prompt. Label as "Optional Pre-Hook".
+  - **Mandatory hook** (`optional: false`): Display as "Automatic Pre-Hook", execute `/{command}`, wait for result before proceeding.
+- If no hooks registered or file doesn't exist, skip silently
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/write-status.sh --command "spec.specify" --status "started"` to signal command start.
 
 ## Outline
 
-The text the user typed after `/spec.specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
+The text the user typed after `/spec.specify` in the triggering message **is** the feature description. Do not ask the user to repeat it unless they provided an empty command.
 
-Given that feature description, do this:
+Given that feature description:
 
 1. **Generate a concise short name** (2-4 words) for the branch:
-   - Analyze the feature description and extract the most meaningful keywords
-   - Create a 2-4 word short name that captures the essence of the feature
-   - Use action-noun format when possible (e.g., "add-user-auth", "fix-payment-bug")
-   - Preserve technical terms and acronyms (OAuth2, API, JWT, etc.)
-   - Keep it concise but descriptive enough to understand the feature at a glance
-   - Examples:
-     - "I want to add user authentication" → "user-auth"
-     - "Implement OAuth2 integration for the API" → "oauth2-api-integration"
-     - "Create a dashboard for analytics" → "analytics-dashboard"
-     - "Fix payment processing timeout bug" → "fix-payment-timeout"
+   - Extract meaningful keywords, use action-noun format (e.g., "user-auth", "fix-payment-timeout")
+   - Preserve technical terms/acronyms
 
-2. **Create the feature branch** by running the script with `--short-name` (and `--json`), and do NOT pass `--number` (the script auto-detects the next globally available number across all branches and spec directories):
-
+2. **Create the feature branch** by running the script with `--short-name` (and `--json`), do NOT pass `--number` (auto-detected):
    - Example: `bash .claude/specify/scripts/bash/create-new-feature.sh "$ARGUMENTS" --json --short-name "user-auth" "Add user authentication"`
+   - Always include `--json`, only run once per feature
+   - JSON output contains BRANCH_NAME and SPEC_FILE paths
 
-   **IMPORTANT**:
-   - Do NOT pass `--number` — the script determines the correct next number automatically
-   - Always include `--json` so the output can be parsed reliably
-   - You must only ever run this script once per feature
-   - The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for
-   - The JSON output will contain BRANCH_NAME and SPEC_FILE paths
-   - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot")
-
-3. **Read the created spec file**: The script creates SPEC_FILE with template content. You MUST Read it now (using the Read tool) so that the Write tool will allow overwriting it later. This is a Claude Code safety guard — Write refuses to overwrite files that haven't been Read in the current conversation.
+3. **Read the created spec file**: The script creates SPEC_FILE with template content. You MUST Read it now (Write refuses to overwrite unread files).
 
 4. Load `.claude/specify/templates/spec-template.md` to understand required sections.
 
 5. Follow this execution flow:
-
-    1. Parse user description from Input
-       If empty: ERROR "No feature description provided"
-    2. Extract key concepts from description
-       Identify: actors, actions, data, constraints
+    1. Parse user description — if empty: ERROR "No feature description provided"
+    2. Extract key concepts: actors, actions, data, constraints
     3. For unclear aspects:
        - Make informed guesses based on context and industry standards
-       - Only mark with [NEEDS CLARIFICATION: specific question] if:
-         - The choice significantly impacts feature scope or user experience
-         - Multiple reasonable interpretations exist with different implications
-         - No reasonable default exists
-       - **LIMIT: Maximum 3 [NEEDS CLARIFICATION] markers total**
-       - Prioritize clarifications by impact: scope > security/privacy > user experience > technical details
-    4. Fill User Scenarios & Testing section
-       If no clear user flow: ERROR "Cannot determine user scenarios"
-    5. Generate Functional Requirements
-       Each requirement must be testable
-       Use reasonable defaults for unspecified details (document assumptions in Assumptions section)
-    6. Define Success Criteria
-       Create measurable, technology-agnostic outcomes
-       Include both quantitative metrics (time, performance, volume) and qualitative measures (user satisfaction, task completion)
-       Each criterion must be verifiable without implementation details
+       - Only mark with [NEEDS CLARIFICATION: specific question] if the choice significantly impacts scope/UX, multiple reasonable interpretations exist, and no reasonable default exists
+       - **LIMIT: Maximum 3 [NEEDS CLARIFICATION] markers**
+       - Priority: scope > security/privacy > UX > technical details
+    4. Fill User Scenarios & Testing section (ERROR if no clear user flow)
+    5. Generate testable Functional Requirements with reasonable defaults (document assumptions)
+    6. Define measurable, technology-agnostic Success Criteria (quantitative + qualitative)
     7. Identify Key Entities (if data involved)
-    8. Return: SUCCESS (spec ready for planning)
+    8. Return: SUCCESS
 
-6. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+6. Write specification to SPEC_FILE using template structure, replacing placeholders with concrete details.
 
-7. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
+7. **Specification Quality Validation**: After writing, validate against quality criteria:
 
-   a. **Create Spec Quality Checklist**: Generate a checklist file at `FEATURE_DIR/checklists/requirements.md` using the checklist template structure with these validation items:
+   a. **Create Spec Quality Checklist** at `FEATURE_DIR/checklists/requirements.md`:
 
       ```markdown
       # Specification Quality Checklist: [FEATURE NAME]
-      
+
       **Purpose**: Validate specification completeness and quality before proceeding to planning
       **Created**: [DATE]
       **Feature**: [Link to spec.md]
-      
+
       ## Content Quality
-      
+
       - [ ] No implementation details (languages, frameworks, APIs)
       - [ ] Focused on user value and business needs
       - [ ] Written for non-technical stakeholders
       - [ ] All mandatory sections completed
-      
+
       ## Requirement Completeness
-      
+
       - [ ] No [NEEDS CLARIFICATION] markers remain
       - [ ] Requirements are testable and unambiguous
-      - [ ] Success criteria are measurable
-      - [ ] Success criteria are technology-agnostic (no implementation details)
-      - [ ] All acceptance scenarios are defined
-      - [ ] Edge cases are identified
-      - [ ] Scope is clearly bounded
+      - [ ] Success criteria are measurable and technology-agnostic
+      - [ ] All acceptance scenarios defined
+      - [ ] Edge cases identified
+      - [ ] Scope clearly bounded
       - [ ] Dependencies and assumptions identified
-      
+
       ## Feature Readiness
-      
+
       - [ ] All functional requirements have clear acceptance criteria
       - [ ] User scenarios cover primary flows
       - [ ] Feature meets measurable outcomes defined in Success Criteria
       - [ ] No implementation details leak into specification
-      
+
       ## Notes
-      
+
       - Items marked incomplete require spec updates before `/spec.clarify` or `/spec.plan`
       ```
 
-   b. **Run Validation Check**: Review the spec against each checklist item:
-      - For each item, determine if it passes or fails
-      - Document specific issues found (quote relevant spec sections)
+   b. **Run Validation Check**: Review spec against each item, document specific issues.
 
    c. **Handle Validation Results**:
-
-      - **If all items pass**: Mark checklist complete and proceed to step 7
-
-      - **If items fail (excluding [NEEDS CLARIFICATION])**:
-        1. List the failing items and specific issues
-        2. Update the spec content in memory to address each issue
-        3. Validate the spec content in memory against checklist criteria. Only write spec.md once all checks pass internally (max 3 mental validation passes). Do not re-read the file after writing.
-        4. If still failing after 3 iterations, document remaining issues in checklist notes and warn user
-
-      - **If [NEEDS CLARIFICATION] markers remain**:
-        1. Extract all [NEEDS CLARIFICATION: ...] markers from the spec
-        2. **LIMIT CHECK**: If more than 3 markers exist, keep only the 3 most critical (by scope/security/UX impact) and make informed guesses for the rest
-        3. For each clarification needed (max 3), present options to user in this format:
+      - **All pass**: Mark checklist complete, proceed
+      - **Items fail (excluding [NEEDS CLARIFICATION])**: List failures, fix in memory, re-validate (max 3 passes). If still failing, document in checklist notes and warn user.
+      - **[NEEDS CLARIFICATION] markers remain**: Extract all markers (keep max 3 most critical, make informed guesses for rest). Present each as:
 
            ```markdown
            ## Question [N]: [Topic]
-           
+
            **Context**: [Quote relevant spec section]
-           
-           **What we need to know**: [Specific question from NEEDS CLARIFICATION marker]
-           
+           **What we need to know**: [Specific question]
+
            **Suggested Answers**:
-           
+
            | Option | Answer | Implications |
            |--------|--------|--------------|
-           | A      | [First suggested answer] | [What this means for the feature] |
-           | B      | [Second suggested answer] | [What this means for the feature] |
-           | C      | [Third suggested answer] | [What this means for the feature] |
-           | Custom | Provide your own answer | [Explain how to provide custom input] |
-           
-           **Your choice**: _[Wait for user response]_
+           | A      | [Answer] | [Implications] |
+           | B      | [Answer] | [Implications] |
+           | C      | [Answer] | [Implications] |
+           | Custom | Provide your own | [How to provide] |
+
+           **Your choice**: _[Wait for response]_
            ```
 
-        4. **CRITICAL - Table Formatting**: Ensure markdown tables are properly formatted:
-           - Use consistent spacing with pipes aligned
-           - Each cell should have spaces around content: `| Content |` not `|Content|`
-           - Header separator must have at least 3 dashes: `|--------|`
-           - Test that the table renders correctly in markdown preview
-        5. Number questions sequentially (Q1, Q2, Q3 - max 3 total)
-        6. Present all questions together before waiting for responses
-        7. Wait for user to respond with their choices for all questions (e.g., "Q1: A, Q2: Custom - [details], Q3: B")
-        8. Update the spec by replacing each [NEEDS CLARIFICATION] marker with the user's selected or provided answer
-        9. Re-run validation after all clarifications are resolved
+        Present all questions together (max 3, sequential Q1/Q2/Q3). After responses, update spec and re-validate.
 
-   d. **Update Checklist**: Write the final checklist pass/fail status once, after all validation is complete.
+   d. **Update Checklist**: Write final pass/fail status once after all validation.
 
-8. Report completion with branch name, spec file path, and checklist results. **Always mention both next steps**: recommend `/spec.clarify` first (it is the expected workflow before planning), then `/spec.plan` as the alternative. The completion message MUST end with: "Next step: `/spec.clarify` to refine the spec, or `/spec.plan` to jump straight to planning."
+8. Report completion with branch name, spec file path, checklist results. The completion message MUST end with: "Next step: `/spec.clarify` (recommended before planning), or `/spec.plan` to skip clarification."
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/write-status.sh --command "spec.specify" --status "completed"` to signal command completion.
 
-9. **Check for extension hooks**: After reporting completion, check if `.claude/specify/extensions.yml` exists in the project root.
-   - If it exists, read it and look for entries under the `hooks.after_specify` key
-   - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
-   - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
-   - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-     - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
-     - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
-   - For each executable hook, output the following based on its `optional` flag:
-     - **Optional hook** (`optional: true`):
-       ```
-       ## Extension Hooks
-
-       **Optional Hook**: {extension}
-       Command: `/{command}`
-       Description: {description}
-
-       Prompt: {prompt}
-       To execute: `/{command}`
-       ```
-     - **Mandatory hook** (`optional: false`):
-       ```
-       ## Extension Hooks
-
-       **Automatic Hook**: {extension}
-       Executing: `/{command}`
-       EXECUTE_COMMAND: {command}
-       ```
-   - If no hooks are registered or `.claude/specify/extensions.yml` does not exist, skip silently
+9. **Check for extension hooks (after specification)**:
+   - Same hook processing logic as pre-execution hooks, but check `hooks.after_specify` key
+   - Optional hooks: display info. Mandatory hooks: auto-execute.
+   - Skip silently if no hooks or file doesn't exist.
 
 **NOTE:** The script creates and checks out the new branch and initializes the spec file before writing.
 
 ## Quick Guidelines
 
-- Focus on **WHAT** users need and **WHY**.
-- Avoid HOW to implement (no tech stack, APIs, code structure).
+- Focus on **WHAT** users need and **WHY** — avoid HOW (no tech stack, APIs, code structure).
 - Written for business stakeholders, not developers.
-- DO NOT create any checklists that are embedded in the spec. That will be a separate command.
+- DO NOT embed checklists in the spec (separate command).
+- Mandatory sections must be completed; remove inapplicable optional sections entirely.
+- Make informed guesses, document assumptions, limit clarifications to max 3 critical decisions.
+- Priority: scope > security/privacy > UX > technical details.
 
-### Section Requirements
-
-- **Mandatory sections**: Must be completed for every feature
-- **Optional sections**: Include only when relevant to the feature
-- When a section doesn't apply, remove it entirely (don't leave as "N/A")
-
-### For AI Generation
-
-When creating this spec from a user prompt:
-
-1. **Make informed guesses**: Use context, industry standards, and common patterns to fill gaps
-2. **Document assumptions**: Record reasonable defaults in the Assumptions section
-3. **Limit clarifications**: Maximum 3 [NEEDS CLARIFICATION] markers - use only for critical decisions that:
-   - Significantly impact feature scope or user experience
-   - Have multiple reasonable interpretations with different implications
-   - Lack any reasonable default
-4. **Prioritize clarifications**: scope > security/privacy > user experience > technical details
-5. **Think like a tester**: Every vague requirement should fail the "testable and unambiguous" checklist item
-6. **Common areas needing clarification** (only if no reasonable default exists):
-   - Feature scope and boundaries (include/exclude specific use cases)
-   - User types and permissions (if multiple conflicting interpretations possible)
-   - Security/compliance requirements (when legally/financially significant)
-
-**Examples of reasonable defaults** (don't ask about these):
-
-- Data retention: Industry-standard practices for the domain
-- Performance targets: Standard web/mobile app expectations unless specified
-- Error handling: User-friendly messages with appropriate fallbacks
-- Authentication method: Standard session-based or OAuth2 for web apps
-- Integration patterns: Use project-appropriate patterns (REST/GraphQL for web services, function calls for libraries, CLI args for tools, etc.)
+**Reasonable defaults** (don't ask about): data retention (industry-standard), performance targets (standard expectations), error handling (user-friendly with fallbacks), auth method (session/OAuth2 for web), integration patterns (project-appropriate).
 
 ### Success Criteria Guidelines
 
-Success criteria must be:
+Success criteria must be **measurable**, **technology-agnostic**, **user-focused**, **verifiable**, with key metrics in backticks and MUST/SHOULD language.
 
-1. **Measurable**: Include specific metrics (time, percentage, count, rate)
-2. **Technology-agnostic**: No mention of frameworks, languages, databases, or tools
-3. **User-focused**: Describe outcomes from user/business perspective, not system internals
-4. **Verifiable**: Can be tested/validated without knowing implementation details
-5. **Formatted for readability**: Wrap key metrics in backticks (e.g., `` `15:1` ``, `` `100%` ``, `` `2 minutes` ``) and use MUST/SHOULD language where the criterion is a hard requirement vs. a target
+**Good**: "Users MUST complete checkout in under `3 minutes`", "System MUST support `10,000` concurrent users", "`95%` of searches return results in under `1 second`"
 
-**Good examples**:
-
-- "Users MUST be able to complete checkout in under `3 minutes`"
-- "System MUST support `10,000` concurrent users"
-- "`95%` of searches return results in under `1 second`"
-- "Task completion rate SHOULD improve by `40%`"
-
-**Bad examples** (implementation-focused):
-
-- "API response time is under 200ms" (too technical, use "Users see results instantly")
-- "Database can handle 1000 TPS" (implementation detail, use user-facing metric)
-- "React components render efficiently" (framework-specific)
-- "Redis cache hit rate above 80%" (technology-specific)
+**Bad** (implementation-focused): "API response time under 200ms", "Database handles 1000 TPS", "React components render efficiently", "Redis cache hit rate above 80%"
