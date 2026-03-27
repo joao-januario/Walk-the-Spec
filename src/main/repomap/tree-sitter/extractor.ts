@@ -141,7 +141,7 @@ export function createTreeSitterExtractor(
   language: Language,
   queries: LanguageQueries,
 ): Extractor {
-  const parser = new Parser();
+  let parser = new Parser();
   parser.setLanguage(language);
 
   // Pre-compile queries — may throw if the query syntax is invalid for this grammar
@@ -160,6 +160,13 @@ export function createTreeSitterExtractor(
     throw err;
   }
 
+  /** Recreate the parser after a WASM crash to avoid corrupted state. */
+  function resetParser(): void {
+    try { parser.delete(); } catch { /* already dead */ }
+    parser = new Parser();
+    parser.setLanguage(language);
+  }
+
   return {
     extensions: config.extensions,
 
@@ -167,7 +174,15 @@ export function createTreeSitterExtractor(
       const relativePath = normalizePath(path.relative(repoRoot, filePath));
       const hash = crypto.createHash('sha256').update(content).digest('hex');
 
-      const tree = parser.parse(content);
+      let tree;
+      try {
+        tree = parser.parse(content);
+      } catch (err: unknown) {
+        // WASM RuntimeError corrupts the parser — recreate it so subsequent files still work
+        console.error(`[repomap] WASM crash parsing ${relativePath} (${config.id}), resetting parser:`, err);
+        resetParser();
+        return { path: relativePath, hash, identifiers: [], imports: [] };
+      }
       if (!tree) {
         return { path: relativePath, hash, identifiers: [], imports: [] };
       }

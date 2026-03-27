@@ -6,6 +6,10 @@ const api = {
   addProject: (path: string, name?: string) => ipcRenderer.invoke('add-project', path, name),
   deleteProject: (id: string) => ipcRenderer.invoke('delete-project', id),
 
+  // Integration
+  planIntegration: (projectPath: string) => ipcRenderer.invoke('integration:plan', projectPath),
+  executeIntegration: (projectPath: string) => ipcRenderer.invoke('integration:execute', projectPath),
+
   // Native folder picker
   showFolderPicker: () => ipcRenderer.invoke('show-folder-picker'),
 

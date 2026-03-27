@@ -8,6 +8,7 @@ export interface ProjectEntry {
   id: string;
   name: string;
   path: string;
+  scaffoldVersion?: string;
 }
 
 export type SoundVolume = 'high' | 'medium' | 'low' | 'off';

@@ -70,7 +70,9 @@ describe('tree-sitter polyglot B (Lua, Elixir, Zig, Bash, OCaml, ObjC, Solidity,
     });
   });
 
-  describe('Zig', () => {
+  // Zig disabled — tree-sitter-zig.wasm crashes with WASM RuntimeError in Electron
+  // Tests pass in Node/Vitest but the grammar is broken in production. Re-enable when upstream fixes the WASM.
+  describe.skip('Zig (disabled — WASM crash in Electron)', () => {
     let extractor: Extractor;
     beforeAll(async () => { extractor = await getExtractorForLang('zig'); });
 
@@ -97,7 +99,8 @@ describe('tree-sitter polyglot B (Lua, Elixir, Zig, Bash, OCaml, ObjC, Solidity,
     });
   });
 
-  describe('Bash', () => {
+  // Bash disabled — tree-sitter-bash.wasm crashes with TypeError in Electron WASM (works in Node/Vitest but not in production)
+  describe.skip('Bash (disabled — WASM crash in Electron)', () => {
     let extractor: Extractor;
     beforeAll(async () => { extractor = await getExtractorForLang('bash'); });
 

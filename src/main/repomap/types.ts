@@ -61,8 +61,15 @@ export interface RepoMapMetadata {
   tokenEstimate: number;
 }
 
-/** Complete repo map: metadata + file entries. */
+/** A file that failed extraction. */
+export interface ExtractionFailure {
+  path: string;
+  error: string;
+}
+
+/** Complete repo map: metadata + file entries + failures. */
 export interface RepoMap {
   metadata: RepoMapMetadata;
   files: FileExtraction[];
+  failures: ExtractionFailure[];
 }

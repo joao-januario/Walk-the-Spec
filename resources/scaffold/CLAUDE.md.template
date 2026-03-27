@@ -1,0 +1,29 @@
+# [PROJECT] Development Guidelines
+
+[Brief description of the project and its purpose.]
+
+## Architecture
+
+[High-level structural overview — what the major components are, how they interact.]
+
+## Context & Navigation
+
+Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.
+
+## Tech Stack
+
+[List core technologies, frameworks, and tools used in this project.]
+
+## Commands
+
+```
+[List common development commands — build, test, dev server, etc.]
+```
+
+## Code Style
+
+[Key coding conventions for this project. Reference `.claude/specify/memory/constitution.md` for full engineering standards once generated.]
+
+<!-- MANUAL ADDITIONS START -->
+<!-- Your project-specific additions go here -->
+<!-- MANUAL ADDITIONS END -->

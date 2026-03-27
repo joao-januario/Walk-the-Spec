@@ -12,6 +12,7 @@ import ReviewView from '../artifacts/ReviewView.js';
 import SummaryView from '../artifacts/SummaryView.js';
 import RefactorBacklogView from '../refactor/RefactorBacklogView.js';
 import EmptyState from '../common/EmptyState.js';
+import IntegrationBanner from '../integration/IntegrationBanner.js';
 import { useFeatureData, useArtifactData } from '../../hooks/useFeatureData.js';
 import { useCommentStore } from '../../hooks/useCommentStore.js';
 import { usePhaseNotification } from '../../hooks/usePhaseNotification.js';
@@ -153,6 +154,8 @@ export default function FeatureDetail({ project }: { project: Project }) {
           <code className="text-board-text text-[0.8125rem]">{feature.branchName}</code>
         </div>
       </div>
+
+      <IntegrationBanner integrationState={project.integrationState} />
 
       {showBacklog ? (
         <RefactorBacklogView projectId={project.id} />

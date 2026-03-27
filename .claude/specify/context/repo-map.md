@@ -1,9 +1,9 @@
 # Repo Map
 
-Generated: 2026-03-27T13:13:45.244Z
-Updated: 2026-03-27T13:13:45.244Z
-Files: 121
-Token estimate: ~8537
+Generated: 2026-03-27T15:11:51.031Z
+Updated: 2026-03-27T15:11:51.031Z
+Files: 79
+Token estimate: ~6172
 
 ---
 
@@ -17,7 +17,7 @@ electron.vite.config.ts
 ⋮...
 
 src/main/config/config-manager.ts
-│ hash: 24f8cf04b72b
+│ hash: 106d336f3c04
 │
 │ imports: fs, path, os, uuid
 │ local: ../utils/paths.js
@@ -47,11 +47,55 @@ src/main/index.ts
 
 ⋮...
 
+src/main/integration/integration-planner.ts
+│ hash: 1515dbc10e7a
+│
+│ imports: fs/promises, path
+│ local: ./types.js, ../utils/paths.js
+│
+│ export async function generateIntegrationPlan(targetPath: string, scaffoldDir: string): Promise<IntegrationPlan>
+
+⋮...
+
+src/main/integration/scaffold-version.ts
+│ hash: 5ea20aff88c9
+│
+│ imports: fs/promises, path
+│
+│ export function getScaffoldDir(base?: string): string
+│ export async function readScaffoldVersion(projectPath: string): Promise<string | null>
+│ export async function writeScaffoldVersion(projectPath: string, version: string): Promise<void>
+│ export async function getBundledScaffoldVersion(scaffoldDir?: string): Promise<string>
+│ export async function isScaffoldOutdated(projectPath: string, appVersion: string): Promise<boolean>
+
+⋮...
+
+src/main/integration/scaffold-writer.ts
+│ hash: a5d97b2d88d0
+│
+│ imports: fs/promises, path
+│ local: ../utils/paths.js
+│
+│ export async function executeIntegration(targetPath: string, scaffoldDir: string): Promise<void>
+
+⋮...
+
+src/main/integration/types.ts
+│ hash: c3088f7daa5a
+│
+│ export type FileAction
+│ export type FileCategory
+│ export interface IntegrationFileEntry
+│ export interface IntegrationPlan
+│ export type IntegrationState
+
+⋮...
+
 src/main/ipc/handlers.ts
-│ hash: 1d0d7b187b81
+│ hash: c08207702c7c
 │
 │ imports: electron, fs, path
-│ local: ../config/config-manager.js, ../config/config-manager.js, ../projects/project-scanner.js, ../phase/phase-detector.js, ../parser/spec-parser.js, ../parser/plan-parser.js, ../parser/tasks-parser.js, ../parser/research-parser.js, ../parser/review-parser.js, ../parser/summary-parser.js, ../parser/refactor-backlog-parser.js, ../writer/artifact-writer.js, ../repomap/index.js, ../repomap/extractors.js
+│ local: ../config/config-manager.js, ../config/config-manager.js, ../projects/project-scanner.js, ../phase/phase-detector.js, ../parser/spec-parser.js, ../parser/plan-parser.js, ../parser/tasks-parser.js, ../parser/research-parser.js, ../parser/review-parser.js, ../parser/summary-parser.js, ../parser/refactor-backlog-parser.js, ../writer/artifact-writer.js, ../repomap/index.js, ../repomap/extractors.js, ../integration/integration-planner.js, ../integration/scaffold-writer.js, ../integration/scaffold-version.js, ../integration/types.js
 │
 │ export function registerIpcHandlers()
 
@@ -232,17 +276,17 @@ src/main/repomap/extractors.ts
 ⋮...
 
 src/main/repomap/format.ts
-│ hash: c3f4e76665b0
+│ hash: b3e0db90f810
 │
 │ local: ./types.js
 │
 │ export function formatRepoMap(map: RepoMap): string
-│ export function buildRepoMap(files: FileExtraction[], now?: string): RepoMap
+│ export function buildRepoMap(files: FileExtraction[], now?: string, failures?: ExtractionFailure[]): RepoMap
 
 ⋮...
 
 src/main/repomap/generator.ts
-│ hash: a27f350bcad6
+│ hash: 0b6a3a5fb727
 │
 │ imports: fs, path, crypto
 │ local: ../utils/paths.js, ./format.js, ./types.js
@@ -275,7 +319,7 @@ src/main/repomap/index.ts
 ⋮...
 
 src/main/repomap/tree-sitter/extractor.ts
-│ hash: 11619ae5beb0
+│ hash: 498583193f63
 │
 │ imports: web-tree-sitter, crypto, path
 │ local: ../../utils/paths.js, ../types.js, ./languages.js, ./queries.js
@@ -301,7 +345,7 @@ src/main/repomap/tree-sitter/index.ts
 ⋮...
 
 src/main/repomap/tree-sitter/languages.ts
-│ hash: 6597403a3c46
+│ hash: 89efb73390eb
 │
 │ export type VisibilityStrategy
 │ export interface LanguageConfig
@@ -331,13 +375,14 @@ src/main/repomap/ts-extractor.ts
 ⋮...
 
 src/main/repomap/types.ts
-│ hash: 71c0803b5e4d
+│ hash: 154b1dd1b605
 │
 │ export interface ExtractedIdentifier
 │ export interface FileExtraction
 │ export interface ImportEntry
 │ export interface Extractor
 │ export interface RepoMapMetadata
+│ export interface ExtractionFailure
 │ export interface RepoMap
 
 ⋮...
@@ -369,7 +414,7 @@ src/main/writer/markdown-serializer.ts
 ⋮...
 
 src/preload/index.ts
-│ hash: d5e8c52a12a2
+│ hash: a9d7dde6c432
 │
 │ imports: electron
 │
@@ -453,10 +498,10 @@ src/renderer/src/components/artifacts/TasksView.tsx
 ⋮...
 
 src/renderer/src/components/board/BoardView.tsx
-│ hash: a0d3f21d18e2
+│ hash: 148215cd69c3
 │
 │ imports: react
-│ local: ./FeatureCard.js, ../../types/index.js, ../../services/api.js
+│ local: ./FeatureCard.js, ../integration/IntegrationDialog.js, ../../types/index.js, ../../services/api.js
 │
 │ export default function BoardView({ onSelectProject, selectedProjectId, refreshKey }: BoardViewProps)
 
@@ -570,12 +615,32 @@ src/renderer/src/components/feature/ArtifactTabs.tsx
 ⋮...
 
 src/renderer/src/components/feature/FeatureDetail.tsx
-│ hash: 5fc8840ecb92
+│ hash: dc33c7b6f872
 │
 │ imports: react, lucide-react, framer-motion
-│ local: ../../theme.js, ../../lib/utils.js, ./ArtifactTabs.js, ../artifacts/SpecView.js, ../artifacts/PlanView.js, ../artifacts/TasksView.js, ../artifacts/ResearchView.js, ../artifacts/ReviewView.js, ../artifacts/SummaryView.js, ../refactor/RefactorBacklogView.js, ../common/EmptyState.js, ../../hooks/useFeatureData.js, ../../hooks/useCommentStore.js, ../../hooks/usePhaseNotification.js, ../../utils/format-comments.js, ../../context/GlossaryContext.js, ../../types/index.js
+│ local: ../../theme.js, ../../lib/utils.js, ./ArtifactTabs.js, ../artifacts/SpecView.js, ../artifacts/PlanView.js, ../artifacts/TasksView.js, ../artifacts/ResearchView.js, ../artifacts/ReviewView.js, ../artifacts/SummaryView.js, ../refactor/RefactorBacklogView.js, ../common/EmptyState.js, ../integration/IntegrationBanner.js, ../../hooks/useFeatureData.js, ../../hooks/useCommentStore.js, ../../hooks/usePhaseNotification.js, ../../utils/format-comments.js, ../../context/GlossaryContext.js, ../../types/index.js
 │
 │ export default function FeatureDetail({ project }: { project: Project })
+
+⋮...
+
+src/renderer/src/components/integration/IntegrationBanner.tsx
+│ hash: 3428fcb49190
+│
+│ imports: react
+│ local: ../../lib/utils.js, ../../types/index.js
+│
+│ export default function IntegrationBanner({ integrationState }: IntegrationBannerProps)
+
+⋮...
+
+src/renderer/src/components/integration/IntegrationDialog.tsx
+│ hash: d73ac5d55521
+│
+│ imports: react, framer-motion
+│ local: ../../lib/utils.js, ../../types/index.js
+│
+│ export default function IntegrationDialog({ plan, onConfirm, onCancel, executing }: IntegrationDialogProps)
 
 ⋮...
 
@@ -731,13 +796,15 @@ src/renderer/src/main.tsx
 ⋮...
 
 src/renderer/src/services/api.ts
-│ hash: 6cb93522574d
+│ hash: 3d53a7ed8f4c
 │
 │ local: ../types/index.js
 │
 │ export async function getProjects()
 │ export async function addProject(path: string, name?: string)
 │ export async function deleteProject(id: string)
+│ export async function planIntegration(projectPath: string)
+│ export async function executeIntegration(projectPath: string)
 │ export async function showFolderPicker()
 │ export async function getFeature(projectId: string)
 │ export async function getArtifact(projectId: string, type: ArtifactType)
@@ -788,7 +855,7 @@ src/renderer/src/themes/themes.ts
 ⋮...
 
 src/renderer/src/types/index.ts
-│ hash: aaa8fe5da9bd
+│ hash: 74587c0bcc5f
 │
 │ export type Phase
 │ export type ArtifactType
@@ -801,6 +868,11 @@ src/renderer/src/types/index.ts
 │ export interface RefactorEntry
 │ export type ElementType
 │ export type FieldType
+│ export type IntegrationState
+│ export type FileAction
+│ export type FileCategory
+│ export interface IntegrationFileEntry
+│ export interface IntegrationPlan
 │ export interface Project
 │ export interface Feature
 │ export interface ArtifactSummary
@@ -832,553 +904,6 @@ src/renderer/src/utils/format-comments.ts
 │ local: ../types/index.js
 │
 │ export function formatComments(comments: Map<ArtifactType, Map<string, string>>): string
-
-⋮...
-
-tests/fixtures/repomap/Sample.java
-│ hash: b5496c399915
-│
-│ imports: java.util.List, java.util.Optional, com.example.db.DatabaseService
-│
-│ public class UserController
-│   public UserController(DatabaseService db) {
-│   public List<User> getUsers()
-│   private void validateInput(String input)
-│   protected void logAccess()
-│   ⋮...
-│ interface UserRepository
-│ enum UserRole
-
-⋮...
-
-tests/fixtures/repomap/sample-react.tsx
-│ hash: 9f31f3eb8b09
-│
-│ imports: react
-│ local: ../hooks/useTheme.js
-│
-│ export interface ButtonProps
-│ export function Button({ label, onClick, variant = 'primary' }: ButtonProps): React.ReactElement
-│ export default function App(): React.ReactElement
-
-⋮...
-
-tests/fixtures/repomap/sample.c
-│ hash: 112d46800c0f
-│
-│ imports: <stdio.h>, <stdlib.h>
-│
-│ typedef struct {
-│ struct Config
-│ enum Status {
-│ void start_server(int port)
-│ int get_user_count(void)
-│ static void internal_init(void)
-
-⋮...
-
-tests/fixtures/repomap/sample.cpp
-│ hash: 1b4808411721
-│
-│ imports: <string>, <vector>
-│
-│ namespace app
-│ class UserService
-│ struct Config
-│ enum class Role {
-│ void initialize(const Config& config)
-
-⋮...
-
-tests/fixtures/repomap/sample.cs
-│ hash: c461e43950cb
-│
-│ imports: System.Collections.Generic
-│
-│ public class UserService
-│   public void GetUser(int id)
-│   private void Validate(int id)
-│   protected void LogAccess()
-│   ⋮...
-│ public interface IRepository
-│ public struct UserData
-│ public enum UserRole
-
-⋮...
-
-tests/fixtures/repomap/sample.dart
-│ hash: 23ee40174689
-│
-│ imports: dart:async, package:http/http.dart
-│
-│ class UserService
-│   Future<User?> getUser(int id)
-│   Future<List<User>> listUsers()
-│   ⋮...
-│ enum UserRole
-│ void createApp(Map<String, dynamic> config)
-│ String _internalHelper()
-
-⋮...
-
-tests/fixtures/repomap/sample.ex
-│ hash: 496b222060cb
-│
-│ imports: Ecto.Query, App.Repo, GenServer
-│
-│ defmodule App.UserService
-│ def list_users
-│ defmodule App.Config
-│ def default_port, do: 8080
-
-⋮...
-
-tests/fixtures/repomap/sample.go
-│ hash: e1cd826478d9
-│
-│ imports: fmt, net/http
-│
-│ type UserService struct {
-│ func (s *UserService) GetUser(id int) (*User, error)
-│ func createHandler() http.Handler
-│ func StartServer(port int) error
-│ type internalConfig struct {
-
-⋮...
-
-tests/fixtures/repomap/sample.kt
-│ hash: f45c603dafa9
-│
-│ imports: kotlin.collections.List, kotlin.io.println
-│
-│ class UserService(private val db: Database)
-│ fun getUser(id: Int): User?
-│ fun listUsers(): List<User>
-│ private fun validate(id: Int): Boolean
-│ object AppConfig
-│ fun createApp(config: AppConfig): UserService
-│ data class User(val id: Int, val name: String)
-
-⋮...
-
-tests/fixtures/repomap/sample.lua
-│ hash: 49e7a9073be6
-│
-│ imports: utils
-│
-│ function start_server(port)
-│ function get_user(id)
-│ local function internal_helper()
-    -- private helper
-│ function UserService(db)
-
-⋮...
-
-tests/fixtures/repomap/sample.m
-│ hash: b503a5492a71
-│
-│ imports: <Foundation/Foundation.h>, AppDelegate.h
-│
-│ @interface UserService : NSObject
-│ @interface UserService : NSObject
-│ - (void)getUser:(int)userId;
-│ - (void)listUsers;
-│ @implementation UserService
-│ @protocol Repository
-│ - (void)save:(id)entity;
-│ - (id)findById:(int)entityId;
-
-⋮...
-
-tests/fixtures/repomap/sample.ml
-│ hash: 0f92a2822a02
-│
-│ imports: Printf, Stdlib
-│
-│ let get_user id =
-│ let create_app config =
-│ type user = {
-│ type config = {
-│ module UserService = struct
-│ let find id = Printf.printf "Finding %d\n" id
-│ let list_all () = Printf.printf "Listing all\n"
-
-⋮...
-
-tests/fixtures/repomap/sample.php
-│ hash: a2fdbf857936
-│
-│ imports: App\Models\User, App\Contracts\Repository
-│
-│ class UserService
-│   public function getUser(int $id): User
-│   private function validate(int $id): bool
-│   protected function logAccess(): void
-│   ⋮...
-│ interface UserRepository
-│ trait Cacheable
-│ public function getCacheKey(): string
-│ enum UserRole: string
-│ function createApp(array $config): void
-
-⋮...
-
-tests/fixtures/repomap/sample.py
-│ hash: a94ef3c1a678
-│
-│ imports: os, pathlib, typing
-│
-│ class UserService:
-│   def __init__(self, db_url: str):
-│   def get_user(self, user_id: int) -> dict:
-│   def list_users(self) -> list:
-│   ⋮...
-│ def create_app(config: dict) -> object:
-│ def _internal_helper():
-
-⋮...
-
-tests/fixtures/repomap/sample.rb
-│ hash: 4e305cff7550
-│
-│ imports: json, helpers
-│
-│ class UserService
-│ def initialize(db)
-│ def get_user(id)
-│ def list_users
-│ module Validators
-│ def self.validate_email(email)
-│ def create_app(config)
-
-⋮...
-
-tests/fixtures/repomap/sample.res
-│ hash: d17306b58296
-│
-│ imports: Belt
-│
-│ let getUser = (id) => {
-│ let createApp = (config) => {
-│ type user = {
-│ type config = {
-│ module UserService = {
-│ let find = (id) => Js.log("Finding")
-│ let listAll = () => Js.log("Listing")
-
-⋮...
-
-tests/fixtures/repomap/sample.rs
-│ hash: 286dabdc36b2
-│
-│ imports: std::collections::HashMap, crate::db::Database
-│
-│ pub struct UserService
-│ impl UserService
-│ pub fn new(db: Database) -> Self
-│ pub fn get_user(&self, id: u64) -> Option<User>
-│ fn internal_validate(&self) -> bool
-│ pub trait Repository
-│ pub enum UserRole {
-│ fn private_helper() -> String
-│ pub fn create_service(db: Database) -> UserService
-
-⋮...
-
-tests/fixtures/repomap/sample.scala
-│ hash: 926a9ce5ba0a
-│
-│ class UserService(db: Database) {
-│   def getUser(id: Int): Option[User] =
-│   def listUsers(): List[User] =
-│   ⋮...
-│ object AppConfig {
-│   val port: Int = 8080
-│   val host: String = "localhost"
-│   ⋮...
-│ trait Repository {
-│ def createApp(config: AppConfig): UserService =
-│ val defaultTimeout: Int = 30
-
-⋮...
-
-tests/fixtures/repomap/sample.sh
-│ hash: 52461863a874
-│
-│ local: ./config.sh, ./utils.sh
-│
-│ start_server()
-│ get_user()
-│ initialize_db()
-│ cleanup()
-
-⋮...
-
-tests/fixtures/repomap/sample.sol
-│ hash: 101745ef3673
-│
-│ imports: @openzeppelin/contracts/token/ERC20/ERC20.sol
-│
-│ contract UserRegistry {
-│   function registerUser(uint id, address addr) public
-│   function getUser(uint id) public view returns (address)
-│   ⋮...
-│ interface IRepository {
-│ struct UserData {
-│ enum UserRole {
-
-⋮...
-
-tests/fixtures/repomap/sample.swift
-│ hash: 330316068243
-│
-│ imports: Foundation, UIKit
-│
-│ public class UserService
-│   public func getUser(id: Int) -> User?
-│   private func validate(id: Int) -> Bool
-│   ⋮...
-│ public protocol Repository {
-│ public struct UserData
-│ func internalHelper() -> Void
-│ public func createApp(config: [String: Any]) -> UserService
-
-⋮...
-
-tests/fixtures/repomap/sample.ts
-│ hash: a0cb4f18e110
-│
-│ imports: path
-│ local: ../utils/paths.js, ./types.js
-│
-│ export interface WatcherEvents
-│ export type Phase
-│ export enum Status
-│ export const DEFAULT_TIMEOUT
-│ export class ProjectWatcher
-│   start(): void
-│   async stop(): Promise<void>
-│   static create(path: string): ProjectWatcher
-│   ⋮...
-│ export function watchProject(projectId: string, projectPath: string): void
-│ export async function scanFiles(dir: string): Promise<string[]>
-
-⋮...
-
-tests/fixtures/repomap/sample.zig
-│ hash: fb13df33ef02
-│
-│ imports: std
-│
-│ const std = @import("std");
-│ const mem = @import("std").mem;
-│ pub fn startServer(port: u16) !void
-│ pub const UserService = struct {
-│ pub fn getUser(self: *UserService, id: u32) ?User
-│ fn internalValidate(self: *UserService, id: u32) bool
-│ const Config = struct {
-│ pub fn createApp(config: Config) UserService
-│ pub fn createApp(config: Config) UserService
-
-⋮...
-
-tests/integration/artifacts.test.ts
-│ hash: f083a83750ef
-│
-│ imports: vitest, fs, path, os
-│ local: ../../src/main/config/config-manager.js, ../../src/main/parser/spec-parser.js, ../../src/main/parser/plan-parser.js, ../../src/main/parser/tasks-parser.js, ../../src/main/parser/research-parser.js, ../../src/main/projects/project-scanner.js
-
-⋮...
-
-tests/unit/config/config-manager.test.ts
-│ hash: 2b3e5905a21b
-│
-│ imports: vitest, fs, path, os
-│ local: ../../../src/main/config/config-manager.js
-
-⋮...
-
-tests/unit/format-comments.test.ts
-│ hash: 8abe333155d2
-│
-│ imports: vitest
-│ local: ../../src/renderer/src/utils/format-comments.js, ../../src/renderer/src/types/index.js
-
-⋮...
-
-tests/unit/os-notifier.test.ts
-│ hash: 9bad319fb826
-│
-│ imports: vitest, electron
-│ local: ../../src/main/notifications/os-notifier.js
-
-⋮...
-
-tests/unit/parser/markdown-parser.test.ts
-│ hash: fea1bac92304
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/parser/markdown-parser.js
-
-⋮...
-
-tests/unit/parser/plan-parser.test.ts
-│ hash: 22c701d03789
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/parser/plan-parser.js
-
-⋮...
-
-tests/unit/parser/refactor-backlog-parser.test.ts
-│ hash: ac7eb8371c7f
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/parser/refactor-backlog-parser.js
-
-⋮...
-
-tests/unit/parser/research-parser.test.ts
-│ hash: af47d57955a0
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/parser/research-parser.js
-
-⋮...
-
-tests/unit/parser/review-parser.test.ts
-│ hash: 28908fab93ad
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/parser/review-parser.js
-
-⋮...
-
-tests/unit/parser/spec-parser.test.ts
-│ hash: d1ba5fff7922
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/parser/spec-parser.js
-
-⋮...
-
-tests/unit/parser/summary-parser.test.ts
-│ hash: 460c910d0519
-│
-│ imports: vitest
-│ local: ../../../src/main/parser/summary-parser.js
-
-⋮...
-
-tests/unit/parser/tasks-parser.test.ts
-│ hash: 8f6a57417553
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/parser/tasks-parser.js
-
-⋮...
-
-tests/unit/paths.test.ts
-│ hash: 96e8f1944a88
-│
-│ imports: vitest
-│ local: ../../src/main/utils/paths.js
-
-⋮...
-
-tests/unit/phase/phase-detector.test.ts
-│ hash: 775adb9af7d6
-│
-│ imports: vitest
-│ local: ../../../src/main/phase/phase-detector.js
-
-⋮...
-
-tests/unit/projects/project-scanner.test.ts
-│ hash: fd1b3dc2791d
-│
-│ imports: vitest, fs, path, os
-│ local: ../../../src/main/projects/project-scanner.js
-
-⋮...
-
-tests/unit/repomap/format.test.ts
-│ hash: 6828e91fafb9
-│
-│ imports: vitest
-│ local: ../../../src/main/repomap/format.js, ../../../src/main/repomap/types.js
-
-⋮...
-
-tests/unit/repomap/generator.test.ts
-│ hash: 677c308d3386
-│
-│ imports: vitest, fs, path, os
-│ local: ../../../src/main/repomap/generator.js, ../../../src/main/repomap/ts-extractor.js
-
-⋮...
-
-tests/unit/repomap/tree-sitter-extractor.test.ts
-│ hash: b75c571db6dd
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/repomap/tree-sitter/extractor.js, ../../../src/main/repomap/tree-sitter/languages.js, ../../../src/main/repomap/tree-sitter/queries.js, ../../../src/main/repomap/types.js
-
-⋮...
-
-tests/unit/repomap/tree-sitter-polyglot-a.test.ts
-│ hash: ed1c13559ed8
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/repomap/tree-sitter/extractor.js, ../../../src/main/repomap/tree-sitter/languages.js, ../../../src/main/repomap/tree-sitter/queries.js, ../../../src/main/repomap/types.js
-
-⋮...
-
-tests/unit/repomap/tree-sitter-polyglot-b.test.ts
-│ hash: a29c1855ac89
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/repomap/tree-sitter/extractor.js, ../../../src/main/repomap/tree-sitter/languages.js, ../../../src/main/repomap/tree-sitter/queries.js, ../../../src/main/repomap/types.js
-
-⋮...
-
-tests/unit/repomap/ts-extractor.test.ts
-│ hash: 299cde6a7315
-│
-│ imports: vitest, fs, path
-│ local: ../../../src/main/repomap/ts-extractor.js
-
-⋮...
-
-tests/unit/sound-player.test.ts
-│ hash: 2e1d3d27f02c
-│
-│ imports: vitest, child_process
-│ local: ../../src/main/notifications/sound-player.js
-
-⋮...
-
-tests/unit/themes.test.ts
-│ hash: dd9dedf7a6b0
-│
-│ imports: vitest
-│ local: ../../src/renderer/src/themes/themes.js
-
-⋮...
-
-tests/unit/writer/artifact-writer.test.ts
-│ hash: d31578c999d7
-│
-│ imports: vitest, fs, path, os
-│ local: ../../../src/main/writer/artifact-writer.js
-
-⋮...
-
-tests/unit/writer/markdown-serializer.test.ts
-│ hash: 37a60fabbcd1
-│
-│ imports: vitest
-│ local: ../../../src/main/writer/markdown-serializer.js
 
 ⋮...
 

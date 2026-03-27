@@ -17,12 +17,33 @@ import { parseRefactorBacklog } from '../parser/refactor-backlog-parser.js';
 import { editTaskCheckbox, editRequirementText } from '../writer/artifact-writer.js';
 import { generateRepoMap } from '../repomap/index.js';
 import { getAllExtractors } from '../repomap/extractors.js';
+import { generateIntegrationPlan } from '../integration/integration-planner.js';
+import { executeIntegration } from '../integration/scaffold-writer.js';
+import { readScaffoldVersion, getBundledScaffoldVersion, getScaffoldDir } from '../integration/scaffold-version.js';
+import type { IntegrationState } from '../integration/types.js';
 
+
+/** Cached bundled scaffold version — read once, reused for all projects. */
+let bundledScaffoldVersion: string | null = null;
+
+/** Detect integration state from in-project files. */
+function detectIntegrationState(projectPath: string): IntegrationState {
+  const versionPath = path.join(projectPath, '.claude', 'specify', '.scaffold-version');
+  if (!fs.existsSync(versionPath)) return 'not-integrated';
+
+  const projectVersion = fs.readFileSync(versionPath, 'utf-8').trim();
+  if (bundledScaffoldVersion && projectVersion !== bundledScaffoldVersion) return 'outdated';
+
+  const constitutionPath = path.join(projectPath, '.claude', 'specify', 'memory', 'constitution.md');
+  if (!fs.existsSync(constitutionPath)) return 'needs-constitution';
+
+  return 'current';
+}
 
 function getProjectState(entry: { id: string; name: string; path: string }) {
   try {
     if (!fs.existsSync(entry.path)) {
-      return { ...entry, currentBranch: '', hasSpeckitContent: false, phase: 'unknown' as const, error: 'Project path no longer exists' };
+      return { ...entry, currentBranch: '', hasSpeckitContent: false, phase: 'unknown' as const, integrationState: 'not-integrated' as IntegrationState, error: 'Project path no longer exists' };
     }
     const scan = scanProject(entry.path);
     let tasksContent: string | undefined;
@@ -34,10 +55,12 @@ function getProjectState(entry: { id: string; name: string; path: string }) {
       currentBranch: scan.currentBranch,
       hasSpeckitContent: scan.hasSpeckitContent,
       phase: detectPhase(scan.artifactFiles, tasksContent),
+      integrationState: detectIntegrationState(entry.path),
       error: null,
     };
-  } catch (err: any) {
-    return { ...entry, currentBranch: '', hasSpeckitContent: false, phase: 'unknown' as const, error: err.message ?? 'Unknown error' };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return { ...entry, currentBranch: '', hasSpeckitContent: false, phase: 'unknown' as const, integrationState: 'not-integrated' as IntegrationState, error: message };
   }
 }
 
@@ -71,6 +94,32 @@ export function registerIpcHandlers() {
     const config = loadConfig();
     removeProject(config, id);
     saveConfig(undefined, config);
+  });
+
+  // --- Integration ---
+
+  // Cache bundled scaffold version at startup
+  void getBundledScaffoldVersion().then((v) => {
+    bundledScaffoldVersion = v;
+  }).catch((err) => {
+    console.error('[integration] failed to read bundled scaffold version:', err);
+  });
+
+  ipcMain.handle('integration:plan', async (_event, projectPath: string) => {
+    if (!fs.existsSync(projectPath)) throw new Error('Path does not exist');
+    if (!fs.existsSync(path.join(projectPath, '.git'))) throw new Error('Path is not a git repository');
+
+    const scaffoldDir = getScaffoldDir();
+    return generateIntegrationPlan(projectPath, scaffoldDir);
+  });
+
+  ipcMain.handle('integration:execute', async (_event, projectPath: string) => {
+    if (!fs.existsSync(projectPath)) throw new Error('Path does not exist');
+    if (!fs.existsSync(path.join(projectPath, '.git'))) throw new Error('Path is not a git repository');
+
+    const scaffoldDir = getScaffoldDir();
+    await executeIntegration(projectPath, scaffoldDir);
+    return { success: true };
   });
 
   // --- Native folder picker ---

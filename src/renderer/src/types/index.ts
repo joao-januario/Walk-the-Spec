@@ -65,6 +65,30 @@ export type ElementType =
 // Field types for structured editing
 export type FieldType = 'checkbox' | 'dropdown' | 'text';
 
+// --- Integration ---
+
+export type IntegrationState = 'not-integrated' | 'needs-constitution' | 'current' | 'outdated';
+
+export type FileAction = 'create' | 'overwrite' | 'preserve';
+export type FileCategory = 'command' | 'script' | 'template' | 'best-practice' | 'meta' | 'user';
+
+export interface IntegrationFileEntry {
+  relativePath: string;
+  action: FileAction;
+  category: FileCategory;
+}
+
+export interface IntegrationPlan {
+  targetPath: string;
+  scaffoldVersion: string;
+  files: IntegrationFileEntry[];
+  createCount: number;
+  overwriteCount: number;
+  preserveCount: number;
+  specsWillBeWiped: boolean;
+  claudeMdExists: boolean;
+}
+
 // --- Project ---
 
 export interface Project {
@@ -74,6 +98,7 @@ export interface Project {
   currentBranch: string;
   hasSpeckitContent: boolean;
   phase: Phase;
+  integrationState: IntegrationState;
   error?: string | null;
 }
 

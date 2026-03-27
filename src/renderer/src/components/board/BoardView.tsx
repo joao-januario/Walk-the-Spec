@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FeatureCard from './FeatureCard.js';
-import type { Project } from '../../types/index.js';
+import IntegrationDialog from '../integration/IntegrationDialog.js';
+import type { Project, IntegrationPlan } from '../../types/index.js';
 import * as api from '../../services/api.js';
 
 interface BoardViewProps {
@@ -12,6 +13,8 @@ interface BoardViewProps {
 export default function BoardView({ onSelectProject, selectedProjectId, refreshKey }: BoardViewProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [integrationPlan, setIntegrationPlan] = useState<IntegrationPlan | null>(null);
+  const [integrationExecuting, setIntegrationExecuting] = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -37,22 +40,40 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
 
   const handleAddProject = async () => {
     try {
-      // Native OS folder picker
       const result = await api.showFolderPicker();
-      if (!result) return; // User cancelled
+      if (!result) return;
 
       if (!result.isGitRepo) {
-        // Could show a notification, but for now just alert
         alert('Selected folder is not a git repository');
         return;
       }
 
-      const project = await api.addProject(result.path);
+      // Generate integration plan (read-only scan)
+      const plan = await api.planIntegration(result.path);
+      setIntegrationPlan(plan);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to add project');
+    }
+  };
+
+  const handleIntegrationConfirm = async () => {
+    if (!integrationPlan) return;
+    setIntegrationExecuting(true);
+    try {
+      await api.executeIntegration(integrationPlan.targetPath);
+      const project = await api.addProject(integrationPlan.targetPath);
       setProjects((prev) => [...prev, project]);
       onSelectProject(project);
-    } catch (err: any) {
-      alert(err.message ?? 'Failed to add project');
+      setIntegrationPlan(null);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Integration failed');
+    } finally {
+      setIntegrationExecuting(false);
     }
+  };
+
+  const handleIntegrationCancel = () => {
+    setIntegrationPlan(null);
   };
 
   return (
@@ -87,6 +108,15 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
           />
         ))}
       </div>
+
+      {integrationPlan && (
+        <IntegrationDialog
+          plan={integrationPlan}
+          onConfirm={handleIntegrationConfirm}
+          onCancel={handleIntegrationCancel}
+          executing={integrationExecuting}
+        />
+      )}
     </div>
   );
 }

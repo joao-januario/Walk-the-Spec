@@ -29,13 +29,17 @@ Read the right doc for your task — don't read all source files.
 | Modify artifact editing | `docs/writer.md` | `docs/ipc.md` (edit-field handler) |
 | Modify file watching / phase detection / notifications / settings | `docs/architecture.md` (inline sections) | — |
 
+## Context & Navigation
+
+Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.
+
 ## Documentation
 
 This table is the **single source of truth** for file-to-doc coverage. Do not duplicate this mapping in doc files.
 
 | File | Covers source paths |
 |------|---------------------|
-| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/main/repomap/`, `src/preload/` |
+| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/main/repomap/`, `src/main/integration/`, `src/preload/` |
 | `docs/parsers.md` | `src/main/parser/` |
 | `docs/ipc.md` | `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/services/api.ts` |
 | `docs/renderer.md` | `src/renderer/src/components/`, `src/renderer/src/hooks/`, `src/renderer/src/themes/` |

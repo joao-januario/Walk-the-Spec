@@ -8,7 +8,7 @@
  * - Metadata header with generation timestamps and token estimate
  */
 
-import type { RepoMap, FileExtraction, ExtractedIdentifier } from './types.js';
+import type { RepoMap, FileExtraction, ExtractedIdentifier, ExtractionFailure } from './types.js';
 
 function estimateTokens(text: string): number {
   // Rough approximation: 1 token ≈ 4 characters for code
@@ -93,6 +93,15 @@ export function formatRepoMap(map: RepoMap): string {
   sections.push(`Files: ${map.metadata.fileCount}`);
   sections.push(`Token estimate: ~${map.metadata.tokenEstimate}`);
   sections.push('');
+  // Extraction failures warning
+  if (map.failures.length > 0) {
+    sections.push(`**WARNING**: ${map.failures.length} file(s) failed extraction:`);
+    for (const f of map.failures) {
+      sections.push(`- \`${f.path}\`: ${f.error}`);
+    }
+    sections.push('');
+  }
+
   sections.push('---');
   sections.push('');
 
@@ -113,7 +122,7 @@ export function formatRepoMap(map: RepoMap): string {
   return output;
 }
 
-export function buildRepoMap(files: FileExtraction[], now?: string): RepoMap {
+export function buildRepoMap(files: FileExtraction[], now?: string, failures?: ExtractionFailure[]): RepoMap {
   const timestamp = now ?? new Date().toISOString();
 
   const map: RepoMap = {
@@ -124,6 +133,7 @@ export function buildRepoMap(files: FileExtraction[], now?: string): RepoMap {
       tokenEstimate: 0,
     },
     files,
+    failures: failures ?? [],
   };
 
   // Calculate token estimate from formatted output

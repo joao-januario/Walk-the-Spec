@@ -13,7 +13,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { normalizePath } from '../utils/paths.js';
 import { formatRepoMap, buildRepoMap } from './format.js';
-import type { Extractor, FileExtraction, RepoMap } from './types.js';
+import type { Extractor, FileExtraction, ExtractionFailure, RepoMap } from './types.js';
 
 const MAP_RELATIVE_PATH = '.claude/specify/context/repo-map.md';
 
@@ -22,6 +22,7 @@ const IGNORED_DIRS = new Set([
   'node_modules', '.git', 'dist', 'build', 'out', 'coverage',
   '.next', '.nuxt', '.svelte-kit', 'target', '__pycache__',
   '.claude', 'release', '.idea', '.vscode',
+  'resources', 'tests',
 ]);
 
 /** Yield to the event loop so the main process stays responsive. */
@@ -120,6 +121,7 @@ export async function generateRepoMap(
   }
 
   const extractions: FileExtraction[] = [];
+  const failures: ExtractionFailure[] = [];
 
   for (let i = 0; i < files.length; i++) {
     // Yield every 25 files and check for cancellation
@@ -149,8 +151,14 @@ export async function generateRepoMap(
       const extraction = extractor.extract(filePath, content, repoRoot);
       extractions.push(extraction);
     } catch (err: unknown) {
-      console.warn(`[repomap] failed to extract ${relativePath}:`, err);
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[repomap] EXTRACTION FAILED ${relativePath}: ${message}`);
+      failures.push({ path: relativePath, error: message });
     }
+  }
+
+  if (failures.length > 0) {
+    console.error(`[repomap] ${failures.length} file(s) failed extraction: ${failures.map((f) => f.path).join(', ')}`);
   }
 
   // Final cancellation check before writing
@@ -159,7 +167,7 @@ export async function generateRepoMap(
   }
 
   const now = new Date().toISOString();
-  const map = buildRepoMap(extractions, now);
+  const map = buildRepoMap(extractions, now, failures);
 
   // Write the map
   const mapDir = path.dirname(mapPath);

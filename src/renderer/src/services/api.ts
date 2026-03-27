@@ -1,4 +1,4 @@
-import type { Project, Feature, Artifact, ArtifactType } from '../types/index.js';
+import type { Project, Feature, Artifact, ArtifactType, IntegrationPlan } from '../types/index.js';
 
 // Access the Electron IPC bridge exposed via preload
 declare global {
@@ -7,6 +7,8 @@ declare global {
       getProjects: () => Promise<{ projects: Project[] }>;
       addProject: (path: string, name?: string) => Promise<Project>;
       deleteProject: (id: string) => Promise<void>;
+      planIntegration: (projectPath: string) => Promise<IntegrationPlan>;
+      executeIntegration: (projectPath: string) => Promise<{ success: true }>;
       showFolderPicker: () => Promise<{ path: string; isGitRepo: boolean } | null>;
       getFeature: (projectId: string) => Promise<Feature | null>;
       getArtifact: (projectId: string, type: string) => Promise<Artifact>;
@@ -40,6 +42,16 @@ export async function addProject(path: string, name?: string) {
 
 export async function deleteProject(id: string) {
   return window.api.deleteProject(id);
+}
+
+// --- Integration ---
+
+export async function planIntegration(projectPath: string) {
+  return window.api.planIntegration(projectPath);
+}
+
+export async function executeIntegration(projectPath: string) {
+  return window.api.executeIntegration(projectPath);
 }
 
 // --- Native folder picker ---

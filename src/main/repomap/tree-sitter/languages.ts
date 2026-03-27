@@ -34,8 +34,10 @@ export const LANGUAGE_CONFIGS: LanguageConfig[] = [
   { id: 'dart',       grammarFile: 'tree-sitter-dart.wasm',       extensions: ['.dart'],                                visibility: 'all-top-level' },
   { id: 'lua',        grammarFile: 'tree-sitter-lua.wasm',        extensions: ['.lua'],                                 visibility: 'all-top-level' },
   { id: 'elixir',     grammarFile: 'tree-sitter-elixir.wasm',     extensions: ['.ex', '.exs'],                          visibility: 'all-top-level' },
-  { id: 'zig',        grammarFile: 'tree-sitter-zig.wasm',        extensions: ['.zig'],                                 visibility: 'keyword-pub' },
-  { id: 'bash',       grammarFile: 'tree-sitter-bash.wasm',       extensions: ['.sh', '.bash'],                         visibility: 'all-top-level' },
+  // Zig disabled — tree-sitter-zig.wasm crashes with WASM RuntimeError in Electron (works in Node/Vitest but not in production)
+  // { id: 'zig',        grammarFile: 'tree-sitter-zig.wasm',        extensions: ['.zig'],                                 visibility: 'keyword-pub' },
+  // Bash disabled — tree-sitter-bash.wasm crashes with TypeError in Electron WASM (works in Node/Vitest but not in production)
+  // { id: 'bash',       grammarFile: 'tree-sitter-bash.wasm',       extensions: ['.sh', '.bash'],                         visibility: 'all-top-level' },
   { id: 'ocaml',      grammarFile: 'tree-sitter-ocaml.wasm',      extensions: ['.ml', '.mli'],                          visibility: 'all-top-level' },
   { id: 'elm',        grammarFile: 'tree-sitter-elm.wasm',        extensions: ['.elm'],                                 visibility: 'none' },
   { id: 'objc',       grammarFile: 'tree-sitter-objc.wasm',       extensions: ['.m'],                                   visibility: 'all-top-level' },
