@@ -2,26 +2,42 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import mermaid from 'mermaid';
 
+// Fixed neutral dark palette — consistent regardless of app theme.
+// fillType0-7 all set to the same value so mermaid's cycling never produces
+// random accent colors on nodes.
 mermaid.initialize({
   startOnLoad: false,
   theme: 'dark',
   themeVariables: {
     darkMode: true,
-    background: '#1a191b',
-    primaryColor: '#70b8ff',
-    primaryTextColor: '#eeeef0',
-    primaryBorderColor: '#49474e',
-    lineColor: '#625f69',
-    secondaryColor: '#baa7ff',
-    tertiaryColor: '#2b292d',
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '16px',
+    background:          '#13131a',
+    mainBkg:             '#2a2a35',
+    nodeBorder:          '#4e4e62',
+    clusterBkg:          '#13131a',
+    clusterBorder:       '#3a3a4a',
+    primaryColor:        '#2a2a35',
+    primaryTextColor:    '#e2e2f0',
+    primaryBorderColor:  '#4e4e62',
+    lineColor:           '#9898b0',
+    secondaryColor:      '#2a2a35',
+    tertiaryColor:       '#2a2a35',
+    edgeLabelBackground: '#13131a',
+    titleColor:          '#e2e2f0',
+    nodeTextColor:       '#e2e2f0',
+    fillType0: '#2a2a35',
+    fillType1: '#2a2a35',
+    fillType2: '#2a2a35',
+    fillType3: '#2a2a35',
+    fillType4: '#2a2a35',
+    fillType5: '#2a2a35',
+    fillType6: '#2a2a35',
+    fillType7: '#2a2a35',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    fontSize:   '14px',
   },
 });
 
-/** Strip fixed dimensions and max-width so the SVG scales to fill the lightbox container.
- *  viewBox is preserved — the browser uses it with the default preserveAspectRatio
- *  (xMidYMid meet) to center and fit the diagram. */
+/** Strip fixed dimensions so the SVG scales to fill the lightbox container. */
 function prepareLightboxSvg(raw: string): string {
   return raw
     .replace(/(<svg[^>]*)\s+style="[^"]*"/g, '$1')
@@ -55,11 +71,13 @@ function DiagramLightbox({ svg, onClose }: { svg: string; onClose: () => void })
       onClick={onClose}
     >
       <div
-        className="h-[90vh] w-[90vw] overflow-auto rounded-lg border border-board-border bg-board-surface p-6"
+        className="h-[90vh] w-[90vw] overflow-auto rounded-lg border border-board-border p-6"
+        style={{ background: '#13131a' }}
         onClick={(e) => e.stopPropagation()}
         onWheel={handleWheel}
       >
         <div
+          className="mermaid-diagram"
           style={{ minWidth: zoomPercent, minHeight: zoomPercent }}
           dangerouslySetInnerHTML={{ __html: lightboxSvg }}
         />
@@ -94,10 +112,11 @@ export default function MermaidBlock({ code }: { code: string }) {
   return (
     <>
       <div
-        className="group relative my-2 cursor-zoom-in overflow-x-auto rounded-md border border-board-border bg-board-bg p-4"
+        className="group relative my-2 cursor-zoom-in overflow-x-auto rounded-md border border-board-border p-4"
+        style={{ background: '#13131a' }}
         onClick={() => setFullscreen(true)}
       >
-        <div dangerouslySetInnerHTML={{ __html: svg }} />
+        <div className="mermaid-diagram" dangerouslySetInnerHTML={{ __html: svg }} />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-2 opacity-0 transition-opacity group-hover:opacity-100">
           <span className="rounded-full bg-board-surface-elevated/90 px-3 py-1 text-xs text-board-text-muted">
             Click to expand

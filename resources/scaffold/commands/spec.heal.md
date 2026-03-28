@@ -36,7 +36,7 @@ Group findings by file. Classify by complexity:
 - **Mechanical** (type annotations, assertion changes, logging, renaming, narrowing) → **Haiku** sub-agent (`model: "haiku"`)
 - **Structural** (refactoring logic, new code paths, architecture changes) → **Sonnet** sub-agent (`model: "sonnet"`)
 
-Launch independent file groups **in parallel**. Each sub-agent receives: file paths (NOT full content), specific findings (rule ID, category, line, proposed fix), and instructions to read the file themselves, apply the fix via Edit, and consult `.claude/specify/context/repo-map.md` for module relationships. Do NOT embed full file content or best-practices docs in the prompt.
+Launch independent file groups **in parallel**. Each sub-agent receives: file paths, specific findings (rule ID, category, line, proposed fix), and instructions to read the file themselves and apply the fix via Edit. Do NOT tell sub-agents to read repo-map.md — they have explicit file paths and findings already. Do NOT embed best-practices docs in the prompt.
 
 ### Step 3: Run Tests
 

@@ -14,7 +14,7 @@ Consider user input before proceeding.
 
 ## Goal
 
-Analyze all code changes on the current branch (vs base branch) against `.claude/best-practices/`. Use **multi-agent architecture**: perform overall branch analysis yourself, spawn parallel Haiku sub-agents per technology vertical, then consolidate into a unified review report. This command is **read-only**.
+Analyze all code changes on the current branch (vs base branch) against `.claude/best-practices/`. Default mode is **inline review** (orchestrator does everything). Sub-agents are only spawned for genuinely massive branches (>50 files AND >2000 diff lines). This command is **read-only**.
 
 ## Severity Categories
 
@@ -63,22 +63,36 @@ Rules: files may appear in multiple verticals; only create verticals with change
 
 ### Phase 2.5: Inline vs Sub-Agent Decision
 
-Count changed **source files** (excluding `.claude/specs/`, `.md`, `package-lock.json`).
+Count changed **source files** (excluding `.claude/specs/`, `.md`, `package-lock.json`). Also run `git diff --stat $(git merge-base HEAD main)..HEAD` and note total lines changed.
 
-If **<= 25 source files**: review ALL diffs yourself inline. Use `git diff` to read diffs per file, check against best practices rules loaded in Phase 2. Do NOT spawn sub-agents. Continue to Phase 4.
+**Decision matrix** (check in order):
+1. If **<= 50 source files OR <= 2000 diff lines**: review ALL diffs yourself inline. Use `git diff` to read diffs per file, check against best practices rules loaded in Phase 2. Do NOT spawn sub-agents. Continue to Phase 4.
+2. If **> 50 source files AND > 2000 diff lines**: proceed to Phase 3 (sub-agent delegation for genuinely massive branches only).
 
-If **> 25 source files**: proceed to Phase 3 (sub-agent delegation for very large branches only).
+File count alone is a poor proxy — 50 small test files is less work than 20 dense infrastructure files. Both thresholds must be exceeded.
 
 ### Phase 3: Delegate to Sub-Agents (large branches only)
 
 > Skip if Phase 2.5 applied (most branches).
 
+#### Phase 3a: Pre-compute diffs (orchestrator does this BEFORE spawning agents)
+
+Run `git diff $(git merge-base HEAD main)..HEAD -- <file>` for every file in each vertical. Collect the diff output. This is done once, in the orchestrator, to avoid each sub-agent repeating the same tool calls.
+
+#### Phase 3b: Spawn sub-agents
+
 For each vertical, spawn a **Haiku sub-agent** (Agent tool, `model: "haiku"`). Launch ALL in parallel.
 
-Each sub-agent prompt MUST include: vertical name, file list (paths only — NOT full diffs), relevant best-practices file paths (NOT full content), and these instructions:
+Each sub-agent prompt MUST include:
+- Vertical name
+- The **pre-computed diffs** for assigned files (embedded inline in the prompt)
+- Relevant best-practices file paths (NOT full content — sub-agents read these themselves)
+
+Sub-agent instructions:
 
 ```
-You are an engineering reviewer. Read .claude/specify/context/repo-map.md first. Use `git diff main -- <file>` to read diffs for your assigned files. Read only the best-practices files listed. Do NOT read full source files — use diffs and Grep.
+You are an engineering reviewer. Your assigned diffs are provided inline below — do NOT run git diff yourself.
+Read only the best-practices files listed. Use Grep for targeted lookups if needed. Do NOT read full source files or repo-map.md — your file list and diffs are already provided.
 
 For each violation report: Rule ID, Category, File:line, Summary, Why, What you gain.
 
@@ -91,11 +105,44 @@ Gather all findings, deduplicate by file:line, validate (rule ID exists, file:li
 
 ### Phase 5: Produce Final Report
 
-Output Markdown report with: branch metadata, summary table (counts per category), findings (each with severity, location, rule, why, gain, code snippets), cross-vertical observations, files not reviewed.
+Output Markdown report with: branch metadata, summary table (counts per category), findings section, cross-vertical observations, files not reviewed.
+
+**spec-board's parser is strict — use this EXACT format for the findings section:**
+
+```markdown
+### Findings
+
+#### Finding #1: RULEID — One-line summary of the issue
+
+**Severity**: CRITICAL
+**Location**: path/to/file.ts:LINE
+**Rule**: RULEID
+
+**Why this severity**: Explanation of why this severity level is warranted...
+
+**What you gain**: What concretely improves when this is fixed...
+
+```typescript
+// offending code snippet
+```
+
+```typescript
+// proposed fix snippet
+```
+
+#### Finding #2: RULEID — ...
+```
+
+Critical constraints:
+- Section heading must be **exactly** `### Findings`
+- Finding heading must be **exactly** `#### Finding #N: RULEID — Summary` — four `#`, the word `Finding`, `#` before the number, colon, rule ID, then `—` (or `–` or `-`), then summary
+- Field labels must be **exactly** `**Severity**:`, `**Location**:`, `**Rule**:`, `**Why this severity**:`, `**What you gain**:`
+- NEEDS_REFACTOR findings go in the **same** `### Findings` section, not a separate one
+- Code blocks for "offending" and "proposed fix" are optional but encouraged for CRITICAL/HIGH
 
 ### Phase 6: Write Review Artifact
 
-Write report to `.claude/specs/<BRANCH_NAME>/review.md`. If exists (re-review), overwrite and note "Re-reviewed on YYYY-MM-DD".
+Write the **complete** report to `.claude/specs/<BRANCH_NAME>/review.md` using the **Write tool** (not Edit). If the file already exists, replace it entirely — do NOT preserve any prior `## Heal Summary` section from a previous heal run, as stale heal statuses would incorrectly mark new findings as FIXED.
 
 ### Phase 7: Record NEEDS_REFACTOR
 
@@ -121,8 +168,8 @@ If no actionable findings: "No fixes needed. Run `/spec.conclude` to finalize."
 
 ## Operating Principles
 
-- **Orchestrator-first** — do the review yourself inline for branches ≤ 25 files. Sub-agents are a last resort for massive branches, not the default.
-- **No content duplication** — never embed full diffs or full best-practices docs in sub-agent prompts. Pass file paths and rule IDs only. Sub-agents read what they need via repo-map, Grep, and `git diff`.
+- **Orchestrator-first** — do the review yourself inline for branches ≤ 50 files / ≤ 2000 diff lines. Sub-agents are a last resort for genuinely massive branches, not the default. When in doubt, stay inline — cold-start overhead of multiple sub-agents often exceeds the cost of sequential inline review.
+- **Pre-compute, don't delegate reads** — the orchestrator pre-computes diffs and embeds them in sub-agent prompts. Sub-agents should never run `git diff` or read `repo-map.md` — they receive everything they need to start reviewing immediately. Best-practices files are the exception: pass paths only, sub-agents read those themselves (they're static and small).
 - **Only review changed code** — pre-existing issues out of scope.
 - **Thorough over fast** — check every rule against every changed line.
 - **Critical thinking** — flag real problems, not theoretical concerns.

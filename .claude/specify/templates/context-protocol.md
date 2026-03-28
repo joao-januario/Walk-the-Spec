@@ -1,6 +1,8 @@
 ## Context Protocol
 
-**This section is mandatory. Follow it before every codebase interaction.**
+**This section is mandatory for the main session. Follow it before every codebase interaction.**
+
+**Exception — sub-agents**: If you were spawned as a sub-agent with an explicit file list and inline data (diffs, context) already in your prompt, skip step 1. The orchestrator already read the map and passed you what you need — reading it again is redundant overhead.
 
 Before exploring the codebase, you MUST follow this procedure:
 

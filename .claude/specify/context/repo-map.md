@@ -1,9 +1,9 @@
 # Repo Map
 
-Generated: 2026-03-27T21:04:56.830Z
-Updated: 2026-03-27T21:04:56.830Z
-Files: 84
-Token estimate: ~6464
+Generated: 2026-03-28T13:43:00.545Z
+Updated: 2026-03-28T13:43:00.545Z
+Files: 85
+Token estimate: ~6533
 
 ---
 
@@ -17,7 +17,7 @@ electron.vite.config.ts
 ⋮...
 
 src/main/config/config-manager.ts
-│ hash: f4fff242d52d
+│ hash: 323e50d86f6e
 │
 │ imports: fs, path, os, uuid
 │ local: ../utils/paths.js
@@ -39,7 +39,7 @@ src/main/config/config-manager.ts
 ⋮...
 
 src/main/index.ts
-│ hash: eb8a46524bd6
+│ hash: 93c84b2163ef
 │
 │ imports: electron, path, fs
 │ local: ./utils/logger.js, ./ipc/handlers.js, ./config/config-manager.js, ./projects/file-watcher.js, ./notifications/os-notifier.js, ./notifications/sound-player.js, ./notifications/notify-server.js, ./projects/project-scanner.js, ./phase/phase-detector.js, ./utils/paths.js, ./updater/auto-updater.js
@@ -94,7 +94,7 @@ src/main/integration/types.ts
 ⋮...
 
 src/main/ipc/handlers.ts
-│ hash: 8d9260376284
+│ hash: b32af77e4f65
 │
 │ imports: electron, fs, path
 │ local: ../config/config-manager.js, ../config/config-manager.js, ../projects/project-scanner.js, ../phase/phase-detector.js, ../parser/spec-parser.js, ../parser/plan-parser.js, ../parser/tasks-parser.js, ../parser/research-parser.js, ../parser/review-parser.js, ../parser/summary-parser.js, ../parser/refactor-backlog-parser.js, ../writer/artifact-writer.js, ../integration/integration-planner.js, ../integration/scaffold-writer.js, ../integration/scaffold-version.js, ../integration/types.js
@@ -445,17 +445,17 @@ src/preload/index.ts
 ⋮...
 
 src/renderer/src/App.tsx
-│ hash: 6501cef90fe5
+│ hash: 97fcfc8aa8d4
 │
 │ imports: react
-│ local: ./components/board/BoardView.js, ./components/feature/FeatureDetail.js, ./components/common/EmptyState.js, ./components/common/UpdateDialog.js, ./hooks/usePhaseNotification.js, ./hooks/useAutoUpdate.js, ./themes/apply-theme.js, ./themes/themes.js, ./types/index.js
+│ local: ./components/board/BoardView.js, ./components/feature/FeatureDetail.js, ./components/common/EmptyState.js, ./components/common/UpdateDialog.js, ./hooks/usePhaseNotification.js, ./hooks/useAutoUpdate.js, ./themes/apply-theme.js, ./themes/themes.js, ./themes/fonts.js, ./types/index.js
 │
 │ export default function App()
 
 ⋮...
 
 src/renderer/src/components/artifacts/PlanView.tsx
-│ hash: c9f80a35872b
+│ hash: dacb2e8f94d8
 │
 │ imports: react
 │ local: ../elements/CodeBlock.js, ../elements/FileStructureView.js, ../ui/CollapsibleSection.js, ../ui/CodeTag.js, ../ui/MarkdownContent.js, ../../types/index.js
@@ -465,7 +465,7 @@ src/renderer/src/components/artifacts/PlanView.tsx
 ⋮...
 
 src/renderer/src/components/artifacts/ResearchView.tsx
-│ hash: 26e4155c808b
+│ hash: b1359d4f313b
 │
 │ imports: react
 │ local: ../ui/CollapsibleSection.js, ../ui/CodeTag.js, ../ui/MarkdownContent.js, ../../types/index.js
@@ -475,7 +475,7 @@ src/renderer/src/components/artifacts/ResearchView.tsx
 ⋮...
 
 src/renderer/src/components/artifacts/ReviewView.tsx
-│ hash: 07d7641e717c
+│ hash: 7c48254fdbe0
 │
 │ imports: react, framer-motion
 │ local: ../../lib/utils.js, ../../theme.js, ../elements/CodeBlock.js, ../ui/CodeTag.js, ../ui/CollapsibleSection.js, ../ui/MarkdownContent.js, ../../types/index.js
@@ -485,7 +485,7 @@ src/renderer/src/components/artifacts/ReviewView.tsx
 ⋮...
 
 src/renderer/src/components/artifacts/SpecView.tsx
-│ hash: 9e14edb22cb8
+│ hash: e5ac40bc9652
 │
 │ imports: react
 │ local: ../elements/UserStoryCard.js, ../elements/RequirementRow.js, ../ui/CodeTag.js, ../ui/CollapsibleSection.js, ../ui/MarkdownContent.js, ../../types/index.js
@@ -500,7 +500,7 @@ src/renderer/src/components/artifacts/SpecView.tsx
 ⋮...
 
 src/renderer/src/components/artifacts/SummaryView.tsx
-│ hash: 8f0369ef3283
+│ hash: 9f83840dae0f
 │
 │ imports: react
 │ local: ../ui/CollapsibleSection.js, ../ui/MarkdownContent.js, ../../types/index.js
@@ -510,7 +510,7 @@ src/renderer/src/components/artifacts/SummaryView.tsx
 ⋮...
 
 src/renderer/src/components/artifacts/TasksView.tsx
-│ hash: 9418d7c6841c
+│ hash: 7bc6650a1362
 │
 │ imports: react
 │ local: ../../lib/utils.js, ../ui/CollapsibleSection.js, ../elements/TaskRow.js, ../../types/index.js
@@ -578,7 +578,7 @@ src/renderer/src/components/editing/TextEditor.tsx
 ⋮...
 
 src/renderer/src/components/elements/CodeBlock.tsx
-│ hash: 86c15118622b
+│ hash: 86c5f206dfb9
 │
 │ imports: react, highlight.js
 │
@@ -597,7 +597,7 @@ src/renderer/src/components/elements/DecisionSection.tsx
 ⋮...
 
 src/renderer/src/components/elements/FileStructureView.tsx
-│ hash: e5ca6ff8bc6e
+│ hash: 176195c3c77e
 │
 │ imports: react, lucide-react
 │ local: ../../lib/utils.js, ../../theme.js, ../../types/index.js
@@ -607,7 +607,7 @@ src/renderer/src/components/elements/FileStructureView.tsx
 ⋮...
 
 src/renderer/src/components/elements/MermaidBlock.tsx
-│ hash: 2f23c125cd61
+│ hash: 9c3638881498
 │
 │ imports: react, react-dom, mermaid
 │
@@ -616,7 +616,7 @@ src/renderer/src/components/elements/MermaidBlock.tsx
 ⋮...
 
 src/renderer/src/components/elements/RequirementRow.tsx
-│ hash: e0910cb86fba
+│ hash: 202c909d4b9e
 │
 │ imports: react
 │ local: ../../types/index.js, ../ui/CodeTag.js, ../ui/MarkdownContent.js
@@ -626,7 +626,7 @@ src/renderer/src/components/elements/RequirementRow.tsx
 ⋮...
 
 src/renderer/src/components/elements/TaskRow.tsx
-│ hash: 366f1493233d
+│ hash: c3589b0f90ec
 │
 │ imports: react
 │ local: ../../lib/utils.js, ../../types/index.js, ../ui/CodeTag.js, ../ui/MarkdownContent.js
@@ -636,7 +636,7 @@ src/renderer/src/components/elements/TaskRow.tsx
 ⋮...
 
 src/renderer/src/components/elements/UserStoryCard.tsx
-│ hash: 36ff0d2e842d
+│ hash: 93822bf98d4f
 │
 │ imports: react, framer-motion
 │ local: ../../lib/utils.js, ../../theme.js, ../ui/Tooltip.js, ../ui/SectionLabel.js, ../ui/MarkdownContent.js, ../../types/index.js
@@ -696,7 +696,7 @@ src/renderer/src/components/refactor/RefactorBacklogView.tsx
 ⋮...
 
 src/renderer/src/components/ui/CodeTag.tsx
-│ hash: 5deca3c71d3f
+│ hash: d6c5b6a8f812
 │
 │ imports: react
 │ local: ../../lib/utils.js
@@ -706,7 +706,7 @@ src/renderer/src/components/ui/CodeTag.tsx
 ⋮...
 
 src/renderer/src/components/ui/CollapsibleSection.tsx
-│ hash: 22f6d5d80111
+│ hash: 69e131ae604d
 │
 │ imports: react, lucide-react
 │ local: ../../lib/utils.js
@@ -727,7 +727,7 @@ src/renderer/src/components/ui/CollapsibleSection.tsx
 ⋮...
 
 src/renderer/src/components/ui/MarkdownContent.tsx
-│ hash: 79a51a7d59be
+│ hash: e6836dabb9db
 │
 │ imports: react, react-markdown, remark-gfm
 │ local: ../../lib/utils.js, ../../lib/inline-code-color.js, ../../context/GlossaryContext.js, ../elements/CodeBlock.js, ./Tooltip.js
@@ -847,7 +847,7 @@ src/renderer/src/main.tsx
 ⋮...
 
 src/renderer/src/services/api.ts
-│ hash: f48b4c92f567
+│ hash: dc09b8ed146a
 │
 │ local: ../types/index.js
 │
@@ -886,7 +886,7 @@ src/renderer/src/theme.ts
 ⋮...
 
 src/renderer/src/themes/apply-theme.ts
-│ hash: 02531e850ff9
+│ hash: c052982f0ac9
 │
 │ local: ./themes.js, ./themes.js
 │
@@ -894,8 +894,18 @@ src/renderer/src/themes/apply-theme.ts
 
 ⋮...
 
+src/renderer/src/themes/fonts.ts
+│ hash: 79fd2121e587
+│
+│ export interface ReadingFont
+│ export const DEFAULT_READING_FONT_ID
+│ export const readingFonts: readonly ReadingFont[]
+│ export function getReadingFontById(id: string): ReadingFont | undefined
+
+⋮...
+
 src/renderer/src/themes/themes.ts
-│ hash: 59bf31da7c58
+│ hash: b46dad771722
 │
 │ export interface ThemeDefinition
 │ export const themes: readonly ThemeDefinition[]

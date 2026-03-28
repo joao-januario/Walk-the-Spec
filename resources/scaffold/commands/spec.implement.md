@@ -16,7 +16,7 @@ Consider user input before proceeding.
 
 ## Outline
 
-1. **Load context**: Read plan.md, spec.md, and all available design artifacts (research.md, data-model.md, contracts/, quickstart.md) — always load these if they exist. For **source code** navigation during implementation, consult `.claude/specify/context/repo-map.md` to identify relevant modules and files before exploring the codebase. If repo-map.md is missing, warn the user — it should have been generated when the project was added. When spawning sub-agents for implementation tasks, include in each prompt: 'Read .claude/specify/context/repo-map.md and use Grep for targeted searches instead of reading full source files.'
+1. **Load context**: Read plan.md, spec.md, and all available design artifacts (research.md, data-model.md, contracts/, quickstart.md) — always load these if they exist. For **source code** navigation during implementation, consult `.claude/specify/context/repo-map.md` to identify relevant modules and files before exploring the codebase. If repo-map.md is missing, warn the user — it should have been generated when the project was added. When spawning sub-agents for implementation tasks, provide the specific file paths and relevant context (imports, exports, relationships from repo-map) inline in the prompt. Sub-agents should NOT read repo-map.md themselves — the orchestrator already has this context and should pass only what's relevant.
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Scan all checklist files, count items matching `- [ ]` / `- [X]` / `- [x]`

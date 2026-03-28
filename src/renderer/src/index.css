@@ -119,6 +119,30 @@ html[data-theme-mode="light"] .hljs-meta {
   }
 }
 
+/* Mermaid diagram — fixed dark style, consistent regardless of app theme.
+   Scoped to .mermaid-diagram to avoid affecting other SVG content.
+   !important is required because mermaid sets fill/stroke as inline SVG styles. */
+.mermaid-diagram .node rect,
+.mermaid-diagram .node circle,
+.mermaid-diagram .node ellipse,
+.mermaid-diagram .node polygon,
+.mermaid-diagram .node path {
+  fill: #2a2a35 !important;
+  stroke: #4e4e62 !important;
+}
+
+.mermaid-diagram .cluster rect {
+  fill: #13131a !important;
+  stroke: #3a3a4a !important;
+  fill-opacity: 1 !important;
+}
+
+.mermaid-diagram .cluster-label text,
+.mermaid-diagram .cluster-label span {
+  fill: #9898b0 !important;
+  color: #9898b0 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

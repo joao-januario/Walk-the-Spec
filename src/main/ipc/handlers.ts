@@ -255,6 +255,7 @@ export function registerIpcHandlers() {
 
     let elements: any[] = [];
     let parseWarning: string | null = null;
+    let reviewParsed: ReturnType<typeof parseReview> | null = null;
     try {
     switch (artifactType) {
       case 'spec': {
@@ -353,14 +354,13 @@ export function registerIpcHandlers() {
         break;
       }
       case 'review': {
-        const parsed = parseReview(content);
-        elements = parsed.findings.map((f) => ({
+        reviewParsed = parseReview(content);
+        elements = reviewParsed.findings.map((f) => ({
           id: String(f.number),
           type: 'section' as const,
           content: f,
           editableFields: [],
         }));
-        // healSummary and branch returned as top-level reviewMeta field below
         break;
       }
     }
@@ -368,9 +368,8 @@ export function registerIpcHandlers() {
       parseWarning = `Partial parse: ${err instanceof Error ? err.message : String(err)}`;
     }
 
-    // For review artifacts, include healSummary as top-level metadata
-    const reviewMeta = artifactType === 'review'
-      ? (() => { const parsed = parseReview(content); return { healSummary: parsed.healSummary, branch: parsed.branch }; })()
+    const reviewMeta = reviewParsed
+      ? { healSummary: reviewParsed.healSummary, branch: reviewParsed.branch }
       : undefined;
 
     return {
