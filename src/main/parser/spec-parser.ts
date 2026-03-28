@@ -69,7 +69,7 @@ function extractUserStories(tree: Root): UserStory[] {
   tree.children.forEach((node, index) => {
     if (node.type === 'heading' && node.depth === 3) {
       const text = getTextContent(node);
-      const match = text.match(/User Story (\d+)\s*-\s*(.+?)\s*\(Priority:\s*(P\d+)\)/);
+      const match = text.match(/User Story (\d+)\s*[-–—]\s*(.+?)\s*\(Priority:\s*(P\d+)\)/);
       if (match) {
         headings.push({ node, index });
       }
@@ -78,7 +78,7 @@ function extractUserStories(tree: Root): UserStory[] {
 
   for (const { node, index } of headings) {
     const text = getTextContent(node);
-    const match = text.match(/User Story (\d+)\s*-\s*(.+?)\s*\(Priority:\s*(P\d+)\)/)!;
+    const match = text.match(/User Story (\d+)\s*[-–—]\s*(.+?)\s*\(Priority:\s*(P\d+)\)/)!;
     const number = parseInt(match[1], 10);
     const title = match[2].trim();
     const priority = match[3];
