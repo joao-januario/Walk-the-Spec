@@ -144,6 +144,80 @@ describe('review-parser', () => {
     });
   });
 
+  describe('freeform format (severity-heading findings)', () => {
+    const content = fs.readFileSync(path.join(FIXTURES, 'review-freeform.md'), 'utf-8');
+    const result = parseReview(content);
+
+    it('extracts all 4 findings', () => {
+      expect(result.findings).toHaveLength(4);
+    });
+
+    it('parses severity from heading prefix', () => {
+      expect(result.findings[0].severity).toBe('HIGH');
+      expect(result.findings[1].severity).toBe('HIGH');
+      expect(result.findings[2].severity).toBe('MEDIUM');
+      expect(result.findings[3].severity).toBe('LOW');
+    });
+
+    it('assigns sequential global numbers in document order', () => {
+      expect(result.findings.map((f) => f.number)).toEqual([1, 2, 3, 4]);
+    });
+
+    it('uses heading ID as ruleId', () => {
+      expect(result.findings[0].ruleId).toBe('HIGH-1');
+      expect(result.findings[1].ruleId).toBe('HIGH-2');
+      expect(result.findings[2].ruleId).toBe('MEDIUM-1');
+      expect(result.findings[3].ruleId).toBe('LOW-1');
+    });
+
+    it('extracts summary from heading text', () => {
+      expect(result.findings[0].summary).toContain('SSE progress events');
+      expect(result.findings[1].summary).toContain('Refresh polling');
+    });
+
+    it('extracts location from File field (strips backticks)', () => {
+      expect(result.findings[0].location).toBe('planner/progress.py:29-66');
+      expect(result.findings[1].location).toBe('planner/server/templates/calendar.html:548-570');
+    });
+
+    it('maps "Why this matters" to why field', () => {
+      expect(result.findings[0].why).toContain('SSE progress endpoint');
+      expect(result.findings[0].why).toContain('progress bar is functionally useless');
+    });
+
+    it('maps "What you gain by fixing" to gain field', () => {
+      expect(result.findings[0].gain).toContain('real-time progress feedback');
+    });
+
+    it('extracts code blocks within findings', () => {
+      expect(result.findings[0].codeBlocks.length).toBeGreaterThanOrEqual(1);
+      expect(result.findings[0].codeBlocks[0].language).toBe('python');
+      expect(result.findings[0].codeBlocks[0].code).toContain('progress_events');
+    });
+
+    it('handles findings with no code blocks', () => {
+      expect(result.findings[2].codeBlocks).toHaveLength(0);
+    });
+
+    it('extracts branch from backtick-wrapped value', () => {
+      expect(result.branch).toBe('001-fix-data-fetching');
+    });
+
+    it('defaults status to unfixed', () => {
+      expect(result.findings.every((f) => f.status === 'unfixed')).toBe(true);
+    });
+  });
+
+  describe('## Findings heading (H2 section)', () => {
+    it('parses findings under ## Findings as well as ### Findings', () => {
+      const h2Content = `## Branch Review\n\n**Branch**: test-branch\n\n## Findings\n\n#### Finding #1: ES04 — Raw ipcRenderer exposed\n\n**Severity**: CRITICAL\n**Location**: src/preload/index.ts:5\n`;
+      const result = parseReview(h2Content);
+      expect(result.findings).toHaveLength(1);
+      expect(result.findings[0].severity).toBe('CRITICAL');
+      expect(result.findings[0].ruleId).toBe('ES04');
+    });
+  });
+
   describe('edge cases', () => {
     it('returns empty findings for empty string', () => {
       const empty = parseReview('');
@@ -154,6 +228,11 @@ describe('review-parser', () => {
     it('handles review with no findings (clean review)', () => {
       const clean = parseReview('## Branch Engineering Review\n\n### Findings\n\n| # | Rule | Category | File:Line | Summary | Fix |\n|---|------|----------|-----------|---------|-----|\n');
       expect(clean.findings).toEqual([]);
+    });
+
+    it('handles review with no Findings section at all', () => {
+      const noSection = parseReview('# Code Review\n\n**Branch**: test\n\nNo findings.\n');
+      expect(noSection.findings).toEqual([]);
     });
   });
 });

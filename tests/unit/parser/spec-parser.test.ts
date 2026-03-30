@@ -59,4 +59,5 @@ describe('spec-parser', () => {
       expect(result.entities[0].name).toBe('Widget');
     });
   });
+
 });

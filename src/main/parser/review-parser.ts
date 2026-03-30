@@ -1,3 +1,6 @@
+import type { Heading, Root, RootContent } from 'mdast';
+import { parseMarkdown } from './markdown-parser.js';
+
 export type FindingSeverity = 'NEEDS_REFACTOR' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 export type FindingStatus = 'unfixed' | 'FIXED' | 'SKIPPED' | 'MANUAL';
 
@@ -41,21 +44,303 @@ export interface ReviewParseResult {
   healSummary: HealSummary | null;
 }
 
-// No regex — we split on | for robustness
 const HEAL_STATUS_ROW = /^\|\s*(\d+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+?)\s*\|$/;
+
+const SEVERITIES: FindingSeverity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NEEDS_REFACTOR'];
+const SEVERITY_PATTERN = SEVERITIES.join('|');
+
+// --- AST helpers (same trivial functions as plan-parser.ts, kept private) ---
+
+function getTextContent(node: any): string {
+  if (node.type === 'text') return node.value;
+  if (node.type === 'inlineCode') return node.value;
+  if (node.children) return node.children.map(getTextContent).join('');
+  return '';
+}
+
+function isHeading(node: RootContent): node is Heading {
+  return node.type === 'heading';
+}
+
+// --- AST-based section and heading detection ---
+
+interface SectionBounds {
+  startOffset: number;
+  endOffset: number;
+  headingDepth: number;
+}
+
+function findFindingsSection(tree: Root, content: string): SectionBounds | null {
+  let sectionStart: number | null = null;
+  let sectionDepth = 0;
+  let sectionEnd = content.length;
+
+  for (const child of tree.children) {
+    if (!isHeading(child) || !child.position) continue;
+
+    const text = getTextContent(child).trim();
+    const offset = child.position.start.offset ?? 0;
+
+    if (sectionStart === null) {
+      if (text === 'Findings') {
+        sectionStart = child.position.end.offset ?? offset;
+        sectionDepth = child.depth;
+      }
+    } else if (child.depth <= sectionDepth) {
+      sectionEnd = offset;
+      break;
+    }
+  }
+
+  if (sectionStart === null) return null;
+  return { startOffset: sectionStart, endOffset: sectionEnd, headingDepth: sectionDepth };
+}
+
+interface FindingHeading {
+  text: string;
+  startOffset: number;
+  endOffset: number;
+}
+
+function findFindingHeadings(
+  tree: Root,
+  section: SectionBounds,
+  content: string,
+): FindingHeading[] {
+  const headings: FindingHeading[] = [];
+
+  for (const child of tree.children) {
+    if (!isHeading(child) || !child.position) continue;
+    const offset = child.position.start.offset ?? 0;
+    if (offset < section.startOffset || offset >= section.endOffset) continue;
+    // Accept any heading deeper than the section heading (handles H4 under ### and H3/H4 under ##)
+    if (child.depth > section.headingDepth) {
+      headings.push({
+        text: getTextContent(child),
+        startOffset: child.position.end.offset ?? offset,
+        endOffset: section.endOffset, // will be narrowed below
+      });
+    }
+  }
+
+  // Narrow endOffset to the start of the next heading
+  for (let i = 0; i < headings.length - 1; i++) {
+    headings[i].endOffset = headings[i + 1].startOffset;
+  }
+
+  return headings;
+}
+
+// --- Heading classification ---
+
+interface HeadingParseResult {
+  number: number;
+  ruleId: string;
+  summary: string;
+  severity?: FindingSeverity;
+}
+
+const CANONICAL_HEADING = /^Finding\s+#(\d+):\s*(\S+)\s*[—–-]\s*(.+)/;
+const SEVERITY_HEADING = new RegExp(
+  `^(${SEVERITY_PATTERN})[- ](\\d+)[:.:]\\s*(.+)`,
+);
+
+function classifyFindingHeading(text: string, sequentialNumber: number): HeadingParseResult | null {
+  // Pattern 1: Canonical — "Finding #1: RULEID — Summary"
+  const canonical = text.match(CANONICAL_HEADING);
+  if (canonical) {
+    return {
+      number: parseInt(canonical[1], 10),
+      ruleId: canonical[2],
+      summary: canonical[3].trim(),
+    };
+  }
+
+  // Pattern 2: Severity-ID — "HIGH-1: Summary" or "MEDIUM-1: Summary"
+  const sevMatch = text.match(SEVERITY_HEADING);
+  if (sevMatch) {
+    const severity = sevMatch[1] as FindingSeverity;
+    const headingId = `${sevMatch[1]}-${sevMatch[2]}`;
+    return {
+      number: sequentialNumber,
+      ruleId: headingId,
+      summary: sevMatch[3].trim(),
+      severity,
+    };
+  }
+
+  // Pattern 3: Loose numbered — "#1: RULEID — Summary" or "1: RULEID — Summary"
+  const loose = text.match(/^#?(\d+):\s*(\S+)\s*[—–-]\s*(.+)/);
+  if (loose) {
+    return {
+      number: parseInt(loose[1], 10),
+      ruleId: loose[2],
+      summary: loose[3].trim(),
+    };
+  }
+
+  return null;
+}
+
+// --- Flexible field extraction from raw block text ---
+
+function stripBulletPrefix(line: string): string {
+  return line.replace(/^[-*]\s+/, '');
+}
+
+function stripBackticks(value: string): string {
+  return value.replace(/^`|`$/g, '');
+}
+
+function extractFieldsFromBlock(rawBlock: string): {
+  fields: Partial<ReviewFinding>;
+  codeBlocks: CodeSnippet[];
+} {
+  const lines = rawBlock.split('\n');
+  const fields: Partial<ReviewFinding> = {};
+  const codeBlocks: CodeSnippet[] = [];
+
+  let currentField: 'why' | 'gain' | 'fix' | 'summary' | null = null;
+  let inCodeBlock = false;
+  let codeLanguage = '';
+  let codeLines: string[] = [];
+
+  for (const line of lines) {
+    // Handle fenced code blocks
+    if (inCodeBlock) {
+      if (line.startsWith('```')) {
+        codeBlocks.push({ label: '', language: codeLanguage, code: codeLines.join('\n') });
+        inCodeBlock = false;
+        codeLines = [];
+        continue;
+      }
+      codeLines.push(line);
+      continue;
+    }
+
+    if (line.startsWith('```')) {
+      inCodeBlock = true;
+      codeLanguage = line.slice(3).trim();
+      codeLines = [];
+      currentField = null;
+      continue;
+    }
+
+    // Skip headings and horizontal rules within the block
+    if (line.startsWith('#') || line.match(/^-{3,}$/)) continue;
+
+    // Strip optional list prefix for field detection
+    const stripped = stripBulletPrefix(line);
+
+    // Field extraction — try multiple label aliases
+    const severityMatch = stripped.match(/^\*\*Severity\*\*:\s*(.+)/);
+    if (severityMatch) {
+      const val = severityMatch[1].trim();
+      if (SEVERITIES.includes(val as FindingSeverity)) {
+        fields.severity = val as FindingSeverity;
+      }
+      currentField = null;
+      continue;
+    }
+
+    // Location: accept **Location**: or **File**:
+    const locationMatch = stripped.match(/^\*\*(?:Location|File)\*\*:\s*(.+)/);
+    if (locationMatch) {
+      const rawLoc = locationMatch[1].trim();
+      // Try to extract from first backtick-wrapped token: `path/to/file:line`
+      const backtickMatch = rawLoc.match(/^`([^`]+)`/);
+      let loc = backtickMatch ? backtickMatch[1] : stripBackticks(rawLoc);
+      // Handle "path:line (description)" — keep path:line, drop paren
+      const parenIdx = loc.indexOf(' (');
+      if (parenIdx > 0) loc = loc.slice(0, parenIdx);
+      // Handle "path:line and path:line" — keep first
+      const andIdx = loc.indexOf(' and ');
+      if (andIdx > 0) loc = loc.slice(0, andIdx);
+      fields.location = loc;
+      currentField = null;
+      continue;
+    }
+
+    const ruleMatch = stripped.match(/^\*\*Rule\*\*:\s*(.+)/);
+    if (ruleMatch) {
+      // Only use as ruleId if it looks like a short ID (e.g., "ES04"), not a description
+      const ruleVal = ruleMatch[1].trim();
+      if (/^\S{2,8}$/.test(ruleVal)) {
+        fields.ruleId = ruleVal;
+      }
+      currentField = null;
+      continue;
+    }
+
+    const summaryMatch = stripped.match(/^\*\*Summary\*\*:\s*(.+)/);
+    if (summaryMatch) {
+      fields.summary = summaryMatch[1].trim();
+      currentField = 'summary';
+      continue;
+    }
+
+    // Why: accept "Why this severity", "Why this matters", or just "Why"
+    const whyMatch = stripped.match(/^\*\*Why(?:\s+this\s+(?:severity|matters))?\*\*:\s*(.+)/);
+    if (whyMatch) {
+      fields.why = whyMatch[1].trim();
+      currentField = 'why';
+      continue;
+    }
+
+    // Gain: accept "What you gain", "What you gain by fixing"
+    const gainMatch = stripped.match(/^\*\*What you gain(?:\s+by fixing)?\*\*:\s*(.+)/);
+    if (gainMatch) {
+      fields.gain = gainMatch[1].trim();
+      currentField = 'gain';
+      continue;
+    }
+
+    // Fix field (from canonical format)
+    const fixMatch = stripped.match(/^\*\*Fix\*\*:\s*(.+)/);
+    if (fixMatch) {
+      fields.fix = fixMatch[1].trim();
+      currentField = 'fix';
+      continue;
+    }
+
+    // Multi-line continuation for current field
+    if (currentField && !stripped.startsWith('**')) {
+      if (line.trim()) {
+        const prev = (fields[currentField] as string) ?? '';
+        (fields as any)[currentField] = prev ? prev + '\n' + line : line;
+      } else if (fields[currentField]) {
+        // Empty line: paragraph break
+        (fields as any)[currentField] = (fields[currentField] as string) + '\n';
+      }
+    } else if (stripped.startsWith('**')) {
+      // Unknown bold field — reset continuation
+      currentField = null;
+    }
+  }
+
+  return { fields, codeBlocks };
+}
+
+// --- Main entry point ---
 
 export function parseReview(content: string): ReviewParseResult {
   if (!content.trim()) {
     return { branch: '', findings: [], healSummary: null };
   }
 
+  const tree = parseMarkdown(content);
   const lines = content.split('\n').map((l) => l.replace(/\r$/, ''));
   const branch = extractBranch(lines);
+  const section = findFindingsSection(tree, content);
 
-  // Try block-based extraction first (new format), fall back to table (old format)
-  let findings = extractFindingsFromBlocks(lines);
-  if (findings.length === 0) {
-    findings = extractFindings(lines);
+  let findings: ReviewFinding[] = [];
+  if (section) {
+    // Try block-based extraction first (handles both canonical and freeform formats)
+    findings = extractFindingsFromBlocks(tree, section, content);
+    // Fall back to table extraction
+    if (findings.length === 0) {
+      findings = extractFindingsFromTable(section, content);
+    }
   }
 
   const healSummary = extractHealSummary(lines);
@@ -73,199 +358,84 @@ export function parseReview(content: string): ReviewParseResult {
   return { branch, findings, healSummary };
 }
 
+// --- Branch extraction ---
+
 function extractBranch(lines: string[]): string {
   for (const line of lines) {
     const match = line.match(/^\*\*Branch\*\*:\s*(.+)/);
-    if (match) return match[1].trim();
+    if (match) return stripBackticks(match[1].trim());
   }
   return '';
 }
 
-function extractFindings(lines: string[]): ReviewFinding[] {
+// --- Block-based finding extraction (canonical + freeform) ---
+
+function extractFindingsFromBlocks(
+  tree: Root,
+  section: SectionBounds,
+  content: string,
+): ReviewFinding[] {
+  const headings = findFindingHeadings(tree, section, content);
+  if (headings.length === 0) return [];
+
   const findings: ReviewFinding[] = [];
-  let inFindings = false;
+  let seqNumber = 1;
 
-  for (const line of lines) {
-    if (line.trim() === '### Findings') {
-      inFindings = true;
-      continue;
-    }
-    if (inFindings && line.startsWith('###')) {
-      inFindings = false;
-      continue;
-    }
+  for (const heading of headings) {
+    const parsed = classifyFindingHeading(heading.text, seqNumber);
+    if (!parsed) continue;
 
-    if (inFindings) {
-      const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
-      if (cells.length >= 6 && /^\d+$/.test(cells[0])) {
-        findings.push({
-          number: parseInt(cells[0], 10),
-          ruleId: cells[1],
-          severity: cells[2] as FindingSeverity,
-          location: cells[3],
-          summary: cells[4],
-          fix: cells[5],
-          why: '',
-          gain: '',
-          codeBlocks: [],
-          status: 'unfixed',
-        });
-      }
-    }
+    const rawBlock = content.slice(heading.startOffset, heading.endOffset);
+    const { fields, codeBlocks } = extractFieldsFromBlock(rawBlock);
+
+    findings.push({
+      number: parsed.number,
+      ruleId: fields.ruleId ?? parsed.ruleId,
+      severity: fields.severity ?? parsed.severity ?? 'MEDIUM',
+      location: fields.location ?? '',
+      summary: parsed.summary || fields.summary || '',
+      fix: (fields.fix ?? '').trim(),
+      why: (fields.why ?? '').trim(),
+      gain: (fields.gain ?? '').trim(),
+      codeBlocks,
+      status: 'unfixed',
+    });
+
+    seqNumber++;
   }
 
   return findings;
 }
 
-function extractFindingsFromBlocks(lines: string[]): ReviewFinding[] {
+// --- Table-based finding extraction (legacy format) ---
+
+function extractFindingsFromTable(section: SectionBounds, content: string): ReviewFinding[] {
   const findings: ReviewFinding[] = [];
-  const FINDING_HEADING = /^####\s+Finding\s+#(\d+):\s*(\S+)\s*[—–-]\s*(.+)/;
+  const sectionContent = content.slice(section.startOffset, section.endOffset);
+  const lines = sectionContent.split('\n');
 
-  let current: Partial<ReviewFinding> | null = null;
-  let currentField: string | null = null;
-  let inCodeBlock = false;
-  let codeLanguage = '';
-  let codeLines: string[] = [];
-  let inFindingsSection = false;
-
-  function finalizeCurrent() {
-    if (current && typeof current.number === 'number') {
+  for (const line of lines) {
+    const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
+    if (cells.length >= 6 && /^\d+$/.test(cells[0])) {
       findings.push({
-        number: current.number,
-        ruleId: current.ruleId ?? '',
-        severity: current.severity ?? 'MEDIUM',
-        location: current.location ?? '',
-        summary: current.summary ?? '',
-        fix: (current.fix ?? '').trim(),
-        why: (current.why ?? '').trim(),
-        gain: (current.gain ?? '').trim(),
-        codeBlocks: current.codeBlocks ?? [],
+        number: parseInt(cells[0], 10),
+        ruleId: cells[1],
+        severity: cells[2] as FindingSeverity,
+        location: cells[3],
+        summary: cells[4],
+        fix: cells[5],
+        why: '',
+        gain: '',
+        codeBlocks: [],
         status: 'unfixed',
       });
     }
   }
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    // Track whether we're in the ### Findings section
-    if (!inCodeBlock && line.trim() === '### Findings') {
-      inFindingsSection = true;
-      continue;
-    }
-    // Exit findings section when we hit another ### heading
-    if (!inCodeBlock && inFindingsSection && /^###\s/.test(line) && line.trim() !== '### Findings') {
-      finalizeCurrent();
-      inFindingsSection = false;
-      break;
-    }
-    // Only look for block findings within ### Findings section
-    if (!inFindingsSection) continue;
-
-    // Handle fenced code blocks
-    if (inCodeBlock) {
-      if (line.startsWith('```')) {
-        if (current) {
-          if (!current.codeBlocks) current.codeBlocks = [];
-          current.codeBlocks.push({ label: '', language: codeLanguage, code: codeLines.join('\n') });
-        }
-        inCodeBlock = false;
-        codeLines = [];
-        continue;
-      }
-      codeLines.push(line);
-      continue;
-    }
-
-    if (line.startsWith('```')) {
-      inCodeBlock = true;
-      codeLanguage = line.slice(3).trim();
-      codeLines = [];
-      continue;
-    }
-
-    // New finding heading
-    const headingMatch = line.match(FINDING_HEADING);
-    if (headingMatch) {
-      finalizeCurrent();
-      current = {
-        number: parseInt(headingMatch[1], 10),
-        ruleId: headingMatch[2],
-        summary: headingMatch[3].trim(),
-        codeBlocks: [],
-        why: '',
-        gain: '',
-        fix: '',
-      };
-      currentField = null;
-      continue;
-    }
-
-    if (!current) continue;
-
-    // Field extraction from **Key**: Value lines
-    const severityMatch = line.match(/^\*\*Severity\*\*:\s*(.+)/);
-    if (severityMatch) {
-      current.severity = severityMatch[1].trim() as FindingSeverity;
-      currentField = null;
-      continue;
-    }
-
-    const locationMatch = line.match(/^\*\*Location\*\*:\s*(.+)/);
-    if (locationMatch) {
-      current.location = locationMatch[1].trim();
-      currentField = null;
-      continue;
-    }
-
-    const ruleMatch = line.match(/^\*\*Rule\*\*:\s*(.+)/);
-    if (ruleMatch) {
-      current.ruleId = ruleMatch[1].trim();
-      currentField = null;
-      continue;
-    }
-
-    const whyMatch = line.match(/^\*\*Why this severity\*\*:\s*(.+)/);
-    if (whyMatch) {
-      current.why = whyMatch[1].trim();
-      currentField = 'why';
-      continue;
-    }
-
-    const gainMatch = line.match(/^\*\*What you gain\*\*:\s*(.+)/);
-    if (gainMatch) {
-      current.gain = gainMatch[1].trim();
-      currentField = 'gain';
-      continue;
-    }
-
-    // Continuation lines for current field — preserve markdown formatting
-    if (currentField && !line.startsWith('**') && !line.startsWith('#')) {
-      if (line.trim()) {
-        if (currentField === 'why') {
-          current.why = (current.why ?? '') + '\n' + line;
-        } else if (currentField === 'gain') {
-          current.gain = (current.gain ?? '') + '\n' + line;
-        }
-      } else {
-        // Empty line: add paragraph break but don't reset field
-        if (currentField === 'why' && current.why) {
-          current.why += '\n';
-        } else if (currentField === 'gain' && current.gain) {
-          current.gain += '\n';
-        }
-      }
-    }
-
-    // Reset field context on next field header or heading
-    if (!line.trim() && !currentField) {
-      currentField = null;
-    }
-  }
-
-  finalizeCurrent();
   return findings;
 }
+
+// --- Heal summary extraction (unchanged) ---
 
 function extractHealSummary(lines: string[]): HealSummary | null {
   let inHeal = false;
