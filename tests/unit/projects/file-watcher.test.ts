@@ -50,11 +50,6 @@ vi.mock('fs', () => ({
   },
 }));
 
-// Provide a no-op stub so the old static import doesn't blow up
-vi.mock('../../src/main/repomap/tree-sitter/languages.js', () => ({
-  ALL_EXTENSIONS: new Set<string>(),
-}));
-
 import { watchProject, unwatchProject, unwatchAll } from '../../../src/main/projects/file-watcher.js';
 import type { WatcherEvents } from '../../../src/main/projects/file-watcher.js';
 

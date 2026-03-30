@@ -422,7 +422,6 @@ update_existing_agent_file() {
     local tech_added=false
     local change_added=false
     local existing_changes=0
-    local has_context_nav=false
 
     while IFS= read -r line || [[ -n "$line" ]]; do
         # Detect ## Active Technologies heading
@@ -457,21 +456,8 @@ update_existing_agent_file() {
             continue
         fi
 
-        # Track ## Context & Navigation section
-        if [[ "$line" == "## Context & Navigation" || "$line" == "## Context Protocol" ]]; then
-            has_context_nav=true
-        fi
-
-        # Detect ## Recent Changes heading — inject Context & Navigation if missing
+        # Detect ## Recent Changes heading
         if [[ "$line" == "## Recent Changes" ]]; then
-            if [[ "$has_context_nav" == false ]]; then
-                echo "" >> "$tmpfile"
-                echo "## Context & Navigation" >> "$tmpfile"
-                echo "" >> "$tmpfile"
-                echo 'Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.' >> "$tmpfile"
-                echo "" >> "$tmpfile"
-                has_context_nav=true
-            fi
             echo "$line" >> "$tmpfile"
             if [[ -n "$new_change_entry" ]]; then
                 echo "$new_change_entry" >> "$tmpfile"
@@ -508,14 +494,6 @@ update_existing_agent_file() {
         # Default: pass through
         echo "$line" >> "$tmpfile"
     done < "$target_file"
-
-    # If Context & Navigation was never found, append before end
-    if [[ "$has_context_nav" == false ]]; then
-        echo "" >> "$tmpfile"
-        echo "## Context & Navigation" >> "$tmpfile"
-        echo "" >> "$tmpfile"
-        echo 'Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.' >> "$tmpfile"
-    fi
 
     # If we were still in tech section at EOF and haven't added entries
     if [[ "$in_tech" == true && "$tech_added" == false && ${#new_tech_entries[@]} -gt 0 ]]; then

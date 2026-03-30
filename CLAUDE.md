@@ -30,17 +30,13 @@ Read the right doc for your task — don't read all source files.
 | Modify file watching / phase detection / notifications / settings | `docs/architecture.md` (inline sections) | — |
 | Modify scaffold / integration / auto-update | `docs/architecture.md` | — |
 
-## Context & Navigation
-
-Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.
-
 ## Documentation
 
 This table is the **single source of truth** for file-to-doc coverage. Do not duplicate this mapping in doc files.
 
 | File | Covers source paths |
 |------|---------------------|
-| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/main/repomap/`, `src/main/integration/`, `src/main/updater/`, `src/preload/`, `resources/scaffold/`, `scripts/`, `.github/workflows/` |
+| `docs/architecture.md` | `src/main/index.ts`, `src/main/projects/`, `src/main/phase/`, `src/main/notifications/`, `src/main/integration/`, `src/main/updater/`, `src/preload/`, `resources/scaffold/`, `scripts/`, `.github/workflows/` |
 | `docs/parsers.md` | `src/main/parser/` |
 | `docs/ipc.md` | `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/services/api.ts` |
 | `docs/renderer.md` | `src/renderer/src/components/`, `src/renderer/src/hooks/`, `src/renderer/src/themes/` |
@@ -82,11 +78,3 @@ TypeScript strict mode. Dark Radix Mauve theme (accessibility-tested). See `.cla
 - `resources/scaffold/.scaffold-version` — bump manually when scaffold content changes
 
 If you edit any file in `.claude/commands/`, `.claude/specify/templates/`, or `.claude/specify/scripts/`, the next `npm run build` automatically propagates it to `resources/scaffold/`. Project-specific commands (e.g., `release-new-version.md`) are excluded via the `EXCLUDE_FILES` list in `scripts/sync-scaffold.sh`. Run `npm run sync-scaffold:check` to verify sync without modifying files.
-
-## Context & Navigation
-
-Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.
-
-## Context & Navigation
-
-Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.

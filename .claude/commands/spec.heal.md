@@ -24,7 +24,7 @@ Determine branch via `git rev-parse --abbrev-ref HEAD`. Read `.claude/specs/<BRA
 
 ### Step 1.5: Inline vs Sub-Agent Decision
 
-If **<= 15 total findings**: apply all fixes yourself inline using Edit. Read the specific files via their paths (use repo-map to understand relationships if needed). Continue to Step 3.
+If **<= 15 total findings**: apply all fixes yourself inline using Edit. Read the specific files via their paths (if you need to trace a caller or import, run ONE Grep for the function/type name — do not explore beyond the results). Continue to Step 3.
 
 If **> 15 findings**: proceed to Step 2.
 
@@ -36,7 +36,7 @@ Group findings by file. Classify by complexity:
 - **Mechanical** (type annotations, assertion changes, logging, renaming, narrowing) → **Haiku** sub-agent (`model: "haiku"`)
 - **Structural** (refactoring logic, new code paths, architecture changes) → **Sonnet** sub-agent (`model: "sonnet"`)
 
-Launch independent file groups **in parallel**. Each sub-agent receives: file paths, specific findings (rule ID, category, line, proposed fix), and instructions to read the file themselves and apply the fix via Edit. Do NOT tell sub-agents to read repo-map.md — they have explicit file paths and findings already. Do NOT embed best-practices docs in the prompt.
+Launch independent file groups **in parallel**. Each sub-agent receives: file paths, specific findings (rule ID, category, line, proposed fix), and instructions to Read the file and apply the fix via Edit. Sub-agents are **FORBIDDEN** from running Glob, broad Grep, or reading files outside their assignment. They have explicit file paths and findings — that is all they need. Do NOT embed best-practices docs in the prompt.
 
 ### Step 3: Run Tests
 

@@ -36,7 +36,6 @@ describe('scaffold-writer', () => {
 
       expect(fs.existsSync(path.join(tmpDir, 'CLAUDE.md'))).toBe(true);
       const content = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf-8');
-      expect(content).toContain('## Context & Navigation');
       expect(content).toContain('[PROJECT]');
     });
 

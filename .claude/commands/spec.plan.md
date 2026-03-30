@@ -48,7 +48,9 @@ Consider user input before proceeding.
    - Integration patterns between components → patterns task
    - Architecture trade-offs needing analysis → decision task
 
-2. **Research inline first**: Use `.claude/specify/context/repo-map.md` and targeted Grep to answer unknowns yourself. Read only the specific files identified by the map. Do NOT spawn sub-agents for research unless the unknown genuinely requires web search or deep analysis across 10+ files that would overflow your context. Most research (how does X work, what pattern does Y follow, where does Z hook in) can be answered with 2-3 targeted file reads.
+2. **Research inline first**: Answer unknowns yourself with targeted Grep — search for the specific function name, type, or pattern you need. Read only the files that match.
+
+   **PROHIBITED**: Spawning Explore agents. Running Glob with broad patterns. Reading files "to understand the project." Opening directories to browse. If you cannot answer a question with 1-3 targeted Grep searches and file reads, THEN and only then spawn a sub-agent — and only for web search or analysis across 10+ files that would overflow your context. Most research (how does X work, what pattern does Y follow, where does Z hook in) needs 1-3 file reads, not 30.
 
 3. **Consolidate findings** in `research.md`:
 

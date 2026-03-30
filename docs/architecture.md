@@ -76,28 +76,6 @@ Pure function. Determines phase from which artifact files exist in the spec dire
 
 Precedence: evaluated top-to-bottom, first match wins.
 
-## Repository Map Generation
-
-**Module**: `src/main/repomap/`
-
-The repomap system analyzes source code structure across multiple languages and generates repository maps for context injection. It powers the structural codebase understanding in spec commands.
-
-**System Components**:
-- `index.ts`: Re-exports from sub-modules (public API)
-- `generator.ts`: Walks project directory, runs extractors, writes formatted map. Also exports `discoverProjectExtensions()` for grammar filtering.
-- `extractors.ts`: Lazy extractor builder — dynamically imports `ts-extractor.ts` and `tree-sitter/index.ts` on first call. Accepts an optional extension filter to load only needed grammars.
-- `ts-extractor.ts`: TypeScript AST walker. Exports async `getTypescriptExtractor()` factory that dynamically imports the `typescript` package on first call (~40-60MB heap, deferred from startup).
-- `tree-sitter/extractor.ts`: Tree-sitter WASM parser for non-TypeScript languages (Python, Go, Rust, Java, etc.)
-- `tree-sitter/index.ts`: Lazy grammar loader. Accepts extension filter to load only grammars for languages present in the current project scan (not all 16).
-- `format.ts`: Formats extracted structures into human-readable tree and summary formats
-- `types.ts`: Typed interfaces for extractors and generated maps
-
-**Lifecycle**:
-- Generated on project add (background, non-blocking, lazy-loads extractors)
-- Regenerated on `.git/index` changes via `onGitIndexChanged` event in file watcher
-- TypeScript compiler and tree-sitter grammars are loaded lazily on first generation — not at startup
-- Per-generation grammar filtering: only loads tree-sitter grammars for languages whose file extensions exist in the project being scanned
-
 ## Notifications
 
 Three components work together when an external command completes:

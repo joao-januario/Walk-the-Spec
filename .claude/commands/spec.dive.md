@@ -16,7 +16,11 @@ Consider user input before proceeding.
 
 1. Run `bash .claude/specify/scripts/bash/check-prerequisites.sh --json` from repo root and parse FEATURE_DIR.
 
-2. **Load context**: Read `summary.md` (Implementation Overview steps), `glossary.md` from FEATURE_DIR, and `.claude/specify/context/repo-map.md`. Use `git diff main --name-only` to identify changed files — then read only the files needed for deep-dives via their paths, not all changed files. For branches with **<= 10 changed files**, write all deep-dives yourself inline. Only spawn sub-agents for branches with 10+ files needing deep-dives. Pass file paths and relevant structural context (imports, exports, call sites from repo-map) in the prompt — sub-agents read the source files themselves but should NOT read repo-map.md independently.
+2. **Load context**: Read `summary.md` (Implementation Overview steps) and `glossary.md` from FEATURE_DIR. Use `git diff main --name-only` to get the list of changed files — read only those files by path.
+
+   **PROHIBITED**: Reading files not in the diff. Running Glob. Running broad Grep. "Exploring" to understand the project. You are writing deep-dives about code that was CHANGED — the diff tells you exactly which files. Read those and only those.
+
+   For branches with **<= 10 changed files**, write all deep-dives yourself inline. Only spawn sub-agents for branches with 10+ files needing deep-dives. When spawning: embed the exact file paths and relevant code snippets in the prompt. Sub-agents are **FORBIDDEN** from exploring beyond their assigned files — no Glob, no broad Grep, no reading unrelated code.
 
 3. **Determine deep-dive candidates**: For each Implementation Overview step, ask: could a developer confidently modify/extend what this step introduced — knowing connections, dependencies, and breakage risks? If they'd need to trace code to figure out relationships, it needs a deep-dive. Steps that fully cover their scope (e.g., adding a union value) don't need one; steps introducing systems, touching multiple files, or having non-obvious relationships do.
 

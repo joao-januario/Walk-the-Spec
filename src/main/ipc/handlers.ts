@@ -107,19 +107,6 @@ export function registerIpcHandlers() {
     const entry = addProject(config, projectPath, name);
     await saveConfig(config);
 
-    // Generate initial repo map in background (non-blocking, lazy-loads extractors)
-    void (async () => {
-      try {
-        const { discoverProjectExtensions, generateRepoMap } = await import('../repomap/generator.js');
-        const { getAllExtractors } = await import('../repomap/extractors.js');
-        const extensions = await discoverProjectExtensions(projectPath);
-        const extractors = await getAllExtractors(extensions);
-        await generateRepoMap(projectPath, extractors);
-      } catch (err) {
-        console.error(`[repomap] initial generation failed for ${entry.name}:`, err);
-      }
-    })();
-
     return getProjectState(entry);
   });
 

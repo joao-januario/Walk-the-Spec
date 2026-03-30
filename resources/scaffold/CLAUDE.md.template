@@ -6,10 +6,6 @@
 
 [High-level structural overview — what the major components are, how they interact.]
 
-## Context & Navigation
-
-Before exploring source code, read `.claude/specify/context/repo-map.md` for the structural map of all files (exports, imports, hashes). Use Grep for targeted searches — do not read entire directories to "discover" the codebase. Full protocol: `.claude/specify/templates/context-protocol.md`.
-
 ## Tech Stack
 
 [List core technologies, frameworks, and tools used in this project.]

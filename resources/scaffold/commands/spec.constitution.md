@@ -54,12 +54,7 @@ If `.claude/specify/memory/constitution.md` doesn't exist, copy from `.claude/sp
 
 7. **Write** the completed constitution to `.claude/specify/memory/constitution.md` (overwrite).
 
-8. **Install Context Protocol in CLAUDE.md**:
-   - Read `.claude/specify/templates/context-protocol.md` and project `CLAUDE.md`
-   - If `## Context Protocol` section doesn't exist: insert before `<!-- MANUAL ADDITIONS START -->` marker (or at end)
-   - If it exists: replace with current template content
-
-9. **Output summary**: new version + bump rationale, Context Protocol install/update status, files needing manual follow-up, suggested commit message.
+8. **Output summary**: new version + bump rationale, files needing manual follow-up, suggested commit message.
 
 **Status Signal**: Run `bash .claude/specify/scripts/bash/teardown-phase.sh --command "spec.constitution" --json` to signal command completion.
 

@@ -16,7 +16,14 @@ Consider user input before proceeding.
 
 ## Outline
 
-1. **Load context**: Read plan.md, spec.md, and all available design artifacts (research.md, data-model.md, contracts/, quickstart.md) — always load these if they exist. For **source code** navigation during implementation, consult `.claude/specify/context/repo-map.md` to identify relevant modules and files before exploring the codebase. If repo-map.md is missing, warn the user — it should have been generated when the project was added. When spawning sub-agents for implementation tasks, provide the specific file paths and relevant context (imports, exports, relationships from repo-map) inline in the prompt. Sub-agents should NOT read repo-map.md themselves — the orchestrator already has this context and should pass only what's relevant.
+1. **Load context**: Read plan.md, spec.md, and all available design artifacts (research.md, data-model.md, contracts/, quickstart.md) — always load these if they exist. Plan.md contains the file paths you will create or modify — use those paths directly.
+
+   **NAVIGATION RULES — MANDATORY, NO EXCEPTIONS:**
+   - You already have file paths from plan.md. Go directly to those files. That is your codebase context.
+   - If you need to understand an existing file, Read it by its exact path. You do not need to "discover" anything.
+   - If you need to find where a function is called, Grep for its name. One search. Read the matches. Done.
+   - **NEVER** spawn Explore agents. **NEVER** run Glob with broad patterns like `**/*.ts`. **NEVER** read directories to "get oriented." **NEVER** read files not mentioned in plan.md unless a specific Grep result points you there.
+   - When spawning sub-agents: embed the exact file paths, the plan step, and any code snippets they need inline in the prompt. Sub-agents are **FORBIDDEN** from running Glob, broad Grep, or reading files outside their assignment. If they need context you didn't provide, that is YOUR failure to brief them — fix the prompt, don't let them explore.
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Scan all checklist files, count items matching `- [ ]` / `- [X]` / `- [x]`

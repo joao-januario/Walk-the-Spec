@@ -42,7 +42,9 @@ Extract CURRENT_BRANCH, BASE_BRANCH (default `main`), CHANGED_FILES, DIFF_STATS.
 
 ### Phase 1.5: Cross-File Impact Analysis
 
-If `.claude/specify/context/repo-map.md` exists, read it to understand the structural context of changed files — identify what they import and export, and which nearby modules may be affected. Flag changed exports where related modules are not in the diff as cross-file impact risks.
+From the `git diff --name-only` output in Phase 1, identify files that export public APIs (functions, types, classes). For each, run ONE targeted Grep for the exported identifier to find dependents not in the diff. That is the only exploration allowed.
+
+**PROHIBITED**: Reading files not in the diff or grep results. Running Glob. Running broad Grep patterns like `import.*` or `from.*`. Spawning agents to "explore the codebase." You have the complete diff — that is your input, not a starting point for exploration.
 
 ### Phase 2: Classify Into Verticals & Load Best Practices
 
@@ -92,7 +94,8 @@ Sub-agent instructions:
 
 ```
 You are an engineering reviewer. Your assigned diffs are provided inline below — do NOT run git diff yourself.
-Read only the best-practices files listed. Use Grep for targeted lookups if needed. Do NOT read full source files or repo-map.md — your file list and diffs are already provided.
+Read only the best-practices files listed. Use Grep for targeted lookups if needed.
+**FORBIDDEN**: Reading any file not in your assigned list. Running Glob. Running broad Grep. "Exploring" the codebase. You have everything you need — if something seems missing, flag it as a finding, do not go hunting.
 
 For each violation report: Rule ID, Category, File:line, Summary, Why, What you gain.
 
@@ -169,7 +172,7 @@ If no actionable findings: "No fixes needed. Run `/spec.conclude` to finalize."
 ## Operating Principles
 
 - **Orchestrator-first** — do the review yourself inline for branches ≤ 50 files / ≤ 2000 diff lines. Sub-agents are a last resort for genuinely massive branches, not the default. When in doubt, stay inline — cold-start overhead of multiple sub-agents often exceeds the cost of sequential inline review.
-- **Pre-compute, don't delegate reads** — the orchestrator pre-computes diffs and embeds them in sub-agent prompts. Sub-agents should never run `git diff` or read `repo-map.md` — they receive everything they need to start reviewing immediately. Best-practices files are the exception: pass paths only, sub-agents read those themselves (they're static and small).
+- **Pre-compute, don't delegate reads** — the orchestrator pre-computes diffs and embeds them in sub-agent prompts. Sub-agents are FORBIDDEN from running git diff, Glob, or broad Grep — they receive everything they need. If a sub-agent needs more context, that means the orchestrator prompt was incomplete — fix the prompt, not the sub-agent's permissions. Best-practices files are the exception: pass paths only, sub-agents read those themselves (they're static and small).
 - **Only review changed code** — pre-existing issues out of scope.
 - **Thorough over fast** — check every rule against every changed line.
 - **Critical thinking** — flag real problems, not theoretical concerns.
