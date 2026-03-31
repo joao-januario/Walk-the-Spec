@@ -43,13 +43,42 @@ Consider user input before proceeding.
    - Include universal patterns: `.DS_Store`, `Thumbs.db`, `*.tmp`, `*.swp`, `.vscode/`, `.idea/`
    - Include tool-specific patterns (Docker, ESLint, Prettier, Terraform, K8s) as appropriate
 
-5. **Execute implementation** following the plan:
-   - Phase-by-phase: complete each before moving to next
-   - **TDD is mandatory**: For every user story, write tests FIRST. Run them. Confirm they FAIL. Only then write the implementation to make them pass. Do NOT write implementation code without a failing test. This is non-negotiable — no exceptions, no "this is hard to test" excuses, no skipping for "thin wrappers" or "event wiring." If it's code, it gets a test first.
-   - File-based coordination: same-file tasks run sequentially
-   - Validation checkpoints at each phase boundary
+5. **Execute implementation** following the plan — in three sub-phases per user story:
 
-6. **Execution order**: Setup → **failing tests** → implementation to make them pass → integration → polish/validation
+   **Sub-phase A — Implement with embedded logging**
+   - Implement the feature
+   - Embed structured logging throughout as you write — not as an afterthought:
+     - Function entry/exit: log parameters and return values for non-trivial functions
+     - Branch decisions: log the condition and which path was taken (e.g. `[FEATURE] cache hit: false, fetching from disk`)
+     - External calls: log every IPC call, file I/O, network request with request + response summary
+     - State changes: log before/after for any meaningful state mutation
+   - Use a consistent prefix per feature (e.g. `[PARSER]`, `[WATCHER]`) for easy log filtering
+   - Use the project's existing log mechanism (console.log, electron-log, structured logger — match what's already in the codebase)
+   - File-based coordination: same-file tasks run sequentially
+
+   **Sub-phase B — Real-run verification loop** ← this is the correctness gate
+   - Determine how to run the feature: check package.json scripts, look at how the project starts
+   - Start the process (dev server, CLI, script — whatever exercises the code path)
+   - Exercise the **exact user story path** from spec.md: trigger the feature as a real user would
+   - Read and analyse the log output. Check:
+     - Expected log entries appear with correct values
+     - No unexpected errors or exceptions appear
+     - Data flows through the expected path (visible in logs)
+   - If anything is wrong: fix the code and re-run. Do not proceed until logs confirm correct behaviour
+   - This loop is the correctness signal — tests cannot substitute for this step
+   - Once logs confirm correct behaviour: remove any logs that are too verbose for production; keep meaningful ones
+
+   **Sub-phase C — Test codification**
+   - Now that you have observed the feature working, write tests encoding that verified behaviour
+   - You now know exactly what to mock (you saw the real calls in logs), what the inputs/outputs are (you saw real values), and which paths matter (you exercised them)
+   - Tests written here should pass immediately — you are codifying what you know works, not discovering behaviour
+   - If a test fails: it means your test assumption is wrong, not the implementation — fix the test to match observed reality, or investigate a genuine regression
+   - **Test quality over coverage**: do NOT write tests to hit a coverage number. Write tests that would catch a real regression. Ask for each test: "if this breaks, does it mean something real is broken?" If not, don't write it.
+   - Required: at least one test per happy path, one per meaningful failure state, one per non-obvious edge case surfaced during verification
+   - Forbidden: tests that duplicate each other, tests that only assert the implementation structure (testing mocks calling mocks), tests added purely to inflate numbers
+   - A feature shipped with 8 precise tests is better than one shipped with 40 tests that wouldn't catch the bugs you just fixed
+
+6. **Execution order**: Setup → implement with logging → real-run until logs confirm correct → codify in tests → integration → polish/validation
 
 7. **Progress tracking**: Report per phase. Halt on critical failure. Provide clear errors with debugging context.
 
