@@ -1,41 +1,48 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import mermaid from 'mermaid';
 
-// Fixed neutral dark palette — consistent regardless of app theme.
-// fillType0-7 all set to the same value so mermaid's cycling never produces
-// random accent colors on nodes.
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'dark',
-  themeVariables: {
-    darkMode: true,
-    background:          '#13131a',
-    mainBkg:             '#2a2a35',
-    nodeBorder:          '#4e4e62',
-    clusterBkg:          '#13131a',
-    clusterBorder:       '#3a3a4a',
-    primaryColor:        '#2a2a35',
-    primaryTextColor:    '#e2e2f0',
-    primaryBorderColor:  '#4e4e62',
-    lineColor:           '#9898b0',
-    secondaryColor:      '#2a2a35',
-    tertiaryColor:       '#2a2a35',
-    edgeLabelBackground: '#13131a',
-    titleColor:          '#e2e2f0',
-    nodeTextColor:       '#e2e2f0',
-    fillType0: '#2a2a35',
-    fillType1: '#2a2a35',
-    fillType2: '#2a2a35',
-    fillType3: '#2a2a35',
-    fillType4: '#2a2a35',
-    fillType5: '#2a2a35',
-    fillType6: '#2a2a35',
-    fillType7: '#2a2a35',
-    fontFamily: "'Inter', system-ui, sans-serif",
-    fontSize:   '14px',
-  },
-});
+// Deferred mermaid loading — the library is ~8.5MB of JS across 15+ diagram
+// engines. We only pay that cost when a mermaid code block is actually rendered.
+let mermaidInstance: typeof import('mermaid')['default'] | null = null;
+
+async function getMermaid() {
+  if (!mermaidInstance) {
+    const m = await import('mermaid');
+    mermaidInstance = m.default;
+    mermaidInstance.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background:          '#13131a',
+        mainBkg:             '#2a2a35',
+        nodeBorder:          '#4e4e62',
+        clusterBkg:          '#13131a',
+        clusterBorder:       '#3a3a4a',
+        primaryColor:        '#2a2a35',
+        primaryTextColor:    '#e2e2f0',
+        primaryBorderColor:  '#4e4e62',
+        lineColor:           '#9898b0',
+        secondaryColor:      '#2a2a35',
+        tertiaryColor:       '#2a2a35',
+        edgeLabelBackground: '#13131a',
+        titleColor:          '#e2e2f0',
+        nodeTextColor:       '#e2e2f0',
+        fillType0: '#2a2a35',
+        fillType1: '#2a2a35',
+        fillType2: '#2a2a35',
+        fillType3: '#2a2a35',
+        fillType4: '#2a2a35',
+        fillType5: '#2a2a35',
+        fillType6: '#2a2a35',
+        fillType7: '#2a2a35',
+        fontFamily: "'Inter', system-ui, sans-serif",
+        fontSize:   '14px',
+      },
+    });
+  }
+  return mermaidInstance;
+}
 
 /** Strip fixed dimensions so the SVG scales to fill the lightbox container. */
 function prepareLightboxSvg(raw: string): string {
@@ -95,10 +102,13 @@ export default function MermaidBlock({ code }: { code: string }) {
   const closeLightbox = useCallback(() => setFullscreen(false), []);
 
   useEffect(() => {
+    let cancelled = false;
     const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
-    mermaid.render(id, code)
-      .then((result) => setSvg(result.svg))
-      .catch((err) => setError(String(err)));
+    getMermaid()
+      .then((m) => m.render(id, code))
+      .then((result) => { if (!cancelled) setSvg(result.svg); })
+      .catch((err) => { if (!cancelled) setError(String(err)); });
+    return () => { cancelled = true; };
   }, [code]);
 
   if (error) {

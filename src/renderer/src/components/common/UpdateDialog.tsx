@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils.js';
 import type { AutoUpdateHandle } from '../../hooks/useAutoUpdate.js';
 
@@ -14,11 +13,7 @@ export default function UpdateDialog({ update }: UpdateDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-board-surface border-board-border w-[420px] rounded-xl border shadow-2xl"
-      >
+      <div className="bg-board-surface border-board-border w-[420px] animate-[dialog-in_0.15s_ease-out] rounded-xl border shadow-2xl">
         {/* Header */}
         <div className="border-board-border border-b px-5 py-4">
           <h2 className="text-board-text-bright m-0 text-[1.125rem] font-semibold">
@@ -79,7 +74,7 @@ export default function UpdateDialog({ update }: UpdateDialogProps) {
             </>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

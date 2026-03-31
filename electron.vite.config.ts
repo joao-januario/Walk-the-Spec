@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin({ include: ['typescript', 'electron-updater', 'electron-log'] })],
+    plugins: [externalizeDepsPlugin({ include: ['electron-updater', 'electron-log'] })],
     define: {
       __dirname: 'import.meta.dirname',
     },

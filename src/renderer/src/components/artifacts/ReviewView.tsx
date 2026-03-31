@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../lib/utils.js';
 import { severityClasses, statusClasses } from '../../theme.js';
 import CodeBlock from '../elements/CodeBlock.js';
@@ -72,25 +71,24 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
         </div>
         <StatusBadge status={finding.status} />
         {hasDetail && (
-          <motion.span
-            animate={{ rotate: expanded ? 90 : 0 }}
-            transition={{ duration: 0.15 }}
-            className="text-board-text-muted text-[0.8125rem]"
+          <span
+            className="text-board-text-muted inline-block text-[0.8125rem] transition-transform duration-150"
+            style={{ transform: `rotate(${expanded ? 90 : 0}deg)` }}
           >
             ▶
-          </motion.span>
+          </span>
         )}
       </div>
 
-      <AnimatePresence>
-        {expanded && hasDetail && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
+      <div
+        className="grid transition-[grid-template-rows,opacity] duration-200 ease-out"
+        style={{
+          gridTemplateRows: expanded ? '1fr' : '0fr',
+          opacity: expanded ? 1 : 0,
+        }}
+      >
+        <div className="overflow-hidden">
+          {hasDetail && (
             <div className="bg-board-surface-elevated border-board-border/10 mb-2 ml-[30px] rounded-md border-l-2 p-4">
               {finding.why && (
                 <div className="mb-3">
@@ -112,9 +110,9 @@ function FindingRow({ finding }: { finding: ReviewFinding }) {
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

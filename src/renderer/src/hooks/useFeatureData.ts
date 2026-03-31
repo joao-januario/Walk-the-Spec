@@ -48,7 +48,6 @@ export function useArtifactData(projectId: string | null, artifactType: Artifact
       const data = await api.getArtifact(projectId, artifactType);
       setArtifact(data);
     } catch (err: any) {
-      setArtifact(null);
       setError(err.message);
     } finally {
       setLoading(false);

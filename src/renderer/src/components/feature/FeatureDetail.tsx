@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { getPhaseClasses } from '../../theme.js';
 import { cn } from '../../lib/utils.js';
 import ArtifactTabs from './ArtifactTabs.js';
@@ -126,18 +125,9 @@ export default function FeatureDetail({ project }: { project: Project }) {
       <div className="mb-4">
         <div className="flex items-center gap-3">
           <h2 className="text-board-text-bright m-0 flex-1 text-[1.25rem]">{feature.summary || project.name}</h2>
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={project.phase}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className={cn('rounded-full px-2.5 py-0.5 text-[0.8125rem] font-semibold', p.bg, p.text)}
-            >
+          <span className={cn('rounded-full px-2.5 py-0.5 text-[0.8125rem] font-semibold transition-all duration-200', p.bg, p.text)}>
               {p.label}
-            </motion.span>
-          </AnimatePresence>
+            </span>
           <button
             onClick={() => setShowBacklog(!showBacklog)}
             aria-label={showBacklog ? 'Back to feature' : 'Refactor Backlog'}
@@ -212,25 +202,22 @@ export default function FeatureDetail({ project }: { project: Project }) {
             </div>
           )}
 
-          {artifactLoading && <div className="text-board-text-muted text-[0.9375rem]">Loading...</div>}
+          {artifactLoading && !artifact && <div className="text-board-text-muted text-[0.9375rem]">Loading...</div>}
 
-          {artifact && activeTab === 'spec' && (
+          {artifact && artifact.type === 'spec' && (
             <SpecView elements={artifact.elements} {...commentProps} />
           )}
-          {artifact && activeTab === 'plan' && (
+          {artifact && artifact.type === 'plan' && (
             <PlanView elements={artifact.elements} {...commentProps} />
           )}
-          {artifact && activeTab === 'tasks' && <TasksView elements={artifact.elements} onToggleTask={handleToggleTask} />}
-          {artifact && activeTab === 'research' && (
+          {artifact && artifact.type === 'tasks' && <TasksView elements={artifact.elements} onToggleTask={handleToggleTask} />}
+          {artifact && artifact.type === 'research' && (
             <ResearchView elements={artifact.elements} {...commentProps} />
           )}
-          {artifact && activeTab === 'summary' && (
+          {artifact && (artifact.type === 'summary' || artifact.type === 'deep-dives') && (
             <SummaryView elements={artifact.elements} {...commentProps} />
           )}
-          {artifact && activeTab === 'deep-dives' && (
-            <SummaryView elements={artifact.elements} {...commentProps} />
-          )}
-          {artifact && activeTab === 'review' && (
+          {artifact && artifact.type === 'review' && (
             <ReviewView
               findings={artifact.elements.map((e) => e.content as ReviewFinding)}
               healSummary={artifact.reviewMeta?.healSummary ?? null}

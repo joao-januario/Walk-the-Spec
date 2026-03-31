@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { DecisionContent } from '../../types/index.js';
 import SectionLabel from '../ui/SectionLabel.js';
 import MarkdownContent from '../ui/MarkdownContent.js';
@@ -14,44 +13,41 @@ export default function DecisionSection({ content }: { content: DecisionContent 
         className="flex cursor-pointer items-center justify-between px-4 py-3"
       >
         <span className="text-board-text-bright text-[0.9375rem] font-semibold">{content.heading}</span>
-        <motion.span
-          animate={{ rotate: expanded ? 90 : 0 }}
-          transition={{ duration: 0.15 }}
-          className="text-board-text-muted text-xs"
+        <span
+          className="text-board-text-muted inline-block text-xs transition-transform duration-150"
+          style={{ transform: `rotate(${expanded ? 90 : 0}deg)` }}
         >
           ▶
-        </motion.span>
+        </span>
       </div>
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="border-board-border/25 border-t px-4 pb-3.5">
-              <div className="mt-2.5">
-                <SectionLabel sub color="text-board-purple">Decision</SectionLabel>
-                <MarkdownContent content={content.content} className="my-1" />
-              </div>
-              {content.rationale && (
-                <div>
-                  <SectionLabel sub color="text-board-purple">Rationale</SectionLabel>
-                  <MarkdownContent content={content.rationale} className="my-1" />
-                </div>
-              )}
-              {content.alternatives && (
-                <div>
-                  <SectionLabel sub>Alternatives</SectionLabel>
-                  <MarkdownContent content={content.alternatives} className="mt-1 text-board-text-muted" />
-                </div>
-              )}
+      <div
+        className="grid transition-[grid-template-rows,opacity] duration-200 ease-out"
+        style={{
+          gridTemplateRows: expanded ? '1fr' : '0fr',
+          opacity: expanded ? 1 : 0,
+        }}
+      >
+        <div className="overflow-hidden">
+          <div className="border-board-border/25 border-t px-4 pb-3.5">
+            <div className="mt-2.5">
+              <SectionLabel sub color="text-board-purple">Decision</SectionLabel>
+              <MarkdownContent content={content.content} className="my-1" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {content.rationale && (
+              <div>
+                <SectionLabel sub color="text-board-purple">Rationale</SectionLabel>
+                <MarkdownContent content={content.rationale} className="my-1" />
+              </div>
+            )}
+            {content.alternatives && (
+              <div>
+                <SectionLabel sub>Alternatives</SectionLabel>
+                <MarkdownContent content={content.alternatives} className="mt-1 text-board-text-muted" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

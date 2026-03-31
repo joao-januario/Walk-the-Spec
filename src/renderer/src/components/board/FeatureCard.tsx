@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { getPhaseClasses } from '../../theme.js';
 import { cn } from '../../lib/utils.js';
 import { usePrevious } from '../../hooks/usePrevious.js';
@@ -52,14 +51,12 @@ export default function FeatureCard({ project, selected, onClick, onContextActio
       style={selected ? { borderImage: `linear-gradient(to bottom, ${phaseVar}, transparent) 1` } : undefined}
     >
       <div className="flex items-center gap-2">
-        <motion.span
-          className="inline-block h-[10px] w-[10px] shrink-0 rounded-full"
+        <span
+          className={cn(
+            'inline-block h-[10px] w-[10px] shrink-0 rounded-full',
+            justTransitioned && 'animate-[phase-pulse_0.8s_ease-out]',
+          )}
           style={{ backgroundColor: phaseVar }}
-          animate={justTransitioned
-            ? { scale: [1, 1.3, 1], boxShadow: [`0 0 0 0 transparent`, `0 0 12px 4px ${phaseVar}`, `0 0 0 0 transparent`] }
-            : {}
-          }
-          transition={justTransitioned ? { duration: 0.8 } : { duration: 0.3 }}
         />
         <span className={cn('text-[0.9375rem] font-semibold', selected ? 'text-board-text-bright' : 'text-board-text')}>
           {project.name}
