@@ -55,17 +55,20 @@ Consider user input before proceeding.
 
 8. **Completion validation**: Verify all tasks complete, features match spec, tests pass with coverage, implementation follows plan.
 
-9. **Generate implementation summary** (if not already present):
-   - If `summary.md` exists in FEATURE_DIR: skip
-   - Otherwise: Read template from `.claude/specify/templates/summary-template.md` and follow its structure EXACTLY
-   - Reference spec.md, plan.md, research.md already in context; review code changes via `git diff main`
-   - Generate `summary.md` with mandatory sections:
+9. **Generate implementation summary** — MANDATORY BEFORE COMMIT, NO EXCEPTIONS:
+   - Check whether `summary.md` exists in FEATURE_DIR
+   - If it already exists and is complete (has all required sections): proceed
+   - If it does not exist or is incomplete: **generate it now** — this step is not optional, cannot be deferred, and cannot be skipped regardless of time, complexity, or any other reason
+   - Read template from `.claude/specify/templates/summary-template.md` and follow its structure EXACTLY
+   - Review code changes via `git diff main`; reference spec.md, plan.md, research.md already in context
+   - Required sections (all mandatory):
      - **Overview**: What was built, mental model, prerequisites (NO code)
      - **Architecture Walkthrough**: Numbered data-flow steps with code snippets and **Why this matters** callouts
      - **Code Deep-Dives**: Min 3 subsections, each with 10-30 line snippet, **Line-by-line** annotations, **What you'd miss skimming** callout
      - **Design Decisions**: Numbered **Chose/Over** format with code comparison when applicable
-     - **Edge Cases & Gotchas**: Actual code with non-obvious explanations (omit if none)
+     - **Edge Cases & Gotchas**: Actual code with non-obvious explanations (omit if none genuinely exist)
    - 60-70% of doc MUST be annotated code snippets; fenced blocks with language tags; narrative walkthrough, not bullet lists; engineer-to-engineer voice
+   - **GATE**: Do not proceed to step 10 until `summary.md` exists in FEATURE_DIR with all required sections present
 
 10. **Commit**: `git add -A` then `feat(<branch>): implement <feature summary>`
 
