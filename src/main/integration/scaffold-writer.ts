@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { normalizePath } from '../utils/paths.js';
+import type { IntegrationPlan } from './types.js';
 
 /** Recursively list all files under a directory, returning paths relative to that directory. */
 async function listFilesRecursive(dir: string, base?: string): Promise<string[]> {
@@ -39,13 +40,14 @@ function scaffoldPathToTarget(scaffoldRelative: string): string {
  *
  * Side effects (in order):
  * 1. Delete .claude/specs/ recursively if it exists
- * 2. Create directory structure for all scaffold paths
- * 3. Copy each scaffold file to the corresponding .claude/ path
- * 4. Create CLAUDE.md from template if it doesn't exist (skip if present)
- * 5. Write .scaffold-version
- * 6. Ensure context/ and memory/ directories exist
+ * 2. Delete deprecated files flagged in the plan
+ * 3. Create directory structure for all scaffold paths
+ * 4. Copy each scaffold file to the corresponding .claude/ path
+ * 5. Create CLAUDE.md from template if it doesn't exist (skip if present)
+ * 6. Write .scaffold-version
+ * 7. Ensure context/ and memory/ directories exist
  */
-export async function executeIntegration(targetPath: string, scaffoldDir: string): Promise<void> {
+export async function executeIntegration(targetPath: string, scaffoldDir: string, plan?: IntegrationPlan): Promise<void> {
   console.log(`[integration] executing integration: scaffold=${scaffoldDir} → target=${targetPath}`);
 
   // Step 1: Wipe .claude/specs/ (FR-016)
@@ -57,7 +59,21 @@ export async function executeIntegration(targetPath: string, scaffoldDir: string
     // Directory might not exist — that's fine
   }
 
-  // Step 2-3: List scaffold files and copy each
+  // Step 2: Delete deprecated files
+  if (plan) {
+    for (const entry of plan.files) {
+      if (entry.action !== 'delete') continue;
+      const filePath = path.join(targetPath, entry.relativePath);
+      try {
+        await fs.rm(filePath, { force: true });
+        console.log(`[integration] deleted deprecated: ${entry.relativePath}`);
+      } catch {
+        // File may not exist — that's fine
+      }
+    }
+  }
+
+  // Step 3-4: List scaffold files and copy each
   const scaffoldFiles = await listFilesRecursive(scaffoldDir);
   const claudeMdExists = await fileExists(path.join(targetPath, 'CLAUDE.md'));
 

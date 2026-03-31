@@ -1,4 +1,4 @@
-export type FileAction = 'create' | 'overwrite' | 'preserve';
+export type FileAction = 'create' | 'overwrite' | 'preserve' | 'delete';
 export type FileCategory = 'command' | 'script' | 'template' | 'best-practice' | 'meta' | 'user';
 
 export interface IntegrationFileEntry {
@@ -14,6 +14,7 @@ export interface IntegrationPlan {
   createCount: number;
   overwriteCount: number;
   preserveCount: number;
+  deleteCount: number;
   specsWillBeWiped: boolean;
   claudeMdExists: boolean;
 }

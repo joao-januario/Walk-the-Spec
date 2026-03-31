@@ -57,6 +57,14 @@ function scaffoldPathToTarget(scaffoldRelative: string): string {
 }
 
 /**
+ * Files that existed in older scaffold versions but have since been removed.
+ * Present in a target project → flagged for deletion on refresh.
+ */
+const DEPRECATED_FILES = new Set([
+  '.claude/specify/context/repo-map.md',
+]);
+
+/**
  * Generate an integration plan by comparing the scaffold against the target project.
  */
 export async function generateIntegrationPlan(
@@ -117,12 +125,13 @@ export async function generateIntegrationPlan(
     existingTargetFiles.delete(targetRel);
   }
 
-  // Remaining existing files are user-owned → preserve
+  // Remaining existing files are user-owned → preserve, or deprecated → delete
   for (const existing of existingTargetFiles) {
     // Skip .claude/specs/ contents — they'll be wiped, not preserved
     if (existing.startsWith('.claude/specs/') || existing === '.claude/specs') continue;
 
-    files.push({ relativePath: existing, action: 'preserve', category: categorize(existing) });
+    const action: FileAction = DEPRECATED_FILES.has(existing) ? 'delete' : 'preserve';
+    files.push({ relativePath: existing, action, category: categorize(existing) });
   }
 
   // Sort for consistent output
@@ -131,6 +140,7 @@ export async function generateIntegrationPlan(
   const createCount = files.filter((f) => f.action === 'create').length;
   const overwriteCount = files.filter((f) => f.action === 'overwrite').length;
   const preserveCount = files.filter((f) => f.action === 'preserve').length;
+  const deleteCount = files.filter((f) => f.action === 'delete').length;
 
   return {
     targetPath,
@@ -139,6 +149,7 @@ export async function generateIntegrationPlan(
     createCount,
     overwriteCount,
     preserveCount,
+    deleteCount,
     specsWillBeWiped,
     claudeMdExists,
   };

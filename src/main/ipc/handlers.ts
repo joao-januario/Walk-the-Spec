@@ -154,7 +154,8 @@ export function registerIpcHandlers() {
     }
 
     const scaffoldDir = getScaffoldDir();
-    await executeIntegration(projectPath, scaffoldDir);
+    const plan = await generateIntegrationPlan(projectPath, scaffoldDir);
+    await executeIntegration(projectPath, scaffoldDir, plan);
     return { success: true };
   });
 

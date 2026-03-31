@@ -13,6 +13,7 @@ export default function IntegrationDialog({ plan, onConfirm, onCancel, executing
   const createFiles = plan.files.filter((f) => f.action === 'create');
   const overwriteFiles = plan.files.filter((f) => f.action === 'overwrite');
   const preserveFiles = plan.files.filter((f) => f.action === 'preserve');
+  const deleteFiles = plan.files.filter((f) => f.action === 'delete');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
@@ -32,6 +33,9 @@ export default function IntegrationDialog({ plan, onConfirm, onCancel, executing
             <span className="text-board-green">{plan.createCount} create</span>
             {plan.overwriteCount > 0 && (
               <span className="text-board-orange">{plan.overwriteCount} overwrite</span>
+            )}
+            {plan.deleteCount > 0 && (
+              <span className="text-board-red">{plan.deleteCount} delete</span>
             )}
             {plan.preserveCount > 0 && (
               <span className="text-board-text-muted">{plan.preserveCount} preserve</span>
@@ -65,6 +69,15 @@ export default function IntegrationDialog({ plan, onConfirm, onCancel, executing
               title="Will be overwritten"
               files={overwriteFiles.map((f) => f.relativePath)}
               color="text-board-orange"
+            />
+          )}
+
+          {/* Delete (deprecated files) */}
+          {deleteFiles.length > 0 && (
+            <FileSection
+              title="Will be deleted (deprecated)"
+              files={deleteFiles.map((f) => f.relativePath)}
+              color="text-board-red"
             />
           )}
 
