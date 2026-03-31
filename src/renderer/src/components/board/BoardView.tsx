@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { cn } from '../../lib/utils.js';
 import FeatureCard from './FeatureCard.js';
 import IntegrationDialog from '../integration/IntegrationDialog.js';
 import type { Project, IntegrationPlan } from '../../types/index.js';
