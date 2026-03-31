@@ -151,15 +151,33 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
 
   const isMac = window.api.platform === 'darwin';
 
+  const handleDragMouseDown = (e: React.MouseEvent) => {
+    if (!isMac) return;
+    const initX = e.screenX;
+    const initY = e.screenY;
+    window.api.startWindowDrag(initX, initY);
+    const onMouseMove = (ev: MouseEvent) => window.api.updateWindowDrag(ev.screenX, ev.screenY);
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
   return (
     <div className={cn('bg-board-bg border-board-border flex h-screen w-[220px] min-w-[220px] flex-col overflow-hidden border-r px-2', isMac ? 'pb-3 pt-10' : 'py-3')}>
-      <div className={cn('flex items-center justify-between px-2 pb-4', isMac && 'app-drag')}>
+      <div
+        onMouseDown={handleDragMouseDown}
+        className={cn('flex items-center justify-between px-2 pb-4', isMac && 'cursor-grab active:cursor-grabbing')}
+      >
         <span className="text-board-text-muted text-[0.8125rem] font-semibold tracking-[0.1em] uppercase">Projects</span>
         <button
           onClick={handleAddProject}
+          onMouseDown={(e) => e.stopPropagation()}
           aria-label="Add project"
           title="Add project"
-          className={cn('border-board-border text-board-text-muted hover:border-board-accent hover:text-board-accent flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[6px] border bg-transparent text-[0.9rem]', isMac && 'app-no-drag')}
+          className="border-board-border text-board-text-muted hover:border-board-accent hover:text-board-accent flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[6px] border bg-transparent text-[0.9rem]"
         >
           +
         </button>

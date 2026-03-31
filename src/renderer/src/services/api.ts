@@ -26,6 +26,8 @@ declare global {
       saveSettings: (partial: Record<string, unknown>) => Promise<{ fontSize: number; readingFont?: string }>;
       getGlossary: (projectId: string) => Promise<{ terms: Record<string, string> }>;
       getMemorySnapshot: () => Promise<{ main: { rss: number; heapTotal: number; heapUsed: number; external: number; arrayBuffers: number }; timestamp: string }>;
+      startWindowDrag: (initX: number, initY: number) => Promise<void>;
+      updateWindowDrag: (mouseX: number, mouseY: number) => void;
       onSettingsChanged: (callback: (...args: any[]) => void) => () => void;
       onSpecsChanged: (callback: (...args: any[]) => void) => () => void;
       onBranchChanged: (callback: (...args: any[]) => void) => () => void;

@@ -67,6 +67,10 @@ const api = {
     return () => ipcRenderer.removeListener('branch-changed', sub);
   },
 
+  // Window drag (macOS IPC-based drag — CSS drag regions broken in Electron 31.4+)
+  startWindowDrag: (initX: number, initY: number) => ipcRenderer.invoke('window:drag-start', { initX, initY }),
+  updateWindowDrag: (mouseX: number, mouseY: number) => ipcRenderer.send('window:drag-update', { mouseX, mouseY }),
+
   // Auto-update events
   onUpdateAvailable: (callback: (payload: { version: string }) => void) => {
     const sub = (_event: any, payload: { version: string }) => callback(payload);

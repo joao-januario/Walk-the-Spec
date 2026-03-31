@@ -482,4 +482,24 @@ export function registerIpcHandlers() {
       timestamp: new Date().toISOString(),
     };
   });
+
+  // --- Window drag (macOS — workaround for Electron 31.4+ CSS drag region regression) ---
+
+  let dragState: { initMouseX: number; initMouseY: number; initWinX: number; initWinY: number } | null = null;
+
+  ipcMain.handle('window:drag-start', (event, { initX, initY }: { initX: number; initY: number }) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) return;
+    const [winX, winY] = win.getPosition();
+    dragState = { initMouseX: initX, initMouseY: initY, initWinX: winX, initWinY: winY };
+  });
+
+  ipcMain.on('window:drag-update', (event, { mouseX, mouseY }: { mouseX: number; mouseY: number }) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win || !dragState) return;
+    win.setPosition(
+      Math.round(dragState.initWinX + (mouseX - dragState.initMouseX)),
+      Math.round(dragState.initWinY + (mouseY - dragState.initMouseY)),
+    );
+  });
 }
