@@ -164,3 +164,11 @@ html[data-theme-mode="light"] .hljs-meta {
     scroll-behavior: auto !important;
   }
 }
+
+/* Electron window chrome — macOS drag regions */
+@utility app-drag {
+  -webkit-app-region: drag;
+}
+@utility app-no-drag {
+  -webkit-app-region: no-drag;
+}

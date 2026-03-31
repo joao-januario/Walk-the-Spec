@@ -4,6 +4,7 @@ import type { Project, Feature, Artifact, ArtifactType, IntegrationPlan } from '
 declare global {
   interface Window {
     api: {
+      platform: string;
       getProjects: () => Promise<{ projects: Pick<Project, 'id' | 'name' | 'path'>[] }>;
       getProjectState: (projectId: string) => Promise<Project>;
       addProject: (path: string, name?: string) => Promise<Project>;

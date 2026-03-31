@@ -148,15 +148,17 @@ export default function BoardView({ onSelectProject, selectedProjectId, refreshK
     }
   };
 
+  const isMac = window.api.platform === 'darwin';
+
   return (
-    <div className="bg-board-bg border-board-border flex h-screen w-[220px] min-w-[220px] flex-col overflow-hidden border-r px-2 py-3">
-      <div className="flex items-center justify-between px-2 pb-4">
+    <div className={cn('bg-board-bg border-board-border flex h-screen w-[220px] min-w-[220px] flex-col overflow-hidden border-r px-2', isMac ? 'pb-3 pt-10' : 'py-3')}>
+      <div className={cn('flex items-center justify-between px-2 pb-4', isMac && 'app-drag')}>
         <span className="text-board-text-muted text-[0.8125rem] font-semibold tracking-[0.1em] uppercase">Projects</span>
         <button
           onClick={handleAddProject}
           aria-label="Add project"
           title="Add project"
-          className="border-board-border text-board-text-muted hover:border-board-accent hover:text-board-accent flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[6px] border bg-transparent text-[0.9rem]"
+          className={cn('border-board-border text-board-text-muted hover:border-board-accent hover:text-board-accent flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-[6px] border bg-transparent text-[0.9rem]', isMac && 'app-no-drag')}
         >
           +
         </button>

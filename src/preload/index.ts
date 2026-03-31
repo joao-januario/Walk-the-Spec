@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 const api = {
+  platform: process.platform as string,
+
   // Projects
   getProjects: () => ipcRenderer.invoke('get-projects'),
   addProject: (path: string, name?: string) => ipcRenderer.invoke('add-project', path, name),
