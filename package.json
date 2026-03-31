@@ -57,6 +57,7 @@
       "allowToChangeInstallationDirectory": true
     },
     "mac": {
+      "identity": null,
       "target": [
         {
           "target": "dmg",
